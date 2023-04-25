@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>icloud-starters</artifactId>
-        <groupId>cn.songqingwei.icloud</groupId>
+        <groupId>cn.isqing.icloud</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -77,11 +77,11 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>cn.songqingwei.icloud</groupId>
+            <groupId>cn.isqing.icloud</groupId>
             <artifactId>icloud-common-utils</artifactId>
         </dependency>
         <dependency>
-            <groupId>cn.songqingwei.icloud</groupId>
+            <groupId>cn.isqing.icloud</groupId>
             <artifactId>icloud-starter-variable-api</artifactId>
         </dependency>
         <dependency>

@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>cn.songqingwei.icloud</groupId>
+    <groupId>cn.isqing.icloud</groupId>
     <artifactId>icloud</artifactId>
     <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
@@ -23,8 +23,50 @@
         <slf4j.version>1.7.5</slf4j.version>
         <dubbo.version>2.7.12</dubbo.version>
         <fastjson2.version>2.0.9</fastjson2.version>
+        <gson.version>2.9.0</gson.version>
+        <kie-spring.version>7.73.0.Final</kie-spring.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <mybatis.version>3.5.11</mybatis.version>
+        <hutool.version>5.8.15</hutool.version>
+        <rocketmq-spring-boot.version>2.2.0</rocketmq-spring-boot.version>
+        <redisson-spring-boot.version>3.13.6</redisson-spring-boot.version>
+        <xxl-job.version>2.3.1</xxl-job.version>
+        <druid-spring-boot.version>1.1.21</druid-spring-boot.version>
+        <mybatis-spring-boot.version>2.2.1</mybatis-spring-boot.version>
+        <curator-framework.version>5.4.0</curator-framework.version>
+        <zookeeper.version>3.6.0</zookeeper.version>
+        <!--插件版本-->
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-release-plugin.version>3.0.0-M1</maven-release-plugin.version>
+        <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+        <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
+        <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
+        <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
     </properties>
 
+    <scm>
+        <url>https://github.com/songqingwei/icloud</url>
+        <connection>scm:git:https://github.com/songqingwei/icloud.git</connection>
+        <developerConnection>scm:git:https://github.com/songqingwei/icloud.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+    <developers>
+        <developer>
+            <id>songqingwei</id>
+            <name>songqingwei</name>
+            <email>songqingwei@aliyun.com</email>
+            <url>http://www.isqing.cn</url>
+            <timezone>+8</timezone>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -43,69 +85,69 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>cn.songqingwei.icloud</groupId>
+                <groupId>cn.isqing.icloud</groupId>
                 <artifactId>icloud-interview-api</artifactId>
                 <version>${project.version}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>cn.songqingwei.icloud</groupId>
+                <groupId>cn.isqing.icloud</groupId>
                 <artifactId>icloud-interview-annotation</artifactId>
                 <version>${project.version}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>cn.songqingwei.icloud</groupId>
+                <groupId>cn.isqing.icloud</groupId>
                 <artifactId>icloud-interview-annotation-processor</artifactId>
                 <version>${project.version}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>cn.songqingwei.icloud</groupId>
+                <groupId>cn.isqing.icloud</groupId>
                 <artifactId>icloud-fodder-A</artifactId>
                 <version>${project.version}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>cn.songqingwei.icloud</groupId>
+                <groupId>cn.isqing.icloud</groupId>
                 <artifactId>icloud-fodder-B</artifactId>
                 <version>${project.version}</version>
                 <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>cn.songqingwei.icloud</groupId>
+                <groupId>cn.isqing.icloud</groupId>
                 <artifactId>icloud-starters</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>cn.songqingwei.icloud</groupId>
+                <groupId>cn.isqing.icloud</groupId>
                 <artifactId>icloud-apps</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>cn.songqingwei.icloud</groupId>
+                <groupId>cn.isqing.icloud</groupId>
                 <artifactId>icloud-common-utils</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>cn.songqingwei.icloud</groupId>
+                <groupId>cn.isqing.icloud</groupId>
                 <artifactId>icloud-starter-drools</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>cn.songqingwei.icloud</groupId>
+                <groupId>cn.isqing.icloud</groupId>
                 <artifactId>icloud-starter-variable</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>cn.songqingwei.icloud</groupId>
+                <groupId>cn.isqing.icloud</groupId>
                 <artifactId>icloud-starter-variable-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.9.0</version>
+                <version>${gson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba.fastjson2</groupId>
@@ -167,57 +209,52 @@
             <dependency>
                 <groupId>org.kie</groupId>
                 <artifactId>kie-spring</artifactId>
-                <version>7.73.0.Final</version>
+                <version>${kie-spring.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.12.0</version>
+                <version>${commons-lang3.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis</artifactId>
-                <version>3.5.11</version>
+                <version>${mybatis.version}</version>
             </dependency>
             <dependency>
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
-                <version>5.8.15</version>
-            </dependency>
-            <dependency>
-                <groupId>eu.bitwalker</groupId>
-                <artifactId>UserAgentUtils</artifactId>
-                <version>1.21</version>
+                <version>${hutool.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.rocketmq</groupId>
                 <artifactId>rocketmq-spring-boot-starter</artifactId>
-                <version>2.2.0</version>
+                <version>${rocketmq-spring-boot.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson-spring-boot-starter</artifactId>
-                <version>3.13.6</version>
+                <version>${redisson-spring-boot.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.xuxueli</groupId>
                 <artifactId>xxl-job-core</artifactId>
-                <version>2.3.1</version>
+                <version>${xxl-job.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid-spring-boot-starter</artifactId>
-                <version>1.1.21</version>
+                <version>${druid-spring-boot.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mybatis.spring.boot</groupId>
                 <artifactId>mybatis-spring-boot-starter</artifactId>
-                <version>2.2.1</version>
+                <version>${mybatis-spring-boot.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.curator</groupId>
                 <artifactId>curator-framework</artifactId>
-                <version>5.4.0</version>
+                <version>${curator-framework.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.dubbo</groupId>
@@ -229,31 +266,12 @@
             <dependency>
                 <groupId>org.apache.zookeeper</groupId>
                 <artifactId>zookeeper</artifactId>
-                <version>3.6.0</version>
+                <version>${zookeeper.version}</version>
             </dependency>
         </dependencies>
 
     </dependencyManagement>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-<!--            <plugin>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--                <version>2.5.4</version>-->
-<!--            </plugin>-->
-        </plugins>
-    </build>
     <repositories>
         <repository>
             <id>mavenRepository</id>
@@ -277,5 +295,145 @@
         </repository>
 
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>mavenRepository</id>
+            <url>https://repo1.maven.org/maven2/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>aliyun</id>
+            <url>https://maven.aliyun.com/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
 
+    </pluginRepositories>
+    <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>UTF-8</encoding>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <!--release-->
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <version>${maven-deploy-plugin.version}</version>
+                    </plugin>
+                    <!-- Source -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${maven-source-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Javadoc -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${maven-javadoc-plugin.version}</version>
+                        <configuration>
+                            <show>package</show>
+                            <tags>
+                                <tag>
+                                    <name>date</name>
+                                </tag>
+                            </tags>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                                <configuration>
+                                    <doclint>none</doclint>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Gpg Signature -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven-gpg-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <keyname>7FCD4CC8C3AE0850</keyname>
+                                    <passphraseServerId>gpg.passphrase</passphraseServerId>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>${nexus-staging-maven-plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>oss-release</serverId>
+                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>sonatype-snapshots</id>
+                    <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+                <repository>
+                    <id>sonatype-release</id>
+                    <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 </project>
