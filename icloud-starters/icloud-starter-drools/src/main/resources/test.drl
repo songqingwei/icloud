@@ -1,0 +1,8 @@
+package cn.isqing.icloud.starter.drools.rules;
+dialect "java"
+
+declare Data
+    targetId:Long
+    actionId:Integer
+    busiDate:java.util.Date
+end

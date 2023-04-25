@@ -1,0 +1,36 @@
+template header
+id
+coreId
+domain
+busiCode
+actionId
+busiCode
+cron
+condition
+orgId
+refFunction
+package cn.isqing.icloud.starter.drools.rules;
+
+global org.slf4j.Logger logger
+import cn.isqing.icloud.starter.drools.service.semaphore.util.Allotter
+import cn.isqing.icloud.starter.drools.common.util.CronUtil
+dialect "java"
+/**@{udf}@*/
+
+template "通用模版"
+
+rule "@{id}"
+    no-loop true
+    activation-group "@{actionId}"
+
+    when
+      $data : Data( CronUtil.isSatisfiedBy("@{cron}",busiDate) && (@{condition}))
+    then
+       log.info("命中规则：@{domain}:@{id}");
+       $data.setRuleId(@{id});
+       $data.setTargetRes(
+            Allotter.getTargetId($data.getCoreId(),@{id},@{refFunction});
+       );
+
+end
+end template
