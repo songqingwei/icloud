@@ -101,11 +101,10 @@ i:
           enabled: true
           statement-create-after-log-enabled: false
           statement-parameter-set-log-enabled: false
-          statement-parameter-clear-log-enable: false
-          statement-create-after-log-enable: false
-          statement-prepare-after-log-enable: false
-          statement-execute-after-log-enable: false
-          statement-prepare-call-after-log-enable: false
+          statement-parameter-clear-log-enabled: false
+          statement-prepare-after-log-enabled: false
+          statement-execute-after-log-enabled: false
+          statement-prepare-call-after-log-enabled: false
           # 这个必须打开
           statement-log-enabled: true
           # 这里是直接赋值可以 -Ddruid.log.stmt.executableSql=true

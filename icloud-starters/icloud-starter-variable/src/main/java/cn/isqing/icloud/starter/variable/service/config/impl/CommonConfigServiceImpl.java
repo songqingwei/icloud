@@ -29,7 +29,7 @@ public class CommonConfigServiceImpl implements CommonConfigService {
     
     @Override
     public Response<PageResDto<CommonConfigDto>> list(PageReqDto<CommonConfigListReq> dto) {
-        CommonConfigListReq req = dto.getCondtion();
+        CommonConfigListReq req = dto.getCondition();
         CommonConfigCondition condition = new CommonConfigCondition();
         SpringBeanUtils.copyProperties(req, condition);
         PageReqDto.PageInfo pageInfo = dto.getPageInfo();

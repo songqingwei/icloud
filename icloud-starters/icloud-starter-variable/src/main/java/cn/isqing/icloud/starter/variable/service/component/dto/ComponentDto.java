@@ -22,17 +22,20 @@ public class ComponentDto {
 
     private Long dataSourceId;
 
-    public Set<String> dependInputParams;
-    // Set<c_res_name>
-    public Set<String> dependCResName;
+    //方言
+    private String dialectConfig;
 
-    /**
-     * key:{@link ComponentTextTypeConstants}
-     */
-    private Map<Integer,Object> dialectConfig;
+    private Set<Long> dependCids;
 
-    private Map<String,String>  constantParams;
-    private Map<String,String>  variableParams;
+    private Map<String,String> dependInputParams;
+
+    private Map<String,String> dependCRes;
+
+    private Map<String,String>  dependConstantParams;
+    private Map<String,String>  selfConstants;
+
+    private Map<String,String>  dependSystemVars;
+
     private String[] resJudge;
 
 }

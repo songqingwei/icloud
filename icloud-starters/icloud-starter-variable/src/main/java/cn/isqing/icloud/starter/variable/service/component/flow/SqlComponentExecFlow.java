@@ -40,7 +40,7 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
 
     @Override
     protected void registerRes(ComponentExecContext context) {
-        ComponentExecDto resDto = context.getResDto();
+        ComponentExecDto resDto = context.getExecDto();
         resDto.getAboveResMap().put(context.getComponent().getId(), context.getExecRes());
     }
 
@@ -58,7 +58,7 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
                 return Response.error("检测到sql注入");
             }
         }
-        sqlArr[0] = sqlArr[0].replace("${" + path + "}", v);
+        sqlArr[0] = sqlArr[0].replace(placeholder, v);
         return Response.SUCCESS;
     }
 
@@ -68,12 +68,12 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
         cacheDataSource(context);
         String sql = (String) JsonUtil.extract(context.getDialectConfig(), SqlComponentDialectType.SQL.getJsonPath());
         final String[] sqlArr = {sql};
-        context.setRequestParams(sqlArr);
+        context.setRequestParamsTpl(sqlArr);
     }
 
     @Override
     protected void execComponent(ComponentExecContext context) {
-        Object request = context.getRequestParams();
+        Object request = context.getRequestParamsTpl();
         String[] sqlArr = (String[]) request;
         String sql = sqlArr[0];
         JdbcTemplate template = JDBC_MAP.get(context.getComponent().getDataSourceId());

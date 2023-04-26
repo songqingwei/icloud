@@ -45,7 +45,7 @@ public class VariableServiceImpl implements VariableService {
 
     @Override
     public Response<PageResDto<VariableDto>> listWithAction(PageReqDto<VariableListReq> dto) {
-        VariableListReq req = dto.getCondtion();
+        VariableListReq req = dto.getCondition();
         ActionVariableCondition left = new ActionVariableCondition();
         left.setActionId(req.getActionId());
         left.setOrderBy(SqlConstants.ID_ASC);
@@ -74,7 +74,7 @@ public class VariableServiceImpl implements VariableService {
 
     @Override
     public Response<PageResDto<VariableDto>> listNoAction(PageReqDto<VariableListReq> dto) {
-        VariableListReq req = dto.getCondtion();
+        VariableListReq req = dto.getCondition();
         VariableCondition condition = new VariableCondition();
         SpringBeanUtils.copyProperties(req,condition);
         condition.setIsDel(YesOrNo.NO.ordinal());

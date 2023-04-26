@@ -29,6 +29,11 @@ public class DataSourceController {
         return service.list(req);
     }
 
+    @PostMapping(value = "/text")
+    public Response<DataSourceDto> getText(Long id) {
+        return service.getText(id);
+    }
+
     @PostMapping(value = "/add")
     public Response<Object> add(@RequestBody DataSourceDto req){
         return service.add(req);

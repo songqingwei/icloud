@@ -198,12 +198,12 @@ public class VariableInterfaceImpl implements VariableInterface {
     public Response<PageResDto<VariableDto>> list(PageReqDto<VariableListReq> req) {
         cn.isqing.icloud.starter.variable.service.variable.dto.VariableListReq condition = new cn.isqing.icloud.starter.variable.service.variable.dto.VariableListReq();
         PageReqDto<cn.isqing.icloud.starter.variable.service.variable.dto.VariableListReq> reqDto = new PageReqDto();
-        reqDto.setCondtion(condition);
+        reqDto.setCondition(condition);
         reqDto.setPageInfo(req.getPageInfo());
-        SpringBeanUtils.copyProperties(req.getCondtion(), condition);
+        SpringBeanUtils.copyProperties(req.getCondition(), condition);
 
         Response<PageResDto<cn.isqing.icloud.starter.variable.service.variable.dto.VariableDto>> response;
-        if (req.getCondtion().getActionId() != null) {
+        if (req.getCondition().getActionId() != null) {
             response = service.listWithAction(reqDto);
         } else {
             response = service.listNoAction(reqDto);

@@ -4,12 +4,12 @@ import java.util.Arrays;
 
 public enum DubboComponentDialectType {
 
-    METHOD_TYPE(1, "$.1", "method_type"),
-    INTERFACENAME(2, "$.2", "interfacename"),
-    METHOD_NAME(3, "$.3", "method_name"),
-    VERSION(4, "$.4", "version"),
-    GROUP(5, "$.5", "group"),
-    PARAMS(6, "$.6", "params"),
+    METHOD_TYPE(1, "$.method_type", "method_type"),
+    INTERFACENAME(2, "$.interfacename", "interfacename"),
+    METHOD_NAME(3, "$.method_name", "method_name"),
+    VERSION(4, "$.version", "version"),
+    GROUP(5, "$.group", "group"),
+    PARAMS(6, "$.params", "params"),
     ;
 
 

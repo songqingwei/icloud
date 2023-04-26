@@ -46,7 +46,7 @@ public class ComponentServiceImpl implements ComponentService {
 
     @Override
     public Response<PageResDto<ComponentDto>> list(PageReqDto<ComponentListReq> dto) {
-        ComponentListReq req = dto.getCondtion();
+        ComponentListReq req = dto.getCondition();
         ComponentCondition condition = new ComponentCondition();
         SpringBeanUtils.copyProperties(req, condition);
         condition.setIsDel(YesOrNo.NO.ordinal());

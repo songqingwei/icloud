@@ -31,7 +31,7 @@ public class DubboComponentExecFlow extends BaseComponentExecFlow {
 
     @Override
     protected void registerRes(ComponentExecContext context) {
-        ComponentExecDto resDto = context.getResDto();
+        ComponentExecDto resDto = context.getExecDto();
         resDto.getAboveResMap().put(context.getComponent().getId(), context.getExecRes());
     }
 
@@ -61,13 +61,13 @@ public class DubboComponentExecFlow extends BaseComponentExecFlow {
         context.setRequestDto(methodDto);
 
         String params = (String) JsonUtil.extract(config, DubboComponentDialectType.PARAMS.getJsonPath());
-        context.setRequestParams(new String[]{params});
+        context.setRequestParamsTpl(new String[]{params});
     }
 
     @Override
     protected void execComponent(ComponentExecContext context) {
         DubboMethodDto dto = (DubboMethodDto) context.getRequestDto();
-        JSONArray objects = JSONArray.parseArray(context.getRequestParams()[0]);
+        JSONArray objects = JSONArray.parseArray(context.getRequestParamsTpl()[0]);
         dto.setParamObj(objects.toArray());
         ReferenceConfig<GenericService> referenceConfig = getReferenceConfig(dto);
         ReferenceConfigCache cache = ReferenceConfigCache.getCache();

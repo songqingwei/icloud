@@ -9,9 +9,9 @@ package cn.isqing.icloud.starter.variable.common.constants;
 public class CommonConfigGroupConstants {
 
     /**
-     * 组件常量
+     * 常量
      */
-    public static final int COMPONENT_PARAMS_CONSTANTS = 1;
+    public static final int CONSTANTS = 1;
 
     /**
      * 域授权码

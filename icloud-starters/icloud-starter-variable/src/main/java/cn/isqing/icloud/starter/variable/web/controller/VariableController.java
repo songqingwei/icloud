@@ -27,7 +27,7 @@ public class VariableController {
 
     @PostMapping(value = "/list")
     public Response<PageResDto<VariableDto>> list(@RequestBody PageReqDto<VariableListReq> req){
-        if(req.getCondtion().getActionId()!=null){
+        if(req.getCondition().getActionId()!=null){
             return service.listWithAction(req);
         }
         return service.listNoAction(req);

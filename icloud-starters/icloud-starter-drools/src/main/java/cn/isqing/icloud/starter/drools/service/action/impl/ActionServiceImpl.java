@@ -28,7 +28,7 @@ public class ActionServiceImpl implements ActionService {
 
     @Override
     public Response<PageResDto<ActionDto>> list(PageReqDto<ActionListReq> dto) {
-        ActionListReq req = dto.getCondtion();
+        ActionListReq req = dto.getCondition();
         ActionCondition condition = new ActionCondition();
         SpringBeanUtils.copyProperties(req, condition);
         PageReqDto.PageInfo pageInfo = dto.getPageInfo();

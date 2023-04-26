@@ -15,7 +15,7 @@ public class PageReqDto<T> implements Serializable {
     private PageInfo pageInfo;
 
     @Valid
-    private T condtion;
+    private T condition;
 
     @Data
     public static class PageInfo implements Serializable {

@@ -82,7 +82,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
      */
     @Override
     public Response<PageResDto<RuleTemplateDto>> list(@Valid PageReqDto<RuleTemplateListReq> dto) {
-        RuleTemplateListReq req = dto.getCondtion();
+        RuleTemplateListReq req = dto.getCondition();
         PageReqDto.PageInfo pageInfo = dto.getPageInfo();
         PageResDto<RuleTemplateDto> resDto = new PageResDto<>();
         if (pageInfo.isNeedList()) {
@@ -105,7 +105,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
      */
     @Override
     public Response<PageResDto<RuleTemplateDto>> baseList(PageReqDto<RuleTemplateListReq> dto) {
-        RuleTemplateListReq req = dto.getCondtion();
+        RuleTemplateListReq req = dto.getCondition();
         PageReqDto.PageInfo pageInfo = dto.getPageInfo();
         PageResDto<RuleTemplateDto> resDto = new PageResDto<>();
         if (pageInfo.isNeedList()) {

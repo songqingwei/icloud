@@ -4,8 +4,7 @@ import java.util.Arrays;
 
 public enum SqlComponentDialectType {
 
-    // todo-sqw
-    SQL(1, "$.1", "sql"),
+    SQL(1, "$.sql", "sql"),
     ;
 
 

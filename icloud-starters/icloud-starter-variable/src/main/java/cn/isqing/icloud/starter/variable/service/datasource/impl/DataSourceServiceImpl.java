@@ -46,7 +46,7 @@ public class DataSourceServiceImpl implements DataSourceService {
 
     @Override
     public Response<PageResDto<DataSourceDto>> list(PageReqDto<DataSourceListReq> dto) {
-        DataSourceListReq req = dto.getCondtion();
+        DataSourceListReq req = dto.getCondition();
         DataSourceCondition condition = new DataSourceCondition();
         SpringBeanUtils.copyProperties(req, condition);
         PageReqDto.PageInfo pageInfo = dto.getPageInfo();
