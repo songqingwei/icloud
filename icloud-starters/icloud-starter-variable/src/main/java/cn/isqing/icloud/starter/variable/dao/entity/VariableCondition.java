@@ -11,6 +11,7 @@ public class VariableCondition extends BaseCondition {
      * 名称
      */
     private String name;
+    private String busiCode;
     private Long cid;
     private List<Long> cidCondition;
     private Integer domain;

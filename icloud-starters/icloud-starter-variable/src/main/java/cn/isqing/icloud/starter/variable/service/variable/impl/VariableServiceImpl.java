@@ -7,6 +7,7 @@ import cn.isqing.icloud.common.utils.dto.PageReqDto;
 import cn.isqing.icloud.common.utils.dto.PageResDto;
 import cn.isqing.icloud.common.utils.dto.Response;
 import cn.isqing.icloud.common.utils.enums.status.YesOrNo;
+import cn.isqing.icloud.common.utils.time.TimeUtil;
 import cn.isqing.icloud.common.utils.validation.group.AddGroup;
 import cn.isqing.icloud.common.utils.validation.group.EditGroup;
 import cn.isqing.icloud.starter.variable.common.constants.TableJoinConstants;
@@ -25,6 +26,7 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.annotation.Resource;
 import javax.validation.groups.Default;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -102,6 +104,9 @@ public class VariableServiceImpl implements VariableService {
     public Response<Object> add(@Validated({AddGroup.class, Default.class}) VariableDto dto) {
         Variable variable = new Variable();
         SpringBeanUtils.copyProperties(dto, variable);
+        LocalDateTime now = TimeUtil.now();
+        variable.setCreateTime(now);
+        variable.setUpdateTime(now);
         // 主表入库
         mapper.insert(variable);
         return Response.SUCCESS;
@@ -111,6 +116,8 @@ public class VariableServiceImpl implements VariableService {
     public Response<Object> edit(@Validated({EditGroup.class, Default.class}) VariableDto dto) {
         Variable variable = new Variable();
         SpringBeanUtils.copyProperties(dto, variable);
+        LocalDateTime now = TimeUtil.now();
+        variable.setUpdateTime(now);
         // 主表入库
         mapper.update(variable);
         return Response.SUCCESS;
@@ -122,8 +129,12 @@ public class VariableServiceImpl implements VariableService {
         Variable condition = new Variable();
         variable.setVersion(dto.getVersion() + 1);
         variable.setIsActive(dto.getStatus());
+        LocalDateTime now = TimeUtil.now();
+        variable.setUpdateTime(now);
+
         condition.setId(dto.getId());
         condition.setVersion(dto.getVersion());
+
         // 更新
         int i = mapper.updateByCondition(variable, condition);
         if (i == 0) {
@@ -141,6 +152,8 @@ public class VariableServiceImpl implements VariableService {
         Variable variable = new Variable();
         variable.setId(id);
         variable.setIsDel(YesOrNo.YES.toValue());
+        LocalDateTime now = TimeUtil.now();
+        variable.setUpdateTime(now);
         // 更新
         int i = mapper.update(variable);
         if (i == 0) {

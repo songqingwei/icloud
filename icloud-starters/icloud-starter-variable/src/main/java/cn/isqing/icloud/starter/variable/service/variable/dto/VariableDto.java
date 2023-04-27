@@ -21,7 +21,7 @@ public class VariableDto {
     // component id 组件id
     private Long cid;
 
-    private String cResName;
+    private String cResPath;
 
     private Integer type;
 
@@ -33,12 +33,10 @@ public class VariableDto {
 
     private Integer domain;
 
+    private String busiCode;
+
     private Integer isDel;
 
     private Integer isActive;
-
-    private LocalDateTime createTime;
-
-    private LocalDateTime updateTime;
 
 }

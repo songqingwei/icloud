@@ -1,11 +1,12 @@
 package cn.isqing.icloud.starter.variable.service.variable.dto;
 
+import cn.isqing.icloud.starter.variable.api.dto.AuthDto;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 
 @Data
-public class VariableListReq {
+public class VariableListReq extends AuthDto {
     /**
      * 名称
      */
@@ -13,8 +14,7 @@ public class VariableListReq {
 
     private Long cid;
 
-    @NotBlank
-    private Integer domain;
+    private String busiCode;
 
     private Long actionId;
 

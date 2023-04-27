@@ -1,5 +1,5 @@
-server :
-  port : 80
+server:
+  port: 80
 spring:
   redis:
     redisson:
@@ -101,7 +101,7 @@ i:
           enabled: true
           statement-create-after-log-enabled: false
           statement-parameter-set-log-enabled: false
-          statement-parameter-clear-log-enabled: false
+          statement-parameter-clear-log-enable: false
           statement-prepare-after-log-enabled: false
           statement-execute-after-log-enabled: false
           statement-prepare-call-after-log-enabled: false

@@ -8,6 +8,7 @@ import cn.isqing.icloud.starter.variable.api.dto.VariableDto;
 import cn.isqing.icloud.starter.variable.api.dto.VariablesValueReqDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ import java.util.Map;
 public class DemoController {
 
     @Autowired
+    @Lazy
     private VariableInterface api;
 
     /**

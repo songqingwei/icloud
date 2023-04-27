@@ -10,7 +10,7 @@ public class VariableListReq extends AuthDto {
     private String name;
 
     private Long cid;
-
+    private String busiCode;
     private Long actionId;
 
     private String type;
