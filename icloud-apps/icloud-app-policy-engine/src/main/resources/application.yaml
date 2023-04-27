@@ -105,6 +105,7 @@ i:
           statement-prepare-after-log-enabled: false
           statement-execute-after-log-enabled: false
           statement-prepare-call-after-log-enabled: false
+          connection-close-after-log-enabled: false
           # 这个必须打开
           statement-log-enabled: true
           # 这里是直接赋值可以 -Ddruid.log.stmt.executableSql=true

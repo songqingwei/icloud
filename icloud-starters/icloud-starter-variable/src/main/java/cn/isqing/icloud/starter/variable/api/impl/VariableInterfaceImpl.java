@@ -198,23 +198,25 @@ public class VariableInterfaceImpl implements VariableInterface {
     @Override
     public Response<PageResDto<VariableDto>> list(PageReqDto<VariableListReq> req) {
         cn.isqing.icloud.starter.variable.service.variable.dto.VariableListReq condition = new cn.isqing.icloud.starter.variable.service.variable.dto.VariableListReq();
-        PageReqDto<cn.isqing.icloud.starter.variable.service.variable.dto.VariableListReq> reqDto = new PageReqDto();
+        PageReqDto<cn.isqing.icloud.starter.variable.service.variable.dto.VariableListReq> reqDto = new PageReqDto<>();
         reqDto.setCondition(condition);
         reqDto.setPageInfo(req.getPageInfo());
         SpringBeanUtils.copyProperties(req.getCondition(), condition);
 
-        Response<PageResDto<cn.isqing.icloud.starter.variable.service.variable.dto.VariableDto>> response;
+        Response<PageResDto<cn.isqing.icloud.starter.variable.service.variable.dto.VariableDto>> rawRes;
         if (req.getCondition().getActionId() != null) {
-            response = service.listWithAction(reqDto);
+            rawRes = service.listWithAction(reqDto);
         } else {
-            response = service.listNoAction(reqDto);
+            rawRes = service.listNoAction(reqDto);
         }
-        if (!response.isSuccess()) {
-            return Response.info(response.getCode(), response.getMsg());
+        if (!rawRes.isSuccess()) {
+            return Response.info(rawRes.getCode(), rawRes.getMsg());
         }
-        List<cn.isqing.icloud.starter.variable.service.variable.dto.VariableDto> dtoList = response.getData().getList();
+        List<cn.isqing.icloud.starter.variable.service.variable.dto.VariableDto> dtoList = rawRes.getData().getList();
+
         Response<PageResDto<VariableDto>> res = Response.success(new PageResDto<>());
         PageResDto<VariableDto> data = res.getData();
+
         data.setTotal(res.getData().getTotal());
         if (dtoList != null) {
             List<VariableDto> list = dtoList.stream().map(o -> {

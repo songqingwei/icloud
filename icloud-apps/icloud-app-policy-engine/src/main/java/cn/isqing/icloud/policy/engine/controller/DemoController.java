@@ -36,7 +36,7 @@ public class DemoController {
      * @return
      */
     @PostMapping(value = "/event")
-    public Response<Object> publishVsetChangeEvent(@RequestParam("coreId") String coreId, @RequestParam("list") List<Long> list){
+    public Response<Object> publishVsetChangeEvent(@RequestParam("coreId") String coreId, @RequestBody List<Long> list){
         return api.publishVsetChangeEvent(coreId,list);
     }
 
@@ -69,7 +69,7 @@ public class DemoController {
      * @return
      */
     @PostMapping(value = "/getOne")
-    public Response<cn.isqing.icloud.starter.variable.api.dto.VariableDto> getVariableById(Long id){
+    public Response<cn.isqing.icloud.starter.variable.api.dto.VariableDto> getVariableById(@RequestParam("id") Long id){
         return api.getVariableById(id);
     }
 
