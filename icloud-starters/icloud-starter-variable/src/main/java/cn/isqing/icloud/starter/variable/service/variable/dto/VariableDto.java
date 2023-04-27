@@ -2,6 +2,7 @@ package cn.isqing.icloud.starter.variable.service.variable.dto;
 
 import cn.isqing.icloud.common.utils.validation.group.AddGroup;
 import cn.isqing.icloud.common.utils.validation.group.EditGroup;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -21,7 +22,7 @@ public class VariableDto {
     // component id 组件id
     private Long cid;
 
-    private String cResPath;
+    private String cresPath;
 
     private Integer type;
 

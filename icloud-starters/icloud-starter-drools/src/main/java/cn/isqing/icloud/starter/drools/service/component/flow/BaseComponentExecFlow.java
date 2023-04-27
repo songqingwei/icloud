@@ -52,7 +52,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     private VariableInterface api;
 
     // 提前组件结果的jsonPath分为三部分
-    private Pattern cResPathPattern = Pattern.compile("^(\\$)\\.(\\d+)\\.([^\\s]+)$");
+    private Pattern cresPathPattern = Pattern.compile("^(\\$)\\.(\\d+)\\.([^\\s]+)$");
 
     protected BaseComponentExecFlow() {
         errorApply(this::errorAccept);
@@ -194,7 +194,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
             if (context.isInterrupted()) {
                 return;
             }
-            Matcher matcher = cResPathPattern.matcher(originalJsonPath);
+            Matcher matcher = cresPathPattern.matcher(originalJsonPath);
             if (!matcher.matches()) {
                 interrupt(context, Response.error("DependCRes的JsonPath不规范,请重新配置"));
                 return;

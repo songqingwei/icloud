@@ -1,5 +1,6 @@
 package cn.isqing.icloud.starter.variable.dao.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -15,7 +16,8 @@ public class Variable {
     // component id 组件id
     private Long cid;
 
-    private String cResPath;
+    
+    private String cresPath;
 
     private Integer type;
 

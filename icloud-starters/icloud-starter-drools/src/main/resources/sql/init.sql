@@ -5,7 +5,7 @@
                           `version` int(11) NOT NULL DEFAULT '0',
                           `is_active` tinyint(1) NOT NULL DEFAULT '0',
                           `is_del` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='动作'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='动作';
 
 CREATE TABLE `action_log` (
                               `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -17,7 +17,7 @@ CREATE TABLE `action_log` (
                               `fail_reason` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                               `version` int(11) NOT NULL DEFAULT '0',
                               PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `common_config` (
                                  `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -27,16 +27,16 @@ CREATE TABLE `common_config` (
                                  `sort` int(11) NOT NULL DEFAULT '0',
                                  PRIMARY KEY (`id`),
                                  KEY `idx_key` (`group`,`key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `common_text` (
-                               `Id` bigint(20) NOT NULL AUTO_INCREMENT,
+                               `id` bigint(20) NOT NULL AUTO_INCREMENT,
                                `fid` bigint(20) NOT NULL DEFAULT '0' COMMENT '关联表主键',
                                `text` varchar(5000) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '文本',
                                `type` int(11) NOT NULL DEFAULT '0' COMMENT '文本类型',
-                               PRIMARY KEY (`Id`),
+                               PRIMARY KEY (`id`),
                                KEY `idx_fid` (`fid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='大字段存储'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='大字段存储';
 
 CREATE TABLE `component` (
                              `id` bigint(20) DEFAULT NULL,
@@ -46,16 +46,16 @@ CREATE TABLE `component` (
                              `version` int(11) NOT NULL DEFAULT '0',
                              `is_active` tinyint(1) NOT NULL DEFAULT '0',
                              `is_del` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='组件'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='组件';
 
 CREATE TABLE `component_text` (
-                                  `Id` bigint(20) NOT NULL AUTO_INCREMENT,
+                                  `id` bigint(20) NOT NULL AUTO_INCREMENT,
                                   `fid` bigint(20) NOT NULL DEFAULT '0' COMMENT '关联表主键',
                                   `text` varchar(5000) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '文本',
                                   `type` int(11) NOT NULL DEFAULT '0' COMMENT '文本类型',
-                                  PRIMARY KEY (`Id`),
+                                  PRIMARY KEY (`id`),
                                   KEY `idx_fid` (`fid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='大字段存储'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='大字段存储';
 
 CREATE TABLE `data_source` (
                                `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -64,7 +64,7 @@ CREATE TABLE `data_source` (
                                `version` int(11) NOT NULL DEFAULT '0',
                                `is_active` tinyint(1) NOT NULL,
                                PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='数据源'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='数据源';
 
 CREATE TABLE `fixed_num_allotter_log` (
                                           `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -77,7 +77,7 @@ CREATE TABLE `fixed_num_allotter_log` (
                                           `num` bigint(20) NOT NULL DEFAULT '0',
                                           PRIMARY KEY (`id`),
                                           UNIQUE KEY `uniq_one` (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `ratio_allotter_log` (
                                       `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -90,20 +90,20 @@ CREATE TABLE `ratio_allotter_log` (
                                       `num` bigint(20) NOT NULL DEFAULT '0',
                                       PRIMARY KEY (`id`),
                                       UNIQUE KEY `uniq_one` (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `rule_core` (
-                             `Id` bigint(20) NOT NULL AUTO_INCREMENT,
+                             `id` bigint(20) NOT NULL AUTO_INCREMENT,
                              `domain` int(11) NOT NULL DEFAULT '0' COMMENT '域',
                              `action_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '动作',
                              `busi_code` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '业务编码',
                              `version` bigint(20) NOT NULL DEFAULT '0',
-                             PRIMARY KEY (`Id`),
+                             PRIMARY KEY (`id`),
                              UNIQUE KEY `uniq_one` (`domain`,`action_id`,`busi_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='规则'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='规则';
 
 CREATE TABLE `rule_template` (
-                                 `Id` bigint(20) NOT NULL AUTO_INCREMENT,
+                                 `id` bigint(20) NOT NULL AUTO_INCREMENT,
                                  `domain` int(11) NOT NULL DEFAULT '0' COMMENT '域',
                                  `name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '规则模版名称',
                                  `comment` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '描述',
@@ -117,19 +117,28 @@ CREATE TABLE `rule_template` (
                                  `update_time` datetime DEFAULT NULL,
                                  `is_del` tinyint(1) NOT NULL DEFAULT '0',
                                  `ref` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '蛇形算法参照物',
-                                 PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='规则模版'
+                                 PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='规则模版';
 
 CREATE TABLE `rule_template_busi` (
-                                      `Id` bigint(20) NOT NULL AUTO_INCREMENT,
+                                      `id` bigint(20) NOT NULL AUTO_INCREMENT,
                                       `tid` bigint(20) NOT NULL DEFAULT '0' COMMENT '模版id',
                                       `busi_code` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '业务编码',
                                       `version` int(11) NOT NULL DEFAULT '0',
                                       `busi_name` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
-                                      PRIMARY KEY (`Id`),
+                                      PRIMARY KEY (`id`),
                                       KEY `idx_busi` (`busi_code`),
                                       KEY `idx_tid` (`tid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='规则模版-关联业务'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='规则模版-关联业务';
+
+CREATE TABLE `run_core_text` (
+                                 `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                                 `fid` bigint(20) NOT NULL DEFAULT '0' COMMENT '关联表主键',
+                                 `text` varchar(5000) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '文本',
+                                 `type` int(11) NOT NULL DEFAULT '0' COMMENT '文本类型',
+                                 PRIMARY KEY (`id`),
+                                 KEY `idx_fid` (`fid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='大字段存储';
 
 CREATE TABLE `run_log` (
                            `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -149,7 +158,7 @@ CREATE TABLE `run_log` (
                            `action_id` bigint(20) NOT NULL DEFAULT '0',
                            PRIMARY KEY (`id`),
                            UNIQUE KEY `uniq_one` (`busi_date`,`core_id`,`source_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `run_log_text` (
                                 `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -157,5 +166,5 @@ CREATE TABLE `run_log_text` (
                                 `text` varchar(5000) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
                                 `fid` bigint(20) NOT NULL DEFAULT '0',
                                 PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='日志大文本'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='日志大文本';
 

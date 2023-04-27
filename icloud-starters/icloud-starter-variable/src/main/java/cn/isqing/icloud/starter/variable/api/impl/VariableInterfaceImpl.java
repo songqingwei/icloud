@@ -144,7 +144,7 @@ public class VariableInterfaceImpl implements VariableInterface {
             log.error(res.getMsg());
             throw new BaseException("查询失败");
         }
-        Object value = JSONPath.extract(resDto.getAboveResMap().get(conf.getCid()), conf.getCResPath());
+        Object value = JSONPath.extract(resDto.getAboveResMap().get(conf.getCid()), conf.getCresPath());
         return JSONArray.parseArray(value.toString()).toList(Long.class);
     }
 

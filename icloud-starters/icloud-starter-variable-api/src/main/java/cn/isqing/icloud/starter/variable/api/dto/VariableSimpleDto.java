@@ -1,5 +1,6 @@
 package cn.isqing.icloud.starter.variable.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
@@ -9,6 +10,7 @@ public class VariableSimpleDto {
     // component id 组件id
     private Long cid;
 
-    private String cResPath;
+    
+    private String cresPath;
 
 }

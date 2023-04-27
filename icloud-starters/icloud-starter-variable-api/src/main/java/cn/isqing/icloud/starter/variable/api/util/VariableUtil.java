@@ -33,7 +33,7 @@ public class VariableUtil {
         if (s == null) {
             return null;
         }
-        Object value = JSONPath.extract(s, v.getCResPath());
+        Object value = JSONPath.extract(s, v.getCresPath());
         return value;
     }
 }
