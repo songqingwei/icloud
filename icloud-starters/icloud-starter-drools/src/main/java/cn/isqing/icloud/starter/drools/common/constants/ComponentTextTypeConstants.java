@@ -15,64 +15,44 @@ public class ComponentTextTypeConstants {
     private ComponentTextTypeConstants() {
     }
 
-    // 公共-----------------------------------------
-    // set<name>
-    public static final int DEPEND_INPUT_PARAMS = 1;
-    // set<res_name>
-    public static final int DEPEND_C_RES_NAME = 2;
-    // 依赖组件id-json[set<Long>]
-    public static final int DEPEND_CID = 3;
     /**
      * {@link DubboComponentDialectType}
      * {@link SqlComponentDialectType}
      */
-    public static final int DIALECT_CONFIG = 4;
-
-    /**
-     * 常量参数 MAP<jsonPath/sql placeholder,key>
-     * jsonPath
-     * key 用来定位常量
-     */
-    public static final int CONSTANT_PARAMS = 5;
-
-    /**
-     * 系统变量参数 MAP<sonPath/sql placeholder,key>
-     * jsonPath
-     * key 用来定位常量
-     */
-    public static final int VARIABLE_PARAMS = 6;
+    public static final int DIALECT_CONFIG = 1;
 
 
-    /**
-     * 输入参数 MAP<sonPath/sql placeholder,key>
-     * jsonPath
-     * key 用来定位常量
-     */
-    public static final int INPUT_PARAMS = 7;
+    // Map<placeholder,jsonPath>
+    public static final int DEPEND_INPUT_PARAMS = 2;
 
-    /**
-     * 上文结果集参数 MAP<sonPath/sql placeholder,key>
-     * jsonPath
-     * key 用来定位常量
-     */
-    public static final int ABOVE_RES_PARAMS = 8;
+    // Map<placeholder,[cid,jsonPath]>
+    public static final int DEPEND_C_RES = 3;
+
+    // 依赖组件id set<Long>
+    public static final int DEPEND_CIDS = 4;
+
+    // 依赖的常量参数 MAP<placeholder,常量map的key>
+    public static final int DEPEND_CONSTANTS = 5;
+
+
+    // 系统变量参数 MAP<placeholder,系统变量map的key>
+    public static final int DEPEND_SYSTEM_VARS = 6;
+
+    // 自身的常量 MAP<placeholder,value>
+    public static final int SELF_CONSTANTS = 7;
 
 
     /**
-     * 常量参数 MAP<sonPath/sql placeholder,key>
-     * jsonPath
-     * key 用来定位常量
+     * 策略结果 MAP<placeholder,jsonPath>
      */
-    public static final int RUN_RES_PARAMS = 9;
+    public static final int DEPEND_RUN_RES = 8;
 
     /**
-     * 变量服务参数 MAP<sonPath/sql placeholder,key>
-     * jsonPath
-     * key 用来定位常量
+     * 依赖的变量 MAP<placeholder,key>
      */
-    public static final int VARIABLE_SERVICE_PARAMS = 10;
+    public static final int DEPEND_VARIABLES = 9;
 
-    // 判断结果 [path,sucessValue]
+    // 判断结果的 [sucessValue jsonPath]
     public static final int RES_JUDGE = 111;
 
 }

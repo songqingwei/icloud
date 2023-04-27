@@ -15,6 +15,6 @@ public class VariableCacheUtil {
     private VariableCacheUtil() {
     }
 
-    public static final Map<Long, ActuatorDto> actuatorMap = new ConcurrentHashMap<>();
+    public static final Map<String, ActuatorDto> actuatorMap = new ConcurrentHashMap<>();
 
 }

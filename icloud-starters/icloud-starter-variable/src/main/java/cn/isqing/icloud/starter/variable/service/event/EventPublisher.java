@@ -6,7 +6,7 @@ package cn.isqing.icloud.starter.variable.service.event;
  **/
 public interface EventPublisher {
 
-    void publishEvent(Long id,String eventType,Object... datas);
-    void publishBcEvent(Long id,String eventType,Object... datas);
+    void publishEvent(String id,String eventType,Object... datas);
+    void publishBcEvent(String id,String eventType,Object... datas);
 
 }

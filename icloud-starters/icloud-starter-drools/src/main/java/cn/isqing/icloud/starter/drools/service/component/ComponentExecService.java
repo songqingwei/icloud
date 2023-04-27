@@ -1,8 +1,8 @@
 package cn.isqing.icloud.starter.drools.service.component;
 
 import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.starter.drools.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.drools.dao.entity.Component;
-import cn.isqing.icloud.starter.drools.service.component.dto.ComponentExecDto;
 
 /**
  * 组件执行服务
@@ -12,6 +12,6 @@ import cn.isqing.icloud.starter.drools.service.component.dto.ComponentExecDto;
  **/
 public interface ComponentExecService {
 
-    Response<Object> exec(Component component, ComponentExecDto resDto);
+    Response<Object> exec(Component component, ComponentExecDto dto);
 
 }

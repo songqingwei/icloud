@@ -1,4 +1,4 @@
-package cn.isqing.icloud.starter.drools.service.util;
+package cn.isqing.icloud.starter.drools.common.util;
 
 import cn.isqing.icloud.starter.drools.common.constants.RunResConstants;
 import cn.isqing.icloud.starter.drools.dao.entity.RunLog;
@@ -11,6 +11,10 @@ import java.util.Map;
  * @version 1.0
  **/
 public class ComponentUtil {
+
+    public static String getActionCoreId(Long ruleCoreId) {
+        return ruleCoreId+":action";
+    }
 
     public static Map<String, Object> getRunRes(RunLog log) {
        Map<String, Object> map = new HashMap<>();

@@ -1,7 +1,9 @@
-package cn.isqing.icloud.starter.drools.service.component.dto;
+package cn.isqing.icloud.starter.drools.common.dto;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 /**
@@ -11,8 +13,13 @@ import java.util.Map;
 @Data
 public class ComponentExecDto {
 
-    // 变量组件id，json
+    private Integer domain;
+
+    private String domainAuthCode;
+
+    // 变量服务组件id，json
     private Map<Long, String> variableAboveResMap;
+
     // 组件id，json
     private Map<Long, String> aboveResMap;
 

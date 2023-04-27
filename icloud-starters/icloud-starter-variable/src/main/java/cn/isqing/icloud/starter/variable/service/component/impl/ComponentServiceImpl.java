@@ -24,7 +24,6 @@ import com.alibaba.fastjson2.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -93,11 +92,11 @@ public class ComponentServiceImpl implements ComponentService {
                 new TypeReference<Map<String,String>>() {
                 })
         );
-        dto.setDependConstantParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_CONSTANT_PARAMS),
+        dto.setDependConstantParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_CONSTANTS),
                 new TypeReference<Map<String,String>>() {
                 })
         );
-        dto.setDependConstantParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_CONSTANT_PARAMS),
+        dto.setDependConstantParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_CONSTANTS),
                 new TypeReference<Map<String,String>>() {
                 })
         );
@@ -128,7 +127,7 @@ public class ComponentServiceImpl implements ComponentService {
                 {dto.getDependCids(), ComponentTextTypeConstants.DEPEND_CIDS},
                 {dto.getDependInputParams(), ComponentTextTypeConstants.DEPEND_INPUT_PARAMS},
                 {dto.getDependCRes(), ComponentTextTypeConstants.DEPEND_C_RES},
-                {dto.getDependConstantParams(), ComponentTextTypeConstants.DEPEND_CONSTANT_PARAMS},
+                {dto.getDependConstantParams(), ComponentTextTypeConstants.DEPEND_CONSTANTS},
                 {dto.getSelfConstants(), ComponentTextTypeConstants.SELF_CONSTANTS},
                 {dto.getResJudge(), ComponentTextTypeConstants.RES_JUDGE}
         };

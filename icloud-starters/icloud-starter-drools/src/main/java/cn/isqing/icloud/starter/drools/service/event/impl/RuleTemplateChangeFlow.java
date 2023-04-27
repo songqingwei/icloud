@@ -26,6 +26,7 @@ import cn.isqing.icloud.starter.drools.service.msg.dto.EventMsg;
 import cn.isqing.icloud.starter.drools.service.msg.dto.TplChangeMsg;
 import cn.isqing.icloud.starter.drools.service.semaphore.dto.AllotterConfigDto;
 import cn.isqing.icloud.starter.drools.service.semaphore.util.Allotter;
+import cn.isqing.icloud.starter.drools.common.util.ComponentUtil;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.VariableSimpleDto;
 import com.alibaba.fastjson2.JSON;
@@ -124,31 +125,31 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
                 runCoreTextMapper.insert(text);
             }
         };
-        LockUtil.tryRunWithRLock(key, 5, TimeUnit.SECONDS, data->true, consumer);
+        LockUtil.tryRunWithRLock(key, 5, TimeUnit.SECONDS, data -> true, consumer);
     }
 
     private void getActionVar(RuleTemplateChangeContext context) {
         Deque<Component> deque = KieUtil.actionMap.get(context.getRuleKeyDto());
         ComponentTextCondition condition1 = new ComponentTextCondition();
-        condition1.setType(ComponentTextTypeConstants.VARIABLE_SERVICE_PARAMS);
+        condition1.setType(ComponentTextTypeConstants.DEPEND_VARIABLES);
         condition1.setOrderBy(SqlConstants.ID_ASC);
-        Map<String, VariableSimpleDto> map = new HashMap<>();
+        List<Long> cids = new ArrayList<>();
         deque.forEach(c -> {
             condition1.setFid(c.getId());
             List<ComponentText> componentTexts = componentTextMapper.selectByCondition(condition1);
 
             String s = componentTexts.stream().collect(Collectors.mapping(ComponentText::getText,
                     Collectors.joining()));
-            map.putAll(JSON.parseObject(s, new TypeReference<Map<String, VariableSimpleDto>>() {
+            cids.addAll(JSON.parseObject(s, new TypeReference<List<Long>>() {
             }));
         });
-        context.setActionVariableMap(map);
-        KieUtil.actionVariableMap.put(context.getRuleKeyDto(), map);
+        context.setActionDepandCids(cids);
     }
 
     private void publishEvent(RuleTemplateChangeContext context) {
         List<Long> list = context.getVariableMap().entrySet().stream().map(e -> e.getValue().getId()).collect(Collectors.toList());
-        variableInterface.publishVsetChangeEvent(context.getCore().getId(), list);
+        variableInterface.publishVsetChangeEvent(context.getCore().getId().toString(), list);
+        variableInterface.publishVsetChangeEvent(ComponentUtil.getActionCoreId(context.getCore().getId()), context.getActionDepandCids());
     }
 
     private void parseAction(RuleTemplateChangeContext context) {
@@ -183,7 +184,7 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
 
         LockUtil.tryRunWithRLock(key, 5, TimeUnit.SECONDS, predicate, consumer);
         if (context.getCore() == null) {
-            interrupt(context,Response.error("获取限界记录失败"));
+            interrupt(context, Response.error("获取限界记录失败"));
         }
 
     }

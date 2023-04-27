@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -56,7 +55,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         stepName("获取系统常量参数值");
         accept(this::getConstantValue);
         stepName("获取变量参数值");
-        accept(this::getVariableValue);
+        accept(this::getSystemVarsValue);
         stepName("准备执行");
         accept(this::pre);
         stepName("替换请求参数");
@@ -87,14 +86,12 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     protected abstract void registerRes(ComponentExecContext context);
 
     private void replaceRequestParam(ComponentExecContext context) {
-        // 请求参数模板模板
-        String[] requestParams = context.getRequestParamsTpl();
         // 替换模版参数
         resolveTplParams(context,context.getDependInputParams(), context.getExecDto().getInputParams());
         resolveTplDependCRes(context);
-        resolveTplParams(context,context.getDependConstantParams(), context.getConstantParams());
+        resolveTplParams(context,context.getDependConstants(), context.getConstantsValue());
         resolveTplParams(context,context.getSelfConstants());
-        resolveTplParams(context,context.getDependSystemVars(), context.getSystemVars());
+        resolveTplParams(context,context.getDependSystemVars(), context.getSystemVarsValue());
     }
 
     /**
@@ -187,10 +184,10 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
 
     protected abstract void execComponent(ComponentExecContext context);
 
-    private void getVariableValue(ComponentExecContext context) {
+    private void getSystemVarsValue(ComponentExecContext context) {
         Map<String, String> map = new HashMap<>();
-        context.setSystemVars(map);
-        context.getSystemVars().values().forEach(v -> {
+        context.setSystemVarsValue(map);
+        context.getDependSystemVars().values().forEach(v -> {
             switch (v) {
                 case "uuid":
                     map.put(v, UuidUtil.randomNum_6());
@@ -210,7 +207,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     }
 
     private void getConstantValue(ComponentExecContext context) {
-        List<String> keyList = new ArrayList<>(context.getConstantParams().values());
+        List<String> keyList = new ArrayList<>(context.getConstantsValue().values());
         CommonConfigCondition config = new CommonConfigCondition();
         config.setGroup(CommonConfigGroupConstants.CONSTANTS);
         config.setKeyCondtion(keyList);
@@ -218,7 +215,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         List<CommonConfig> list = configMapper.selectByCondition(config);
         Map<String, String> map = list.stream().collect(Collectors.groupingBy(CommonConfig::getKey,
                 Collectors.mapping(CommonConfig::getValue, Collectors.joining())));
-        context.setConstantParams(map);
+        context.setConstantsValue(map);
     }
 
 
@@ -239,11 +236,11 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setDependConstantParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_CONSTANT_PARAMS),
+        context.setDependConstants(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_CONSTANTS),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setDependConstantParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_CONSTANT_PARAMS),
+        context.setDependSystemVars(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_SYSTEM_VARS),
                 new TypeReference<Map<String, String>>() {
                 })
         );

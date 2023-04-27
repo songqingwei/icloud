@@ -32,7 +32,6 @@ public class KieUtil {
     public static final Map<RuleKeyDto, KieHelper> helperMap = new ConcurrentHashMap<>();
     public static final Map<RuleKeyDto, KieBase> baseMap = new ConcurrentHashMap<>();
     public static final Map<RuleKeyDto, Map<String, VariableSimpleDto>> variableMap = new ConcurrentHashMap<>();
-    public static final Map<RuleKeyDto, Map<String, VariableSimpleDto>> actionVariableMap = new ConcurrentHashMap<>();
     public static final Map<RuleKeyDto, Deque<Component>> actionMap = new ConcurrentHashMap<>();
 
 

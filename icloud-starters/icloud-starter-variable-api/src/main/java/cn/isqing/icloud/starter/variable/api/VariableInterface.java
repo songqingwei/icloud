@@ -23,7 +23,7 @@ public interface VariableInterface {
      * @param list
      * @return
      */
-    Response<Object> publishVsetChangeEvent(Long coreId, List<Long> list);
+    Response<Object> publishVsetChangeEvent(String coreId, List<Long> list);
 
     /**
      * 获取变量集对应组件运行结果

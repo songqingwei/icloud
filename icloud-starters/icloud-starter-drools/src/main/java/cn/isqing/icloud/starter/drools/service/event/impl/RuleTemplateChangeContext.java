@@ -8,6 +8,7 @@ import cn.isqing.icloud.starter.drools.service.msg.dto.TplChangeMsg;
 import cn.isqing.icloud.starter.variable.api.dto.VariableSimpleDto;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,7 +25,7 @@ public class RuleTemplateChangeContext extends FlowContext {
     Map<Long, Component> allComponent;
 
     private Map<String,VariableSimpleDto> variableMap;
-    private Map<String,VariableSimpleDto> actionVariableMap;
+    private List<Long> actionDepandCids;
 
     private RuleCore core;
 

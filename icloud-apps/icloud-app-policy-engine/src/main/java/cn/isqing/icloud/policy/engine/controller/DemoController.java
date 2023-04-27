@@ -36,7 +36,7 @@ public class DemoController {
      * @return
      */
     @PostMapping(value = "/event")
-    public Response<Object> publishVsetChangeEvent(@RequestParam("coreId") Long coreId, @RequestParam("list") List<Long> list){
+    public Response<Object> publishVsetChangeEvent(@RequestParam("coreId") String coreId, @RequestParam("list") List<Long> list){
         return api.publishVsetChangeEvent(coreId,list);
     }
 

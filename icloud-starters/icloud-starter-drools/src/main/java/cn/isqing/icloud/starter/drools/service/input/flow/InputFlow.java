@@ -176,7 +176,7 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
 
     private void getVariables(InputFlowContext context) {
         VariablesValueReqDto reqDto = new VariablesValueReqDto();
-        reqDto.setCoreId(context.getCoreId());
+        reqDto.setCoreId(context.getCoreId().toString());
         reqDto.setInputParams(context.getInputDto().getParams());
         Response<Map<Long, String>> res = variableInterface.getComponentRes(reqDto);
         if(!res.isSuccess()){

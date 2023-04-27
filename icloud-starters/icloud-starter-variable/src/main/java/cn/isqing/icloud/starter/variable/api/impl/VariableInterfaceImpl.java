@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
  * @author songqingwei@aliyun.com
  * @version 1.0
  **/
+//@Service(group = "${i.variable.dubbo.group:iVariable}", timeout = 3000, retries = -1, version = "1.0.0")
 @Service
 @Slf4j
 public class VariableInterfaceImpl implements VariableInterface {
@@ -67,7 +68,7 @@ public class VariableInterfaceImpl implements VariableInterface {
     private CommonConfigMapper configMapper;
 
     @Override
-    public Response<Object> publishVsetChangeEvent(Long coreId, List<Long> list) {
+    public Response<Object> publishVsetChangeEvent(String coreId, List<Long> list) {
         eventPublisher.publishEvent(coreId, EventTypeConstants.VSET_CHANGE, list);
         return Response.SUCCESS;
     }
@@ -158,7 +159,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         return JSON.parseObject(first.getValue(), VsetDefQueryConf.class);
     }
 
-    private void vsetChangeEvent(VariablesValueReqDto reqDto,  List<Long> vidList) {
+    private void vsetChangeEvent(VariablesValueReqDto reqDto, List<Long> vidList) {
         VsetChangeContext context = new VsetChangeContext();
         EventMsg eventMsg = new EventMsg();
         context.setEventMsg(eventMsg);
@@ -167,7 +168,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         Response<Object> res = vsetChangeFlow.exec(context);
         if (!res.isSuccess()) {
             log.warn(res.getMsg());
-             throw new BaseException("缓存组件异常");
+            throw new BaseException("缓存组件异常");
         }
     }
 

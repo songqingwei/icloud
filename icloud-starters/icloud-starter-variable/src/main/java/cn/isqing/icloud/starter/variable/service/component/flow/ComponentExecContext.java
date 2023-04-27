@@ -24,9 +24,9 @@ public class ComponentExecContext extends FlowContext<Object> {
     // 组件配置 start----
     private Map<String,String> dependInputParams;
 
-    private Map<String,String> dependCRes;
+    private Map<String,String>  dependCRes;
 
-    private Map<String,String>  dependConstantParams;
+    private Map<String,String>  dependConstants;
     private Map<String,String>  selfConstants;
 
     private Map<String,String>  dependSystemVars;
@@ -34,8 +34,8 @@ public class ComponentExecContext extends FlowContext<Object> {
     private String[] resJudge;
     // 组件配置 end----
 
-    private Map<String, String> constantParams;
-    private Map<String, String> systemVars;
+    private Map<String, String> constantsValue;
+    private Map<String, String> systemVarsValue;
 
     // 组件对外请求参数模版
     private String[] requestParamsTpl;

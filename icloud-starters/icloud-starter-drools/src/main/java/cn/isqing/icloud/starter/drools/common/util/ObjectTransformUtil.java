@@ -1,4 +1,4 @@
-package cn.isqing.icloud.starter.drools.service.util;
+package cn.isqing.icloud.starter.drools.common.util;
 
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
 import cn.isqing.icloud.starter.drools.dao.entity.RuleCore;

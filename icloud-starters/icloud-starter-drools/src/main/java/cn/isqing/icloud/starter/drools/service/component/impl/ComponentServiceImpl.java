@@ -7,7 +7,6 @@ import cn.isqing.icloud.common.utils.dto.PageResDto;
 import cn.isqing.icloud.common.utils.dto.Response;
 import cn.isqing.icloud.common.utils.enums.status.YesOrNo;
 import cn.isqing.icloud.starter.drools.common.constants.ComponentTextTypeConstants;
-import cn.isqing.icloud.starter.drools.common.constants.VariableConstants;
 import cn.isqing.icloud.starter.drools.common.dto.UpdateStatusDto;
 import cn.isqing.icloud.starter.drools.common.util.TextSqlUtil;
 import cn.isqing.icloud.starter.drools.dao.entity.Component;
@@ -25,7 +24,6 @@ import com.alibaba.fastjson2.TypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,33 +73,34 @@ public class ComponentServiceImpl implements ComponentService {
     public Response<ComponentDto> getText(Long id) {
         ComponentTextCondition condition = new ComponentTextCondition();
         condition.setOrderBy(SqlConstants.ID_ASC);
-        condition.setTypeCondition(Arrays.asList(ComponentTextTypeConstants.DEPEND_INPUT_PARAMS,
-                ComponentTextTypeConstants.DEPEND_C_RES_NAME, ComponentTextTypeConstants.DIALECT_CONFIG,
-                ComponentTextTypeConstants.CONSTANT_PARAMS, ComponentTextTypeConstants.VARIABLE_PARAMS
-        ));
+        condition.setFid(id);
         List<ComponentText> texts = textMapper.selectByCondition(condition);
         Map<Integer, String> map = texts.stream().collect(Collectors.groupingBy(ComponentText::getType,
                 Collectors.mapping(ComponentText::getText, Collectors.joining())));
 
         ComponentDto dto = new ComponentDto();
+        dto.setDialectConfig(map.get(ComponentTextTypeConstants.DIALECT_CONFIG));
+        dto.setDependCids(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_CIDS),
+                new TypeReference<Set<String>>() {
+                })
+        );
         dto.setDependInputParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_INPUT_PARAMS),
-                new TypeReference<Set<String>>() {
+                new TypeReference<Map<String,String>>() {
                 })
         );
-        dto.setDependCResName(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_C_RES_NAME),
-                new TypeReference<Set<String>>() {
+        dto.setDependCRes(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_C_RES),
+                new TypeReference<Map<String,String>>() {
                 })
         );
-        dto.setDialectConfig(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DIALECT_CONFIG),
-                new TypeReference<Map<Integer, Object>>() {
-                }));
-        dto.setConstantParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.CONSTANT_PARAMS),
-                new TypeReference<Map<String, String>>() {
-                }));
-        dto.setVariableParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.VARIABLE_PARAMS),
-                new TypeReference<Map<String, String>>() {
-                }));
-        dto.setResJudge(JSON.parseArray(map.get(ComponentTextTypeConstants.VARIABLE_PARAMS)).toArray(new String[0]));
+        dto.setDependConstants(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_CONSTANTS),
+                new TypeReference<Map<String,String>>() {
+                })
+        );
+        dto.setSelfConstants(JSONObject.parseObject(map.get(ComponentTextTypeConstants.SELF_CONSTANTS),
+                new TypeReference<Map<String,String>>() {
+                })
+        );
+        dto.setResJudge(JSON.parseArray(map.get(ComponentTextTypeConstants.RES_JUDGE )).toArray(new String[0]));
         return Response.success(dto);
     }
 
@@ -119,15 +118,13 @@ public class ComponentServiceImpl implements ComponentService {
     private void insertText(ComponentDto dto, Long id) {
         ComponentText text = new ComponentText();
         text.setFid(id);
-        Set<Long> dependCid = dto.getDependCResName().stream().map(s -> Long.valueOf(s.substring(1,
-                s.indexOf(VariableConstants.DATA_SOURCE_SEPARATOR)))).collect(Collectors.toSet());
         Object[][] arr = {
-                {dto.getDependInputParams(), ComponentTextTypeConstants.DEPEND_INPUT_PARAMS},
-                {dto.getDependCResName(), ComponentTextTypeConstants.DEPEND_C_RES_NAME},
-                {dependCid, ComponentTextTypeConstants.DEPEND_CID},
                 {dto.getDialectConfig(), ComponentTextTypeConstants.DIALECT_CONFIG},
-                {dto.getConstantParams(), ComponentTextTypeConstants.CONSTANT_PARAMS},
-                {dto.getVariableParams(), ComponentTextTypeConstants.VARIABLE_PARAMS},
+                {dto.getDependCids(), ComponentTextTypeConstants.DEPEND_CIDS},
+                {dto.getDependInputParams(), ComponentTextTypeConstants.DEPEND_INPUT_PARAMS},
+                {dto.getDependCRes(), ComponentTextTypeConstants.DEPEND_C_RES},
+                {dto.getDependConstants(), ComponentTextTypeConstants.DEPEND_CONSTANTS},
+                {dto.getSelfConstants(), ComponentTextTypeConstants.SELF_CONSTANTS},
                 {dto.getResJudge(), ComponentTextTypeConstants.RES_JUDGE}
         };
         for (Object[] arr1 : arr) {

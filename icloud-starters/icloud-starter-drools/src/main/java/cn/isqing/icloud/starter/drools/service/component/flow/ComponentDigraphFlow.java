@@ -107,7 +107,7 @@ public class ComponentDigraphFlow extends FlowTemplate<ComponentDigraphContext, 
                 if (!list1.isEmpty()) {
                     ComponentTextCondition condition1 = new ComponentTextCondition();
                     condition1.setFidCondition(list1);
-                    condition1.setType(ComponentTextTypeConstants.DEPEND_CID);
+                    condition1.setType(ComponentTextTypeConstants.DEPEND_CIDS);
                     List<ComponentText> componentTexts = componentTextMapper.selectByCondition(condition1);
                     Map<Long, String> collect1 =
                             componentTexts.stream().collect(Collectors.groupingBy(ComponentText::getFid,
@@ -159,7 +159,7 @@ public class ComponentDigraphFlow extends FlowTemplate<ComponentDigraphContext, 
 
             ComponentTextCondition condition1 = new ComponentTextCondition();
             condition1.setFidCondition(list1);
-            condition1.setType(ComponentTextTypeConstants.DEPEND_CID);
+            condition1.setType(ComponentTextTypeConstants.DEPEND_CIDS);
             List<ComponentText> componentTexts = componentTextMapper.selectByCondition(condition1);
             Map<Long, String> collect1 = componentTexts.stream().collect(Collectors.groupingBy(ComponentText::getFid,
                     Collectors.mapping(ComponentText::getText, Collectors.joining())));

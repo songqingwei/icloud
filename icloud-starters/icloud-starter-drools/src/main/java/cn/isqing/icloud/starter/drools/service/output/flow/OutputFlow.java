@@ -11,6 +11,7 @@ import cn.isqing.icloud.common.utils.kit.RedisUtil;
 import cn.isqing.icloud.starter.drools.common.constants.EventTypeConstants;
 import cn.isqing.icloud.starter.drools.common.constants.LockScenarioConstants;
 import cn.isqing.icloud.starter.drools.common.constants.RunLogTextTypeConstants;
+import cn.isqing.icloud.starter.drools.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
 import cn.isqing.icloud.starter.drools.common.util.KieUtil;
 import cn.isqing.icloud.starter.drools.dao.entity.*;
@@ -19,11 +20,10 @@ import cn.isqing.icloud.starter.drools.dao.mapper.RuleCoreMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.RunLogMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.RunLogTextMapper;
 import cn.isqing.icloud.starter.drools.service.component.ComponentExecService;
-import cn.isqing.icloud.starter.drools.service.component.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.drools.service.component.factory.ComponentExecFactory;
 import cn.isqing.icloud.starter.drools.service.event.EventSubscriber;
 import cn.isqing.icloud.starter.drools.service.msg.dto.EventMsg;
-import cn.isqing.icloud.starter.drools.service.util.ObjectTransformUtil;
+import cn.isqing.icloud.starter.drools.common.util.ObjectTransformUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -113,6 +113,9 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
     private void doAction(OutputFlowContext context) {
         Map<Integer, String> map = context.getParamsMap();
         ComponentExecDto paramDto = new ComponentExecDto();
+        paramDto.setDomain(context.getRuleCore().getDomain());
+        //todo-sqw
+        paramDto.setDomainAuthCode("");
         paramDto.setVariableAboveResMap(JSONObject.parseObject(map.get(RunLogTextTypeConstants.VC_RES_MAP),new TypeReference<Map<String,Object>>(){}));
         paramDto.setAboveResMap(new HashMap<>());
         paramDto.setInputParams(JSONObject.parseObject(map.get(RunLogTextTypeConstants.INPUT_PARAMS),new TypeReference<Map<String,Object>>(){}));

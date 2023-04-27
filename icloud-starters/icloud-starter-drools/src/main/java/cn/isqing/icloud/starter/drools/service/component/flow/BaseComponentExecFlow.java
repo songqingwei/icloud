@@ -9,12 +9,15 @@ import cn.isqing.icloud.common.utils.uuid.UuidUtil;
 import cn.isqing.icloud.starter.drools.common.constants.CommonConfigGroupConstants;
 import cn.isqing.icloud.starter.drools.common.constants.CommonTextTypeConstants;
 import cn.isqing.icloud.starter.drools.common.constants.ComponentTextTypeConstants;
+import cn.isqing.icloud.starter.drools.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.drools.dao.entity.*;
 import cn.isqing.icloud.starter.drools.dao.mapper.CommonConfigMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.CommonTextMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.ComponentTextMapper;
 import cn.isqing.icloud.starter.drools.service.component.ComponentExecService;
-import cn.isqing.icloud.starter.drools.service.component.dto.ComponentExecDto;
+import cn.isqing.icloud.starter.variable.api.VariableInterface;
+import cn.isqing.icloud.starter.variable.api.dto.VariablesValueReqDto;
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.TypeReference;
@@ -25,6 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -43,16 +48,24 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     @Autowired
     private CommonConfigMapper configMapper;
 
+    @Autowired
+    private VariableInterface api;
+
+    // 提前组件结果的jsonPath分为三部分
+    private Pattern cResPathPattern = Pattern.compile("^(\\$)\\.(\\d+)\\.([^\\s]+)$");
+
     protected BaseComponentExecFlow() {
         errorApply(this::errorAccept);
         stepName("查询组件配置");
         accept(this::getConfig);
         stepName("查询数据源配置");
         accept(this::getDSConfig);
-        stepName("获取常量参数值");
+        stepName("获取系统常量参数值");
         accept(this::getConstantValue);
-        stepName("获取变量参数值");
-        accept(this::getVariableValue);
+        stepName("获取系统变量参数值");
+        accept(this::getSystemVarsValue);
+        stepName("获取变量服务参数值");
+        accept(this::getVariablesValue);
         stepName("准备执行");
         accept(this::pre);
         stepName("替换请求参数");
@@ -65,90 +78,137 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         accept(this::registerRes);
     }
 
+    private void getVariablesValue(ComponentExecContext context) {
+        ComponentExecDto execDto = context.getExecDto();
+        VariablesValueReqDto reqDto = new VariablesValueReqDto();
+        reqDto.setDomain(execDto.getDomain());
+        reqDto.setDomainAuthCode(execDto.getDomainAuthCode());
+        reqDto.setAboveResMap(execDto.getAboveResMap());
+        reqDto.setInputParams(execDto.getInputParams());
+        Response<Map<Long, Object>> res = api.getValues(reqDto);
+        if (!res.isSuccess()) {
+            log.warn("获取变量失败:"+res.getMsg());
+            interrupt(context, Response.error("获取变量失败"));
+            return;
+        }
+        context.setVariablesValue(res.getData());
+    }
+
     private Response<Object> errorAccept(ComponentExecContext componentExecContext) {
         return Response.ERROR;
     }
 
-    private void checkRes(ComponentExecContext context){
-        String resJudge = context.getResJudge();
+    private void checkRes(ComponentExecContext context) {
+        String[] resJudge = context.getResJudge();
         String res = context.getExecRes();
-        Object value = JsonUtil.extract(res, resJudge);
-        if(value==null){
-            interrupt(context,Response.error("执行结果异常"));
+        for (int i = 0; i < resJudge.length; i++) {
+            Object value = JsonUtil.extract(res, resJudge[i]);
+            if (value == null) {
+                interrupt(context, Response.error("执行结果异常"));
+            }
         }
     }
 
     protected abstract void registerRes(ComponentExecContext context);
 
     private void replaceRequestParam(ComponentExecContext context) {
-        String[] requestParams = context.getRequestParams();
-        Map[][] arr = {
-                {context.getConstantParams(),context.getConstantMap()},
-                {context.getVariableParams(),context.getVariableMap()},
-        };
-        for (Map[] maps : arr) {
-            if(maps[0]!=null){
-                for (Object o : maps[0].entrySet()) {
-                    Map.Entry<String,Object> entry = (Map.Entry) o;
-                    Response<Object> res = replace(requestParams, entry.getKey(), maps[1].get(entry.getValue()));
-                    if(!res.isSuccess()){
-                        interrupt(context,res);
-                        return;
-                    }
-                }
-            }
-        }
-        // 原始入参解析
-        if(context.getInputParams()!=null){
-            for (Map.Entry<String, String> entry : context.getInputParams().entrySet()) {
-                Response<Object> res = replace(requestParams, entry.getKey(), JSONPath.extract(context.getResDto().getInputParams(),entry.getValue()));
-                if(!res.isSuccess()){
-                    interrupt(context,res);
-                    return;
-                }
-            }
-        }
-        // 解析规则执行结果
-        if(context.getRunResParams()!=null){
-            for (Map.Entry<String, String> entry : context.getRunResParams().entrySet()) {
-                Response<Object> res = replace(requestParams, entry.getKey(), JSONPath.extract(context.getResDto().getRunRes(),entry.getValue()));
-                if(!res.isSuccess()){
-                    interrupt(context,res);
-                    return;
-                }
-            }
-        }
-        // 变量服务参数解析
-        if(context.getVariableServiceParams()!=null){
-            for (Map.Entry<String, String> entry : context.getVariableServiceParams().entrySet()) {
-                String uni_name = entry.getValue();
-                int index = uni_name.indexOf("_");
-                Long cid = Long.valueOf(uni_name.substring(1, index));
-                String jsonPath = uni_name.substring(index + 1);
-                Response<Object> res = replace(requestParams, entry.getKey(), JSONPath.extract(context.getResDto().getVariableAboveResMap().get(cid),jsonPath));
-                if(!res.isSuccess()){
-                    interrupt(context,res);
-                    return;
-                }
-            }
-        }
-        // 上文结果集单独解析
-        if(context.getAboveResParams()!=null){
-            for (Map.Entry<String, String> entry : context.getAboveResParams().entrySet()) {
-                String uni_name = entry.getValue();
-                int index = uni_name.indexOf("_");
-                Long cid = Long.valueOf(uni_name.substring(1, index));
-                String jsonPath = uni_name.substring(index + 1);
-                Response<Object> res = replace(requestParams, entry.getKey(), JSONPath.extract(context.getResDto().getAboveResMap().get(cid),jsonPath));
-                if(!res.isSuccess()){
-                    interrupt(context,res);
-                    return;
-                }
-            }
-        }
+        // 替换模版参数
+        resolveTplParams(context, context.getDependInputParams(), context.getExecDto().getInputParams());
+        resolveTplParams(context, context.getDependRunRes(), context.getExecDto().getRunRes());
+        resolveTplDependCRes(context);
+        resolveTplParams(context, context.getDependConstants(), context.getConstantsValue());
+        resolveTplParams(context, context.getSelfConstants());
+        resolveTplParams(context, context.getDependSystemVars(), context.getSystemVarsValue());
+        resolveTplValiables(context,context.getDependVariables(),context.getVariablesValue());
     }
 
-    protected abstract Response<Object> replace(String[] requestParams,String path,Object value);
+    /**
+     * 解析参数模版,遍历替换占位符
+     *
+     * @param context
+     * @param config
+     * @param inputParams
+     */
+    private void resolveTplParams(ComponentExecContext context, Map<String, String> config, String inputParams) {
+        String[] tpl = context.getRequestParamsTpl();
+        config.forEach((placeholder, jsonPath) -> {
+            if (context.isInterrupted()) {
+                return;
+            }
+            Object value = JSONPath.extract(inputParams, jsonPath);
+            Response<Object> res = replace(tpl, placeholder, value);
+            if (!res.isSuccess()) {
+                interrupt(context, res);
+            }
+        });
+    }
+
+    private void resolveTplParams(ComponentExecContext context, Map<String, String> config) {
+        String[] tpl = context.getRequestParamsTpl();
+        config.forEach((placeholder, value) -> {
+            if (context.isInterrupted()) {
+                return;
+            }
+            Response<Object> res = replace(tpl, placeholder, value);
+            if (!res.isSuccess()) {
+                interrupt(context, res);
+            }
+        });
+    }
+
+    private void resolveTplParams(ComponentExecContext context, Map<String, String> config, Map<String, String> valueMap) {
+        String[] tpl = context.getRequestParamsTpl();
+        config.forEach((placeholder, valueMapkey) -> {
+            if (context.isInterrupted()) {
+                return;
+            }
+            String value = valueMap.get(valueMapkey);
+            // todo-sqw 特殊类型转换
+            Response<Object> res = replace(tpl, placeholder, value);
+            if (!res.isSuccess()) {
+                interrupt(context, res);
+            }
+        });
+    }
+
+    private void resolveTplValiables(ComponentExecContext context, Map<String, Long> config, Map<Long, Object> valueMap) {
+        String[] tpl = context.getRequestParamsTpl();
+        config.forEach((placeholder, valueMapkey) -> {
+            if (context.isInterrupted()) {
+                return;
+            }
+            Object value = valueMap.get(valueMapkey);
+            // todo-sqw 特殊类型转换
+            Response<Object> res = replace(tpl, placeholder, value);
+            if (!res.isSuccess()) {
+                interrupt(context, res);
+            }
+        });
+    }
+
+    private void resolveTplDependCRes(ComponentExecContext context) {
+        String[] tpl = context.getRequestParamsTpl();
+        Map<String, String> config = context.getDependCRes();
+        Map<Long, String> aboveResMap = context.getExecDto().getAboveResMap();
+        config.forEach((placeholder, originalJsonPath) -> {
+            if (context.isInterrupted()) {
+                return;
+            }
+            Matcher matcher = cResPathPattern.matcher(originalJsonPath);
+            if (!matcher.matches()) {
+                interrupt(context, Response.error("DependCRes的JsonPath不规范,请重新配置"));
+                return;
+            }
+            Object value = JSONPath.extract(aboveResMap.get(matcher.group(2)), "$." + matcher.group(3));
+            Response<Object> res = replace(tpl, placeholder, value);
+            if (!res.isSuccess()) {
+                interrupt(context, res);
+            }
+        });
+    }
+
+
+    protected abstract Response<Object> replace(String[] requestParams, String path, Object value);
 
     protected abstract void pre(ComponentExecContext componentExecContext);
 
@@ -167,10 +227,10 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
 
     protected abstract void execComponent(ComponentExecContext context);
 
-    private void getVariableValue(ComponentExecContext context) {
+    private void getSystemVarsValue(ComponentExecContext context) {
         Map<String, String> map = new HashMap<>();
-        context.setVariableMap(map);
-        context.getVariableParams().values().forEach(v -> {
+        context.setSystemVarsValue(map);
+        context.getDependSystemVars().values().forEach(v -> {
             switch (v) {
                 case "uuid":
                     map.put(v, UuidUtil.randomNum_6());
@@ -190,15 +250,15 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     }
 
     private void getConstantValue(ComponentExecContext context) {
-        List<String> keyList = new ArrayList<>(context.getConstantParams().values());
+        List<String> keyList = new ArrayList<>(context.getConstantsValue().values());
         CommonConfigCondition config = new CommonConfigCondition();
-        config.setGroup(CommonConfigGroupConstants.COMPONENT_PARAMS_CONSTANTS);
+        config.setGroup(CommonConfigGroupConstants.VSET_DEFINITION_QUERY);
         config.setKeyCondtion(keyList);
         config.setOrderBy(SqlConstants.ID_ASC);
         List<CommonConfig> list = configMapper.selectByCondition(config);
         Map<String, String> map = list.stream().collect(Collectors.groupingBy(CommonConfig::getKey,
                 Collectors.mapping(CommonConfig::getValue, Collectors.joining())));
-        context.setConstantMap(map);
+        context.setConstantsValue(map);
     }
 
 
@@ -210,34 +270,41 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         Map<Integer, String> map = list.stream().collect(Collectors.groupingBy(ComponentText::getType,
                 Collectors.mapping(ComponentText::getText, Collectors.joining())));
 
-        context.setConstantParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.CONSTANT_PARAMS),
+        context.setDialectConfig(map.get(ComponentTextTypeConstants.DIALECT_CONFIG));
+        context.setDependInputParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_INPUT_PARAMS),
+                new TypeReference<Map<String, String>>() {
+                })
+        );
+        context.setDependCRes(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_C_RES),
+                new TypeReference<Map<String, String>>() {
+                })
+        );
+        context.setDependConstants(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_CONSTANTS),
+                new TypeReference<Map<String, String>>() {
+                })
+        );
+        context.setDependSystemVars(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_SYSTEM_VARS),
+                new TypeReference<Map<String, String>>() {
+                })
+        );
+        context.setSelfConstants(JSONObject.parseObject(map.get(ComponentTextTypeConstants.SELF_CONSTANTS),
+                new TypeReference<Map<String, String>>() {
+                })
+        );
+        context.setDependRunRes(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_RUN_RES),
                 new TypeReference<Map<String, String>>() {
                 }));
-        context.setVariableParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.VARIABLE_PARAMS),
-                new TypeReference<Map<String, String>>() {
+        context.setDependVariables(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_VARIABLES),
+                new TypeReference<Map<String, Long>>() {
                 }));
-        context.setResJudge(map.get(ComponentTextTypeConstants.VARIABLE_PARAMS));
-
-        context.setAboveResParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.ABOVE_RES_PARAMS),
-                new TypeReference<Map<Long, String>>() {
-                }));
-        context.setRunResParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.RUN_RES_PARAMS),
-                new TypeReference<Map<Long, String>>() {
-                }));
-        context.setVariableServiceParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.VARIABLE_SERVICE_PARAMS),
-                new TypeReference<Map<Long,String>>() {
-                }));
-        context.setInputParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.INPUT_PARAMS),
-                new TypeReference<Map<Long, String>>() {
-                }));
-        context.setDialectConfig(map.get(ComponentTextTypeConstants.RUN_RES_PARAMS));
+        context.setResJudge(JSON.parseArray(map.get(ComponentTextTypeConstants.RES_JUDGE)).toArray(new String[0]));
     }
 
 
     @Override
-    public Response<Object> exec(Component component, ComponentExecDto resDto) {
+    public Response<Object> exec(Component component, ComponentExecDto dto) {
         ComponentExecContext context = new ComponentExecContext();
-        context.setResDto(resDto);
+        context.setExecDto(dto);
         context.setComponent(component);
         return exec(context);
     }

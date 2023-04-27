@@ -8,14 +8,14 @@ import cn.isqing.icloud.starter.variable.common.constants.DubboDSConfigConstatnt
 import cn.isqing.icloud.starter.variable.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.variable.common.dto.DubboMethodDto;
 import cn.isqing.icloud.starter.variable.common.enums.DubboComponentDialectType;
+import com.alibaba.dubbo.config.ReferenceConfig;
+import com.alibaba.dubbo.config.RegistryConfig;
+import com.alibaba.dubbo.config.utils.ReferenceConfigCache;
+import com.alibaba.dubbo.rpc.service.GenericService;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.dubbo.config.ReferenceConfig;
-import org.apache.dubbo.config.RegistryConfig;
-import org.apache.dubbo.config.utils.ReferenceConfigCache;
-import org.apache.dubbo.rpc.service.GenericService;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

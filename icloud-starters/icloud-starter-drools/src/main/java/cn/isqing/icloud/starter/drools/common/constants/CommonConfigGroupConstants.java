@@ -18,5 +18,10 @@ public class CommonConfigGroupConstants {
      */
     public static final int DOMAIN_AUTH_CODE = 2;
 
+    /**
+     * 变量集定义查询 组件ID
+     */
+    public static final int VSET_DEFINITION_QUERY = 3;
+
 
 }

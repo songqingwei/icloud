@@ -36,17 +36,13 @@ public class ComponentTextTypeConstants {
     public static final int DEPEND_CIDS = 4;
 
     // 依赖的常量参数 MAP<placeholder,常量map的key>
-    public static final int DEPEND_CONSTANT_PARAMS = 5;
-
+    public static final int DEPEND_CONSTANTS = 5;
 
     // 系统变量参数 MAP<placeholder,系统变量map的key>
     public static final int DEPEND_SYSTEM_VARS = 6;
 
-    // 上文结果集参数 MAP<placeholder,[cid,jsonPath]>
-    public static final int DEPEND_ABOVE_RES = 7;
-
     // 自身的常量 MAP<placeholder,value>
-    public static final int SELF_CONSTANTS = 8;
+    public static final int SELF_CONSTANTS = 7;
 
 
     // 判断结果的 [sucessValue jsonPath]

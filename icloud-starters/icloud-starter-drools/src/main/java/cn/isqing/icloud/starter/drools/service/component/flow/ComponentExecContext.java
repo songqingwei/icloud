@@ -1,8 +1,8 @@
 package cn.isqing.icloud.starter.drools.service.component.flow;
 
 import cn.isqing.icloud.common.utils.flow.FlowContext;
+import cn.isqing.icloud.starter.drools.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.drools.dao.entity.Component;
-import cn.isqing.icloud.starter.drools.service.component.dto.ComponentExecDto;
 import lombok.Data;
 
 import java.util.Map;
@@ -18,24 +18,28 @@ public class ComponentExecContext extends FlowContext<Object> {
     Map<String, Object> dsConfig;
     // 组件方言配置项
     private String dialectConfig;
-    // 上文结果集
-    private ComponentExecDto resDto;
+    // 上文组件结果集
+    private ComponentExecDto execDto;
 
     // 组件配置 start----
-    private Map<String, String> aboveResParams;
-    private Map<String, String> inputParams;
-    private Map<String, String> runResParams;
+    private Map<String, String> dependInputParams;
+    private Map<String, String> dependCRes;
+    private Map<String, String> dependConstants;
+    private Map<String, String> selfConstants;
+    private Map<String, String> dependSystemVars;
+    private Map<String, String> dependRunRes;
+    private Map<String, Long> dependVariables;
 
-    private Map<String, String> constantParams;
-    private Map<String, String> variableParams;
-    private Map<String, String> variableServiceParams;
-    private String resJudge;
+    private String[] resJudge;
     // 组件配置 end----
 
-    private Map<String, String> constantMap;
-    private Map<String, String> variableMap;
+    private Map<String, String> constantsValue;
+    private Map<String, String> systemVarsValue;
+    private Map<Long, Object> variablesValue;
 
-    private String[] requestParams;
+    // 组件对外请求参数模版
+    private String[] requestParamsTpl;
+
     private Object requestDto;
 
     private String execRes;

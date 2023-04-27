@@ -48,7 +48,7 @@ public class VsetChangeFlow extends FlowTemplate<VsetChangeContext, Object> impl
     /**
      * coreId,threadId
      */
-    private final Map<Long, Long> lockMap = new ConcurrentHashMap<>();
+    private final Map<String, Long> lockMap = new ConcurrentHashMap<>();
 
     public VsetChangeFlow() {
         start("变量：规则模版变更流程", this);
@@ -87,7 +87,7 @@ public class VsetChangeFlow extends FlowTemplate<VsetChangeContext, Object> impl
 
     private void releaseResource(VsetChangeContext context) {
         long threadId = Thread.currentThread().getId();
-        Long id = context.getEventMsg().getId();
+        String id = context.getEventMsg().getId();
         Long lastTid = lockMap.get(id);
         if (lastTid == null) {
             return;

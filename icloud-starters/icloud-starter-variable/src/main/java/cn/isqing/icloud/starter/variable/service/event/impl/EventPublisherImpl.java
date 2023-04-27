@@ -28,12 +28,12 @@ public class EventPublisherImpl implements EventPublisher {
     private MsgParserService msgParserService;
 
     @Override
-    public void publishEvent(Long id, String eventType,Object... datas) {
+    public void publishEvent(String id, String eventType,Object... datas) {
         EventMsg eventMsg = getEventMsg(id, eventType, datas);
         MqUtil.asyncSend(topic, msgParserService.assembleMsg(eventMsg));
     }
 
-    private static EventMsg getEventMsg(Long id, String eventType, Object[] datas) {
+    private static EventMsg getEventMsg(String id, String eventType, Object[] datas) {
         EventMsg eventMsg = new EventMsg();
         eventMsg.setId(id);
         eventMsg.setEventType(eventType);
@@ -47,7 +47,7 @@ public class EventPublisherImpl implements EventPublisher {
     }
 
     @Override
-    public void publishBcEvent(Long id, String eventType, Object... datas) {
+    public void publishBcEvent(String id, String eventType, Object... datas) {
         EventMsg eventMsg = getEventMsg(id, eventType, datas);
         MqUtil.asyncSend(bcTopic, msgParserService.assembleMsg(eventMsg));
     }

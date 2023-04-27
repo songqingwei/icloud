@@ -13,7 +13,7 @@ import java.util.List;
 public class EventMsg {
 
     @NotNull
-    private Long id;
+    private String id;
 
     @NotNull
     private String eventType;

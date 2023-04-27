@@ -5,17 +5,17 @@ import cn.isqing.icloud.common.utils.dto.Response;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
 import cn.isqing.icloud.starter.drools.common.constants.DataSourceTypeConstatnts;
 import cn.isqing.icloud.starter.drools.common.constants.DubboDSConfigConstatnts;
+import cn.isqing.icloud.starter.drools.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.drools.common.dto.DubboMethodDto;
 import cn.isqing.icloud.starter.drools.common.enums.DubboComponentDialectType;
-import cn.isqing.icloud.starter.drools.service.component.dto.ComponentExecDto;
+import com.alibaba.dubbo.config.ReferenceConfig;
+import com.alibaba.dubbo.config.RegistryConfig;
+import com.alibaba.dubbo.config.utils.ReferenceConfigCache;
+import com.alibaba.dubbo.rpc.service.GenericService;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.dubbo.config.ReferenceConfig;
-import org.apache.dubbo.config.RegistryConfig;
-import org.apache.dubbo.config.utils.ReferenceConfigCache;
-import org.apache.dubbo.rpc.service.GenericService;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -31,8 +31,8 @@ public class DubboComponentExecFlow extends BaseComponentExecFlow {
 
     @Override
     protected void registerRes(ComponentExecContext context) {
-        ComponentExecDto paramDto = context.getResDto();
-        paramDto.getAboveResMap().put(context.getComponent().getId(), context.getExecRes());
+        ComponentExecDto resDto = context.getExecDto();
+        resDto.getAboveResMap().put(context.getComponent().getId(), context.getExecRes());
     }
 
     @Override
@@ -61,13 +61,13 @@ public class DubboComponentExecFlow extends BaseComponentExecFlow {
         context.setRequestDto(methodDto);
 
         String params = (String) JsonUtil.extract(config, DubboComponentDialectType.PARAMS.getJsonPath());
-        context.setRequestParams(new String[]{params});
+        context.setRequestParamsTpl(new String[]{params});
     }
 
     @Override
     protected void execComponent(ComponentExecContext context) {
         DubboMethodDto dto = (DubboMethodDto) context.getRequestDto();
-        JSONArray objects = JSONArray.parseArray(context.getRequestParams()[0]);
+        JSONArray objects = JSONArray.parseArray(context.getRequestParamsTpl()[0]);
         dto.setParamObj(objects.toArray());
         ReferenceConfig<GenericService> referenceConfig = getReferenceConfig(dto);
         ReferenceConfigCache cache = ReferenceConfigCache.getCache();
