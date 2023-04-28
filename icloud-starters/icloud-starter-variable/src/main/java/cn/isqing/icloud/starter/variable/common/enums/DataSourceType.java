@@ -1,4 +1,4 @@
-package cn.isqing.icloud.starter.drools.common.enums;
+package cn.isqing.icloud.starter.variable.common.enums;
 
 import java.util.Arrays;
 

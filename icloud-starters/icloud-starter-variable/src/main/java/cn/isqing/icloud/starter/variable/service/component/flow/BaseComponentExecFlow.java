@@ -185,9 +185,13 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     protected abstract void execComponent(ComponentExecContext context);
 
     private void getSystemVarsValue(ComponentExecContext context) {
+        Map<String, String> configMap = context.getDependSystemVars();
+        if(configMap==null || configMap.isEmpty()){
+            return;
+        }
         Map<String, String> map = new HashMap<>();
         context.setSystemVarsValue(map);
-        context.getDependSystemVars().values().forEach(v -> {
+        configMap.values().forEach(v -> {
             switch (v) {
                 case "uuid":
                     map.put(v, UuidUtil.randomNum_6());
@@ -207,7 +211,11 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     }
 
     private void getConstantValue(ComponentExecContext context) {
-        List<String> keyList = new ArrayList<>(context.getConstantsValue().values());
+        Map<String, String> configMap = context.getDependConstants();
+        if(configMap==null || configMap.isEmpty()){
+            return;
+        }
+        List<String> keyList = new ArrayList<>(context.getDependConstants().values());
         CommonConfigCondition config = new CommonConfigCondition();
         config.setGroup(CommonConfigGroupConstants.CONSTANTS);
         config.setKeyCondtion(keyList);
