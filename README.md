@@ -1,7 +1,7 @@
 # icloud
 icloud是一个基于springboot的开源项目，旨在提供开箱即用的各种场景组件，帮助开发者快速构建应用。<br>
-gitee:https://gitee.com/isongqingwei/icloud
-github:https://github.com/songqingwei/icloud
+gitee:https://gitee.com/isongqingwei/icloud <br>
+github:https://github.com/songqingwei/icloud <br>
 
 # 主要特性
 1. 常用工具包<br>
