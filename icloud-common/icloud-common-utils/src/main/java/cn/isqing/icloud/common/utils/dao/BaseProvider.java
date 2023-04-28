@@ -19,6 +19,8 @@ import java.util.Arrays;
 @Slf4j
 public class BaseProvider<T> {
 
+    private String simpleTpl = "`%s`=#{%s%s}";
+
     private long lockMinutes = 10;
 
     private static final String ERR_MSG = "解析sql异常";
@@ -273,11 +275,11 @@ public class BaseProvider<T> {
     }
 
     private String[] getKV(T object, String pre) {
-        String left = "=#{";
-        if (pre != null && !pre.equals("")) {
-            left += pre + ".";
+        if(pre==null){
+            pre="";
+        }else {
+            pre+=".";
         }
-        String right = "}";
         ArrayList<Object> list = new ArrayList<>();
         Field[] fields = object.getClass().getDeclaredFields();
         for (Field field : fields) {
@@ -295,7 +297,8 @@ public class BaseProvider<T> {
             String fieldName = field.getName();
 
             String[] arr = SqlUtil.getFieldName(fieldName, false);
-            list.add(arr[0] + left + fieldName + right);
+            list.add(String.format(simpleTpl, arr[0],pre, fieldName));
+
         }
         return list.toArray(new String[0]);
     }

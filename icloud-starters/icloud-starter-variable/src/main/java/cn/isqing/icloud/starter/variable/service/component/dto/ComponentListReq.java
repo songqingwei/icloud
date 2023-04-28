@@ -14,7 +14,7 @@ public class ComponentListReq {
 
     private Integer isActive;
 
-    private Integer dataSourcetype;
+    private Integer dataSourceType;
 
     private Long dataSourceId;
 

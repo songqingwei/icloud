@@ -17,7 +17,7 @@ public class ComponentDto {
 
     private String name;
 
-    private Integer dataSourcetype;
+    private Integer dataSourceType;
 
     private Long dataSourceId;
 

@@ -33,29 +33,29 @@ public class ConditionParser {
     private String tableAlias = "";
     private String tableAliasPre = "";
     // 如id=#{dto.id}
-    private String nomalSymbol = "%s%s=#{%s%s}";
-    private final Map<String, String> specialSymbolMap = new HashMap<>();
+    private String nomalTpl = "%s`%s`=#{%s%s}";
+    private final Map<String, String> specialTplMap = new HashMap<>();
 
     {
-        specialSymbolMap.put("_min", "%s%s>=#{%s%s}");
-        specialSymbolMap.put("_min_open", "%s%s>#{%s%s}");
-        specialSymbolMap.put("_max", "%s%s<=#{%s%s}");
-        specialSymbolMap.put("_max_open", "%s%s<#{%s%s}");
-        specialSymbolMap.put("_like", "%s%s like #{%s%s%}");
-        specialSymbolMap.put("_not_eq", "%s%s != #{%s%s}");
-        specialSymbolMap.put("_not_in", "%s%s not in %s");
+        specialTplMap.put("_min", "%s`%s`>=#{%s%s}");
+        specialTplMap.put("_min_open", "%s`%s`>#{%s%s}");
+        specialTplMap.put("_max", "%s`%s`<=#{%s%s}");
+        specialTplMap.put("_max_open", "%s`%s`<#{%s%s}");
+        specialTplMap.put("_like", "%s`%s` like #{%s%s%}");
+        specialTplMap.put("_not_eq", "%s`%s` != #{%s%s}");
+        specialTplMap.put("_not_in", "%s`%s` not in %s");
     }
 
-    private final Map<String, Consumer<Object>> baseConditonConsumerMap = new HashMap<>();
+    private final Map<String, Consumer<Object>> baseConditionConsumerMap = new HashMap<>();
 
     {
-        baseConditonConsumerMap.put("groupBy", v -> sql.GROUP_BY((String[]) v));
-        baseConditonConsumerMap.put("selectFiled", v -> {
+        baseConditionConsumerMap.put("groupBy", v -> sql.GROUP_BY((String[]) v));
+        baseConditionConsumerMap.put("selectFiled", v -> {
             //移除默认的查询字段*，否则指定支持一个字段 转换Long对象等会拿结果集第一条映射转换，逻辑混乱报错
             sql.REMOVE_SELECT("*");
-            sql.GROUP_BY((String[]) v);
+            sql.SELECT((String[]) v);
         });
-        baseConditonConsumerMap.put("orderBy", v -> sql.GROUP_BY((String[]) v));
+        baseConditionConsumerMap.put("orderBy", v -> sql.ORDER_BY((String[]) v));
     }
 
     private List<Object> list;
@@ -116,21 +116,21 @@ public class ConditionParser {
 
 
     private boolean dealSpecialSymbolString(String[] arr, String fieldName, Object v) {
-        String s = specialSymbolMap.get(arr[1]);
+        String s = specialTplMap.get(arr[1]);
         if (s == null) {
             return false;
         }
 
         if (v instanceof List) {
-            list.add(String.format(specialSymbolMap.get(arr[1]), tableAliasPre, arr[0], getSqlIn()));
+            list.add(String.format(specialTplMap.get(arr[1]), tableAliasPre, arr[0], getSqlIn()));
         } else {
-            list.add(String.format(specialSymbolMap.get(arr[1]), tableAliasPre, arr[0], paramNamePre, fieldName));
+            list.add(String.format(specialTplMap.get(arr[1]), tableAliasPre, arr[0], paramNamePre, fieldName));
         }
         return true;
     }
 
     private void dealString(String column, String fieldName) {
-        list.add(String.format(nomalSymbol, tableAliasPre, column, paramNamePre, fieldName));
+        list.add(String.format(nomalTpl, tableAliasPre, column, paramNamePre, fieldName));
     }
 
     private void dealList(String column) {
@@ -172,7 +172,7 @@ public class ConditionParser {
     }
 
     private void comsumer(String name) {
-        Consumer<Object> consumer = baseConditonConsumerMap.get(name);
+        Consumer<Object> consumer = baseConditionConsumerMap.get(name);
         if (consumer == null) {
             return;
         }

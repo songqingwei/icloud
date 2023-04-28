@@ -27,7 +27,7 @@ public class ControllerAspect {
     @Autowired
     private CommonConfigMapper configMapper;
 
-    @Around("execution(* cn.isqing.icloud.starter.variable.api..*.*(..))")
+    @Around("execution(* cn.isqing.icloud.starter.variable.web.controller..*.*(..))")
     public Object aroundMethod(ProceedingJoinPoint joinPoint) {
         MDCUtil.appendTraceId();
         try {

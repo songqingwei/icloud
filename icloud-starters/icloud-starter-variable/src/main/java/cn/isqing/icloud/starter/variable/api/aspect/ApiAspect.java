@@ -40,8 +40,10 @@ public class ApiAspect {
             checkAuth(args);
             return joinPoint.proceed();
         } catch (BaseException e) {
+            log.warn(e.getMessage(),e);
             return Response.error(e.getCode(), e.getMessage());
         } catch (Throwable e) {
+            log.error(e.getMessage(),e);
             return Response.ERROR;
         } finally {
             MDCUtil.cancelAppendTraceId();

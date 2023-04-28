@@ -9,7 +9,7 @@ public class VariableFiled {
 
     public static String CID = "cid";
 
-    public static String C_RES_PATH = "c_res_path";
+    public static String C_RES_PATH = "cres_path";
 
     public static String TYPE = "type";
 

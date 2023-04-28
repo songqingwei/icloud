@@ -18,10 +18,10 @@ import java.util.List;
  **/
 @Service
 public class EventPublisherImpl implements EventPublisher {
-    @Value("i.variable.event.topic:i-variable-event")
+    @Value("${i.variable.event.topic:i-variable-event}")
     private String topic;
 
-    @Value("i.variable.bc-event.topic:i-variable-bc-event")
+    @Value("${i.variable.bc-event.topic:i-variable-bc-event}")
     private String bcTopic;
 
     @Autowired

@@ -555,7 +555,7 @@ public abstract class AbstractSQL<T> {
                                String conjunction) {
             if (!parts.isEmpty()) {
                 if (!builder.isEmpty()) {
-                    builder.append("\n");
+                    builder.append(" ");
                 }
                 builder.append(keyword);
                 builder.append(" ");

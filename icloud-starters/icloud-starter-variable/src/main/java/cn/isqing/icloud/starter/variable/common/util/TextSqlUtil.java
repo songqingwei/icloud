@@ -14,6 +14,9 @@ public class TextSqlUtil {
 
 
     public static void insertText(BaseMapper mapper, Object text, Object o, Consumer<Object> pre, Consumer<String> loop) {
+        if(o == null){
+            return;
+        }
         pre.accept(text);
         String o1;
         if(o instanceof String){

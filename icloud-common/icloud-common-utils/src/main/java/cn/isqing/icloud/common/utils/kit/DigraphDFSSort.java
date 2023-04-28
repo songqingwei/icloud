@@ -17,7 +17,7 @@ public class DigraphDFSSort<T> {
     private Map<T, Set<T>> adj;
 
     // 记录顶点是否已被搜索
-    private Map<T, Boolean> searched;
+    private Map<T, Boolean> searched = new HashMap<>();
     // 记录顶点是否已被搜索
     private Deque<T> deque = new ArrayDeque<>();
 

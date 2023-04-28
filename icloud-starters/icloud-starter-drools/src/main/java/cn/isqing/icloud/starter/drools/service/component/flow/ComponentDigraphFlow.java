@@ -94,13 +94,14 @@ public class ComponentDigraphFlow extends FlowTemplate<ComponentDigraphContext, 
                     .collect(Collectors.toList());
             pageList.forEach(list1 -> {
                 ComponentCondition condition = new ComponentCondition();
-                condition.setIdConditon(list1);
+                condition.setIdCondition(list1);
                 List<Component> components = componentMapper.selectByCondition(condition);
                 components.forEach(c -> {
                     if (excludeCid != null && excludeCid.contains(c.getId())) {
                         return;
                     }
                     allComponent.put(c.getId(), c);
+                    dependencyMap.put(c.getId(), Collections.emptySet());
                 });
 
                 list1.removeAll(dependencyMap.keySet());
@@ -148,7 +149,7 @@ public class ComponentDigraphFlow extends FlowTemplate<ComponentDigraphContext, 
 
         pageList.parallelStream().forEach(list1 -> {
             ComponentCondition condition = new ComponentCondition();
-            condition.setIdConditon(list1);
+            condition.setIdCondition(list1);
             List<Component> components = componentMapper.selectByCondition(condition);
             components.forEach(c -> {
                 if (excludeCid != null && excludeCid.contains(c.getId())) {

@@ -69,7 +69,7 @@ public class VariableInterfaceImpl implements VariableInterface {
 
     @Override
     public Response<Object> publishVsetChangeEvent(String coreId, List<Long> list) {
-        eventPublisher.publishEvent(coreId, EventTypeConstants.VSET_CHANGE, list);
+        eventPublisher.publishBcEvent(coreId, EventTypeConstants.VSET_CHANGE, list);
         return Response.SUCCESS;
     }
 
@@ -83,7 +83,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         Deque<Component> deque = actuatorDto.getComponentDeque();
         // 组件结果集
         Map<Long, String> resMap = new HashMap<>();
-        if (reqDto.getAboveResMap() != null) {
+        if (reqDto.getAboveResMap() != null || !reqDto.getAboveResMap().isEmpty()) {
             resMap.putAll(reqDto.getAboveResMap());
         }
         ComponentExecDto resDto = new ComponentExecDto();
