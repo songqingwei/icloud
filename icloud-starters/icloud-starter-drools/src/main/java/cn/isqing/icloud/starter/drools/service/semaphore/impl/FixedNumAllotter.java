@@ -94,7 +94,7 @@ public class FixedNumAllotter {
         // 求最小值
 
         Map.Entry<Long, BigDecimal> entry = completenessMap.entrySet().stream().filter(e ->
-                nowMap.get(e.getKey()).getNum() < configDto.getAllotMap().get(e.getKey()).longValue()).min(Comparator.comparing(Map.Entry::getValue)).orElse(null);
+                nowMap.get(e.getKey()).getNum() < configDto.getAllotMap().get(e.getKey()).longValue()).min(Map.Entry.comparingByValue()).orElse(null);
         Long targetId = null;
         if (entry != null) {
             targetId = entry.getKey();

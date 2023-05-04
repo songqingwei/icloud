@@ -6,6 +6,7 @@ import cn.isqing.icloud.common.utils.dto.Response;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.VariableDto;
 import cn.isqing.icloud.starter.variable.api.dto.VariablesValueReqDto;
+import com.alibaba.dubbo.config.annotation.Reference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -24,7 +25,7 @@ import java.util.Map;
 @RequestMapping(value = "/demo",produces = MediaType.APPLICATION_JSON_VALUE)
 public class DemoController {
 
-    @Autowired
+    @Reference(group = "${i.variable.dubbo.group:iVariable}", timeout = 3000, retries = -1, version = "1.0.0")
     @Lazy
     private VariableInterface api;
 

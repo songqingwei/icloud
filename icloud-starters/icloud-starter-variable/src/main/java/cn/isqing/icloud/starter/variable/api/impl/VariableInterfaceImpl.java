@@ -29,12 +29,12 @@ import cn.isqing.icloud.starter.variable.service.event.impl.VsetChangeContext;
 import cn.isqing.icloud.starter.variable.service.event.impl.VsetChangeFlow;
 import cn.isqing.icloud.starter.variable.service.msg.dto.EventMsg;
 import cn.isqing.icloud.starter.variable.service.variable.VariableService;
+import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONPath;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.Deque;
 import java.util.HashMap;
@@ -47,8 +47,8 @@ import java.util.stream.Collectors;
  * @author songqingwei@aliyun.com
  * @version 1.0
  **/
-//@Service(group = "${i.variable.dubbo.group:iVariable}", timeout = 3000, retries = -1, version = "1.0.0")
-@Service
+@Service(group = "${i.variable.dubbo.group:iVariable}", timeout = 3000, retries = -1, version = "1.0.0")
+//@Service
 @Slf4j
 public class VariableInterfaceImpl implements VariableInterface {
 
