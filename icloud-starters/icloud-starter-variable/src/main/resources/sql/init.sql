@@ -12,7 +12,7 @@ CREATE TABLE `action_variable`
 CREATE TABLE `common_config`
 (
     `id`    bigint(20)                               NOT NULL AUTO_INCREMENT,
-    `group` int(11)                                  NOT NULL DEFAULT '0',
+    `group` varchar(255)                                  NOT NULL DEFAULT '',
     `key`   varchar(128) COLLATE utf8mb4_unicode_ci           DEFAULT NULL,
     `value` varchar(2000) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
     `sort`  int(11)                                  NOT NULL DEFAULT '0',
@@ -64,7 +64,7 @@ CREATE TABLE `data_source`
     `name`      varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
     `type`      int(11)                                 NOT NULL DEFAULT '0' COMMENT '类型 1数据库 2 dubbo',
     `version`   int(11)                                 NOT NULL DEFAULT '0',
-    `is_active` tinyint(1)                              NOT NULL,
+    `is_active` tinyint(1)                              NOT NULL DEFAULT '0',
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 3

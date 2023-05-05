@@ -34,6 +34,7 @@ public class ConditionParser {
     private String tableAliasPre = "";
     // 如id=#{dto.id}
     private String nomalTpl = "%s`%s`=#{%s%s}";
+    private String inTpl = "%s`%s` in %s";
     private final Map<String, String> specialTplMap = new HashMap<>();
 
     {
@@ -134,7 +135,7 @@ public class ConditionParser {
     }
 
     private void dealList(String column) {
-        list.add(column + " in " + getSqlIn());
+        list.add(String.format(inTpl, tableAliasPre, column, getSqlIn()));
     }
 
     private String getSqlIn() {

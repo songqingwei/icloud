@@ -6,6 +6,7 @@ import cn.isqing.icloud.common.utils.dto.PageReqDto;
 import cn.isqing.icloud.common.utils.dto.PageResDto;
 import cn.isqing.icloud.common.utils.dto.Response;
 import cn.isqing.icloud.common.utils.kit.ParallelStreamUtil;
+import cn.isqing.icloud.common.utils.kit.StrUtil;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.VariableDto;
 import cn.isqing.icloud.starter.variable.api.dto.VariableListReq;
@@ -140,7 +141,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         if (c == null) {
             return Response.error("缺少组件配置,请联系管理员");
         }
-        // 执行组件
+        // 执行组件获取变量id
         List<Long> vidList = getVidList(reqDto, conf, c);
         // 变更事件
         vsetChangeEvent(reqDto, vidList);
@@ -150,7 +151,6 @@ public class VariableInterfaceImpl implements VariableInterface {
 
     private List<Long> getVidList(VariablesValueReqDto reqDto, VsetDefQueryConf conf, Component c) {
         ComponentExecDto resDto = new ComponentExecDto();
-        resDto.setAboveResMap(new HashMap<>());
         resDto.setInputParams(reqDto.getInputParams());
         ComponentExecService service = execFactory.getSingle(c.getDataSourceType().toString());
         Response<Object> res = service.exec(c, resDto);
@@ -164,8 +164,8 @@ public class VariableInterfaceImpl implements VariableInterface {
 
     private VsetDefQueryConf getCommonConfig(VariablesValueReqDto reqDto) {
         CommonConfig config = new CommonConfig();
-        config.setGroup(CommonConfigGroupConstants.VSET_DEFINITION_QUERY);
-        config.setKey(reqDto.getDomain().toString());
+        config.setGroup(StrUtil.assembleKey(CommonConfigGroupConstants.VSET_DEFINITION_QUERY,reqDto.getDomain().toString()));
+        config.setKey(reqDto.getCoreId().toString());
         CommonConfig first = configMapper.first(config, null);
         if (first == null) {
             throw new BaseException("缺少变量集查询配置,请联系管理员");
@@ -195,9 +195,11 @@ public class VariableInterfaceImpl implements VariableInterface {
         }
         ActuatorDto actuatorDto = VariableCacheUtil.actuatorMap.get(reqDto.getCoreId());
         Map<Long, String> data = res.getData();
-        Map<Long, Object> map = actuatorDto.getVariableMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-                e -> VariableUtil.getValue(e.getValue(), data)));
 
+        Map<Long, Object> map = new HashMap<>();
+        actuatorDto.getVariableMap().forEach((k,v)->{
+            map.put(k,VariableUtil.getValue(v, data));
+        });
         return Response.success(map);
     }
 

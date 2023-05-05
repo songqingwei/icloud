@@ -11,17 +11,18 @@ public class CommonConfigGroupConstants {
     /**
      * 组件常量
      */
-    public static final int COMPONENT_PARAMS_CONSTANTS = 1;
+    public static final String COMPONENT_PARAMS_CONSTANTS = "1";
 
     /**
      * 域授权码
      */
-    public static final int DOMAIN_AUTH_CODE = 2;
+    public static final String DOMAIN_AUTH_CODE = "2";
 
     /**
      * 变量集定义查询 组件ID
+     * 和domain组合使用
      */
-    public static final int VSET_DEFINITION_QUERY = 3;
+    public static final String VSET_DEFINITION_QUERY = "3";
 
 
 }

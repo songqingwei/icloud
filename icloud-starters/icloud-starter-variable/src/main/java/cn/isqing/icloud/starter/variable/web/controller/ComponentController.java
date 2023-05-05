@@ -49,4 +49,9 @@ public class ComponentController {
         return service.del(id);
     }
 
+    @PostMapping(value = "/getText")
+    public Response<ComponentDto> getText(@RequestParam("id") Long id){
+        return service.getText(id);
+    }
+
 }

@@ -7,7 +7,7 @@ public class CommonConfig {
 
     private Long id;
 
-    private Integer group;
+    private String group;
 
     private String key;
 

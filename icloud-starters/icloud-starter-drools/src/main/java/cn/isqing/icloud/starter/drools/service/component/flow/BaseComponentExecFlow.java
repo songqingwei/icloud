@@ -5,6 +5,7 @@ import cn.isqing.icloud.common.utils.constants.StrConstants;
 import cn.isqing.icloud.common.utils.dto.Response;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
+import cn.isqing.icloud.common.utils.kit.StrUtil;
 import cn.isqing.icloud.common.utils.time.TimeUtil;
 import cn.isqing.icloud.common.utils.uuid.UuidUtil;
 import cn.isqing.icloud.starter.drools.common.constants.CommonConfigGroupConstants;
@@ -56,7 +57,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     private Pattern cresPathPattern = Pattern.compile("^(\\$)\\.(\\d+)\\.([^\\s]+)$");
 
     protected BaseComponentExecFlow() {
-        start("执行组件",this);
+        start("执行组件", this);
         errorApply(this::errorAccept);
         stepName("查询组件配置");
         accept(this::getConfig);
@@ -89,7 +90,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         reqDto.setInputParams(execDto.getInputParams());
         Response<Map<Long, Object>> res = api.getValues(reqDto);
         if (!res.isSuccess()) {
-            log.warn("获取变量失败:"+res.getMsg());
+            log.warn("获取变量失败:" + res.getMsg());
             interrupt(context, Response.error("获取变量失败"));
             return;
         }
@@ -121,7 +122,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         resolveTplParams(context, context.getDependConstants(), context.getConstantsValue());
         resolveTplParams(context, context.getSelfConstants());
         resolveTplParams(context, context.getDependSystemVars(), context.getSystemVarsValue());
-        resolveTplValiables(context,context.getDependVariables(),context.getVariablesValue());
+        resolveTplValiables(context, context.getDependVariables(), context.getVariablesValue());
     }
 
     /**
@@ -254,7 +255,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     private void getConstantValue(ComponentExecContext context) {
         List<String> keyList = new ArrayList<>(context.getConstantsValue().values());
         CommonConfigCondition config = new CommonConfigCondition();
-        config.setGroup(CommonConfigGroupConstants.VSET_DEFINITION_QUERY);
+        config.setGroup(StrUtil.assembleKey(CommonConfigGroupConstants.VSET_DEFINITION_QUERY, context.getExecDto().getDomain().toString()));
         config.setKeyCondition(keyList);
         config.setOrderBy(SqlConstants.ID_ASC);
         List<CommonConfig> list = configMapper.selectByCondition(config);
@@ -272,31 +273,31 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         Map<Integer, String> map = list.stream().collect(Collectors.groupingBy(ComponentText::getType,
                 Collectors.mapping(ComponentText::getText, Collectors.joining())));
 
-        context.setDialectConfig(map.getOrDefault(ComponentTextTypeConstants.DIALECT_CONFIG,StrConstants.EMPTY_STR));
-        context.setDependInputParams(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_INPUT_PARAMS,StrConstants.EMPTY_JSON_OBJ),
+        context.setDialectConfig(map.getOrDefault(ComponentTextTypeConstants.DIALECT_CONFIG, StrConstants.EMPTY_STR));
+        context.setDependInputParams(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_INPUT_PARAMS, StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setDependCRes(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_C_RES,StrConstants.EMPTY_JSON_OBJ),
+        context.setDependCRes(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_C_RES, StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setDependConstants(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_CONSTANTS,StrConstants.EMPTY_JSON_OBJ),
+        context.setDependConstants(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_CONSTANTS, StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setDependSystemVars(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_SYSTEM_VARS,StrConstants.EMPTY_JSON_OBJ),
+        context.setDependSystemVars(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_SYSTEM_VARS, StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setSelfConstants(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.SELF_CONSTANTS,StrConstants.EMPTY_JSON_OBJ),
+        context.setSelfConstants(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.SELF_CONSTANTS, StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setDependRunRes(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_RUN_RES,StrConstants.EMPTY_JSON_OBJ),
+        context.setDependRunRes(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_RUN_RES, StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 }));
-        context.setDependVariables(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_VARIABLES,StrConstants.EMPTY_JSON_OBJ),
+        context.setDependVariables(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_VARIABLES, StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, Long>>() {
                 }));
         context.setResJudge(JSON.parseArray(map.getOrDefault(ComponentTextTypeConstants.RES_JUDGE, StrConstants.EMPTY_JSON_ARR)).toArray(new String[0]));

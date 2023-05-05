@@ -158,7 +158,10 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
                 interrupt(context, Response.error("DependCRes的JsonPath不规范,请重新配置"));
                 return;
             }
-            Object value = JSONPath.extract(aboveResMap.get(matcher.group(2)), "$."+matcher.group(3));
+            String cid = matcher.group(2);
+            String path = "$." + matcher.group(3);
+            String jsonStr = aboveResMap.get(Long.valueOf(cid));
+            Object value = JSONPath.extract(jsonStr, path);
             Response<Object> res = replace(tpl, placeholder, value);
             if (!res.isSuccess()) {
                 interrupt(context, res);

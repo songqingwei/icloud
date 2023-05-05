@@ -38,7 +38,7 @@ public class DubboComponentExecFlow extends BaseComponentExecFlow {
     @Override
     protected Response<Object> replace(String[] requestParams, String path, Object value) {
         requestParams[0] = requestParams[0].replace("#{" + path + "}", "\'" + value + "\'");
-        requestParams[0] = requestParams[0].replace("${" + path + "}", (String) value);
+        requestParams[0] = requestParams[0].replace("${" + path + "}", String.valueOf(value));
         return Response.SUCCESS;
     }
 
@@ -54,8 +54,8 @@ public class DubboComponentExecFlow extends BaseComponentExecFlow {
         methodDto.setInterfaceName((String) JsonUtil.extract(config,
                 DubboComponentDialectType.INTERFACENAME.getJsonPath()));
         methodDto.setMethodName((String) JsonUtil.extract(config, DubboComponentDialectType.METHOD_NAME.getJsonPath()));
-        methodDto.setMethodType((String[]) JsonUtil.extract(config,
-                DubboComponentDialectType.METHOD_TYPE.getJsonPath()));
+        JSONArray array = (JSONArray) JsonUtil.extract(config,DubboComponentDialectType.METHOD_TYPE.getJsonPath());
+        methodDto.setMethodType(array.toArray(new String[array.size()]));
         methodDto.setGroup((String) JsonUtil.extract(config, DubboComponentDialectType.GROUP.getJsonPath()));
         methodDto.setVersion((String) JsonUtil.extract(config, DubboComponentDialectType.VERSION.getJsonPath()));
         context.setRequestDto(methodDto);
