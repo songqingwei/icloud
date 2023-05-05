@@ -4,7 +4,7 @@ import cn.isqing.icloud.starter.variable.api.dto.VariableSimpleDto;
 import cn.isqing.icloud.starter.variable.dao.entity.Component;
 import lombok.Data;
 
-import java.util.Deque;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,7 +17,7 @@ import java.util.Map;
 public class ActuatorDto {
 
     // 组件拓扑图
-    private Deque<Component> componentDeque;
+    private List<List<Component>> componentList;
     // id:variable
     private Map<Long, VariableSimpleDto> variableMap;
 

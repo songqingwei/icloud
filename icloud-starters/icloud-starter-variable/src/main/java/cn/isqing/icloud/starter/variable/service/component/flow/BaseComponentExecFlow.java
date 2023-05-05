@@ -48,6 +48,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     private Pattern cresPathPattern = Pattern.compile("^(\\$)\\.(\\d+)\\.([^\\s]+)$");
 
     protected BaseComponentExecFlow() {
+        start("执行组件",this);
         errorApply(this::errorAccept);
         stepName("查询组件配置");
         accept(this::getConfig);

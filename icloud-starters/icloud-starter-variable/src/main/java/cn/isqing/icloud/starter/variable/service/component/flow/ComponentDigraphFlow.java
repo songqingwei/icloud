@@ -3,7 +3,7 @@ package cn.isqing.icloud.starter.variable.service.component.flow;
 import cn.isqing.icloud.common.utils.dto.Response;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;
 import cn.isqing.icloud.common.utils.kit.Digraph;
-import cn.isqing.icloud.common.utils.kit.DigraphDFSSort;
+import cn.isqing.icloud.common.utils.kit.TopologicalSort;
 import cn.isqing.icloud.starter.variable.common.constants.ComponentTextTypeConstants;
 import cn.isqing.icloud.starter.variable.dao.entity.Component;
 import cn.isqing.icloud.starter.variable.dao.entity.ComponentCondition;
@@ -18,7 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,7 +31,7 @@ import java.util.stream.Stream;
  **/
 @Service
 @Slf4j
-public class ComponentDigraphFlow extends FlowTemplate<ComponentDigraphContext, Deque<Component>> {
+public class ComponentDigraphFlow extends FlowTemplate<ComponentDigraphContext, List<List<Component>>> {
 
     @Value("${i.variable.loadDependency.selfCheckingLimit:1000}")
     private int selfCheckingLimit;
@@ -54,17 +57,12 @@ public class ComponentDigraphFlow extends FlowTemplate<ComponentDigraphContext, 
         Digraph<Long> digraph = new Digraph<>();
         digraph.setAdj(context.getDependencyMap());
         digraph.reverse();
-        DigraphDFSSort<Long> sort = new DigraphDFSSort<>(digraph.getAdj());
-        Deque<Long> deque = sort.sort();
-
+        List<List<Long>> list = TopologicalSort.sort(digraph.getAdj());
         Map<Long, Component> map = context.getAllComponent();
-
-        Deque<Component> deque1 = new ArrayDeque<>();
-        Long fid;
-        while ((fid = deque.pollLast()) != null) {
-            deque1.push(map.get(fid));
-        }
-        context.setFlowRes(Response.success(deque1));
+        List<List<Component>> list1 = list.stream()
+                .map(innerList -> innerList.stream().map(cid -> map.get(cid)).collect(Collectors.toList()))
+                .collect(Collectors.toList());
+        context.setFlowRes(Response.success(list1));
     }
 
     private void loadIndirectDependency(ComponentDigraphContext context) {

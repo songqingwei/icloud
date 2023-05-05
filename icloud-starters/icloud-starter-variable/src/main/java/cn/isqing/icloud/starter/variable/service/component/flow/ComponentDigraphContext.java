@@ -5,7 +5,6 @@ import cn.isqing.icloud.common.utils.flow.FlowContext;
 import cn.isqing.icloud.starter.variable.dao.entity.Component;
 import lombok.Data;
 
-import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version 1.0
  **/
 @Data
-public class ComponentDigraphContext extends FlowContext<Deque<Component>> {
+public class ComponentDigraphContext extends FlowContext<List<List<Component>>> {
     // 初始基础依赖组件id
     private List<Long> cidReq;
     // 排除组件id

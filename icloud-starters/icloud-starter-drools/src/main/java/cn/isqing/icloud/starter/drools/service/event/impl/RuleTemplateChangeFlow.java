@@ -129,20 +129,20 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
     }
 
     private void getActionVar(RuleTemplateChangeContext context) {
-        Deque<Component> deque = KieUtil.actionMap.get(context.getRuleKeyDto());
+        List<List<Component>> list = KieUtil.actionMap.get(context.getRuleKeyDto());
         ComponentTextCondition condition1 = new ComponentTextCondition();
         condition1.setType(ComponentTextTypeConstants.DEPEND_VARIABLES);
         condition1.setOrderBy(SqlConstants.ID_ASC);
         List<Long> cids = new ArrayList<>();
-        deque.forEach(c -> {
+
+        list.forEach(innerList -> innerList.forEach(c ->{
             condition1.setFid(c.getId());
             List<ComponentText> componentTexts = componentTextMapper.selectByCondition(condition1);
 
-            String s = componentTexts.stream().collect(Collectors.mapping(ComponentText::getText,
-                    Collectors.joining()));
+            String s = componentTexts.stream().map(ComponentText::getText).collect(Collectors.joining());
             cids.addAll(JSON.parseObject(s, new TypeReference<List<Long>>() {
             }));
-        });
+        }));
         context.setActionDepandCids(cids);
     }
 
@@ -158,7 +158,7 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
         ComponentDigraphContext digraphContext = new ComponentDigraphContext();
         digraphContext.setCidReq(Arrays.asList(action.getCid()));
         digraphContext.setExcludeCidReq(context.getAllComponent().keySet());
-        Response<Deque<Component>> res = digraphFlow.exec(digraphContext);
+        Response<List<List<Component>>> res = digraphFlow.exec(digraphContext);
         if (!res.isSuccess()) {
             log.error(res.getMsg());
             interrupt(context, Response.error("解析action组件拓扑图异常"));

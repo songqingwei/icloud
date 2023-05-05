@@ -5,6 +5,7 @@ import cn.isqing.icloud.common.utils.dto.BaseException;
 import cn.isqing.icloud.common.utils.dto.PageReqDto;
 import cn.isqing.icloud.common.utils.dto.PageResDto;
 import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.utils.kit.ParallelStreamUtil;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.VariableDto;
 import cn.isqing.icloud.starter.variable.api.dto.VariableListReq;
@@ -35,12 +36,14 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONPath;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +55,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class VariableInterfaceImpl implements VariableInterface {
 
+    @Value("${i.variable.execCompoentTimeOut:60000}")
+    private int execCompoentTimeOut;
     @Autowired
     private VariableMapper mapper;
     @Autowired
@@ -80,19 +85,18 @@ public class VariableInterfaceImpl implements VariableInterface {
             return Response.cleanData(actuatorRes);
         }
         ActuatorDto actuatorDto = actuatorRes.getData();
-        Deque<Component> deque = actuatorDto.getComponentDeque();
+        List<List<Component>> componentList = actuatorDto.getComponentList();
         // 组件结果集
-        Map<Long, String> resMap = new HashMap<>();
+        Map<Long, String> resMap = new ConcurrentHashMap<>();
         if (reqDto.getAboveResMap() != null && !reqDto.getAboveResMap().isEmpty()) {
             resMap.putAll(reqDto.getAboveResMap());
         }
         ComponentExecDto resDto = new ComponentExecDto();
         resDto.setAboveResMap(resMap);
         resDto.setInputParams(reqDto.getInputParams());
-        // deque是全局对象不能直接 while ((c = deque.poll()) != null) {}
         AtomicBoolean end = new AtomicBoolean(false);
-        deque.forEach(c -> {
-            if (end.get() || resMap.get(c.getId()) != null) {
+        Consumer<Component> consumer = (c) -> {
+            if (resMap.get(c.getId()) != null){
                 return;
             }
             ComponentExecService service = execFactory.getSingle(c.getDataSourceType().toString());
@@ -100,6 +104,16 @@ public class VariableInterfaceImpl implements VariableInterface {
             if (!res.isSuccess()) {
                 log.error(res.getMsg());
                 end.set(true);
+            }
+        };
+        componentList.forEach(list -> {
+            if (end.get()) {
+                return;
+            }
+            try {
+                ParallelStreamUtil.exec(list, consumer, execCompoentTimeOut);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         });
         if (end.get()) {

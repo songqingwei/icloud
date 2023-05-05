@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -106,14 +105,14 @@ public class VsetChangeFlow extends FlowTemplate<VsetChangeContext, Object> impl
 
         ComponentDigraphContext digraphContext = new ComponentDigraphContext();
         digraphContext.setCidReq(list);
-        Response<Deque<Component>> res = digraphFlow.exec(digraphContext);
+        Response<List<List<Component>>> res = digraphFlow.exec(digraphContext);
         if (!res.isSuccess()) {
             log.error(res.getMsg());
             interrupt(context, Response.error("解析组件拓扑图异常"));
             return;
         }
         ActuatorDto actuatorDto = new ActuatorDto();
-        actuatorDto.setComponentDeque(res.getData());
+        actuatorDto.setComponentList(res.getData());
         actuatorDto.setVariableMap(context.getVariableMap());
         VariableCacheUtil.actuatorMap.put(context.getEventMsg().getId(), actuatorDto);
     }

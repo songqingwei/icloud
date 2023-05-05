@@ -1,9 +1,8 @@
 package cn.isqing.icloud.starter.drools.common.dto;
 
 import lombok.Data;
+import org.jboss.netty.util.internal.ConcurrentHashMap;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 /**
@@ -18,10 +17,10 @@ public class ComponentExecDto {
     private String domainAuthCode;
 
     // 变量服务组件id，json
-    private Map<Long, String> variableAboveResMap;
+    private Map<Long, String> variableAboveResMap = new ConcurrentHashMap<>();
 
     // 组件id，json
-    private Map<Long, String> aboveResMap;
+    private Map<Long, String> aboveResMap = new ConcurrentHashMap<>();
 
     private String inputParams;
     // 规则执行结果

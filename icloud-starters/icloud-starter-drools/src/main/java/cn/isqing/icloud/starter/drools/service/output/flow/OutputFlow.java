@@ -7,6 +7,7 @@ import cn.isqing.icloud.common.utils.enums.status.CommonStatusEnum;
 import cn.isqing.icloud.common.utils.enums.status.SubFlowStatusEnum;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;
 import cn.isqing.icloud.common.utils.kit.LockUtil;
+import cn.isqing.icloud.common.utils.kit.ParallelStreamUtil;
 import cn.isqing.icloud.common.utils.kit.RedisUtil;
 import cn.isqing.icloud.starter.drools.common.constants.EventTypeConstants;
 import cn.isqing.icloud.starter.drools.common.constants.LockScenarioConstants;
@@ -14,6 +15,7 @@ import cn.isqing.icloud.starter.drools.common.constants.RunLogTextTypeConstants;
 import cn.isqing.icloud.starter.drools.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
 import cn.isqing.icloud.starter.drools.common.util.KieUtil;
+import cn.isqing.icloud.starter.drools.common.util.ObjectTransformUtil;
 import cn.isqing.icloud.starter.drools.dao.entity.*;
 import cn.isqing.icloud.starter.drools.dao.mapper.ActionLogMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.RuleCoreMapper;
@@ -23,18 +25,17 @@ import cn.isqing.icloud.starter.drools.service.component.ComponentExecService;
 import cn.isqing.icloud.starter.drools.service.component.factory.ComponentExecFactory;
 import cn.isqing.icloud.starter.drools.service.event.EventSubscriber;
 import cn.isqing.icloud.starter.drools.service.msg.dto.EventMsg;
-import cn.isqing.icloud.starter.drools.common.util.ObjectTransformUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Deque;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -45,6 +46,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @RouteType(r1 = EventTypeConstants.OUTPUT)
 public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implements EventSubscriber {
+
+    @Value("${i.drools.execActionTimeOut:60000}")
+    private int execActionTimeOut;
 
     @Autowired
     private RunLogMapper mapper;
@@ -116,22 +120,19 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
         paramDto.setDomain(context.getRuleCore().getDomain());
         //todo-sqw
         paramDto.setDomainAuthCode("");
-        paramDto.setVariableAboveResMap(JSONObject.parseObject(map.get(RunLogTextTypeConstants.VC_RES_MAP),new TypeReference<Map<String,Object>>(){}));
-        paramDto.setAboveResMap(new HashMap<>());
+        paramDto.getVariableAboveResMap().putAll(JSONObject.parseObject(map.get(RunLogTextTypeConstants.VC_RES_MAP),new TypeReference<Map<String,Object>>(){}));
         paramDto.setInputParams(JSONObject.parseObject(map.get(RunLogTextTypeConstants.INPUT_PARAMS),new TypeReference<Map<String,Object>>(){}));
         paramDto.setRunRes(map.get(RunLogTextTypeConstants.INPUT_PARAMS));
 
         RuleCore ruleCore = context.getRuleCore();
         RuleKeyDto ruleKeyDto = ObjectTransformUtil.transform(ruleCore, RuleKeyDto.class);
-        Deque<Component> deque = KieUtil.actionMap.get(ruleKeyDto);
 
         RunLog runLog = context.getRunLog();
         ActionLog actionLog = new ActionLog();
         actionLog.setRunLogId(runLog.getId());
-        deque.forEach(c -> {
-            if(context.isFlowEnd()){
-                return;
-            }
+
+        List<List<Component>> componentList = KieUtil.actionMap.get(ruleKeyDto);
+        Consumer<Component> consumer = (c) -> {
             actionLog.setCid(c.getId());
             ActionLog first = actionLogMapper.first(actionLog, null);
             if(first!=null && first.getStatus()>CommonStatusEnum.FAILED.getCode()){
@@ -146,7 +147,20 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
                 interrupt(context, Response.error("执行异常"));
             }
             updataActionLog(first,runLog, res,c);
+        };
+        componentList.forEach(list -> {
+            if(context.isFlowEnd()){
+                return;
+            }
+            try {
+                ParallelStreamUtil.exec(list, consumer, execActionTimeOut);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         });
+
+
+
     }
 
     private void updataActionLog(ActionLog first, RunLog runLog, Response<Object> res,Component c) {
