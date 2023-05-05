@@ -48,7 +48,7 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
     protected Response<Object> replace(String[] requestParams, String path, Object value) {
         String[] sqlArr = requestParams;
         String v;
-        v = SqlUtil.escapeSqlValue((String) value);
+        v = SqlUtil.escapeSqlValue(String.valueOf(value));
 
         sqlArr[0] = sqlArr[0].replace("#{" + path + "}", "\'" + v + "\'");
         String placeholder = "${" + path + "}";

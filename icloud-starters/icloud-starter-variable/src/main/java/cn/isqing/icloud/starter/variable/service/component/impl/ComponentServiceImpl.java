@@ -129,6 +129,7 @@ public class ComponentServiceImpl implements ComponentService {
                 {dto.getDependCRes(), ComponentTextTypeConstants.DEPEND_C_RES},
                 {dto.getDependConstantParams(), ComponentTextTypeConstants.DEPEND_CONSTANTS},
                 {dto.getSelfConstants(), ComponentTextTypeConstants.SELF_CONSTANTS},
+                {dto.getDependSystemVars(), ComponentTextTypeConstants.DEPEND_SYSTEM_VARS},
                 {dto.getResJudge(), ComponentTextTypeConstants.RES_JUDGE}
         };
         for (Object[] arr1 : arr) {

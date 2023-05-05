@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class RuleTemplateBusiCondition extends BaseCondition {
 
-    private List<Long> tidCondtion;
+    private List<Long> tidCondition;
 
     private Long tid;
 

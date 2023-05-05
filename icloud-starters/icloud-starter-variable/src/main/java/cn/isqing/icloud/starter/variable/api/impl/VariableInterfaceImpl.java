@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  * @author songqingwei@aliyun.com
  * @version 1.0
  **/
-@Service(group = "${i.variable.dubbo.group:iVariable}", timeout = 3000, retries = -1, version = "1.0.0")
+@Service(group = "${i.variable.dubbo.group:iVariable}", timeout = 60000, retries = -1, version = "1.0.0")
 //@Service
 @Slf4j
 public class VariableInterfaceImpl implements VariableInterface {
@@ -83,7 +83,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         Deque<Component> deque = actuatorDto.getComponentDeque();
         // 组件结果集
         Map<Long, String> resMap = new HashMap<>();
-        if (reqDto.getAboveResMap() != null || !reqDto.getAboveResMap().isEmpty()) {
+        if (reqDto.getAboveResMap() != null && !reqDto.getAboveResMap().isEmpty()) {
             resMap.putAll(reqDto.getAboveResMap());
         }
         ComponentExecDto resDto = new ComponentExecDto();

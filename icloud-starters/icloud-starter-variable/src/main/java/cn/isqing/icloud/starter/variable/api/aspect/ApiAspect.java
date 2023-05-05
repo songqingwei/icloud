@@ -6,6 +6,7 @@ import cn.hutool.cache.CacheUtil;
 import cn.isqing.icloud.common.utils.dto.BaseException;
 import cn.isqing.icloud.common.utils.dto.Response;
 import cn.isqing.icloud.common.utils.enums.ResCodeEnum;
+import cn.isqing.icloud.common.utils.json.JsonUtil;
 import cn.isqing.icloud.common.utils.log.MDCUtil;
 import cn.isqing.icloud.common.utils.validation.ValidationUtil;
 import cn.isqing.icloud.starter.variable.api.dto.AuthDto;
@@ -33,7 +34,7 @@ public class ApiAspect {
         MDCUtil.appendTraceId();
         try {
             Object[] args = joinPoint.getArgs();
-            log.info("请求参数:{}", args);
+            log.info("请求参数:{}", JsonUtil.toJsonString(args));
             // 参数校验
             ValidationUtil.validateWithThrow(args);
             // 权限校验

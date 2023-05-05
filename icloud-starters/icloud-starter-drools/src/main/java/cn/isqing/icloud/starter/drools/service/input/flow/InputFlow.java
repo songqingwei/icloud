@@ -17,7 +17,7 @@ import cn.isqing.icloud.starter.drools.common.constants.RunLogTextTypeConstants;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
 import cn.isqing.icloud.starter.drools.common.util.KieUtil;
 import cn.isqing.icloud.starter.drools.common.util.TextSqlUtil;
-import cn.isqing.icloud.starter.drools.dao.entity.RuleCoreCondtion;
+import cn.isqing.icloud.starter.drools.dao.entity.RuleCoreCondition;
 import cn.isqing.icloud.starter.drools.dao.entity.RunLog;
 import cn.isqing.icloud.starter.drools.dao.entity.RunLogText;
 import cn.isqing.icloud.starter.drools.dao.mapper.RuleCoreMapper;
@@ -232,7 +232,7 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
 
     private void getCoreId(InputFlowContext context) {
         InputDto dto = context.getInputDto();
-        RuleCoreCondtion core = new RuleCoreCondtion();
+        RuleCoreCondition core = new RuleCoreCondition();
         core.setDomain(dto.getDomain());
         core.setBusiCode(dto.getBusiCode());
         core.setActionId(dto.getActionId());

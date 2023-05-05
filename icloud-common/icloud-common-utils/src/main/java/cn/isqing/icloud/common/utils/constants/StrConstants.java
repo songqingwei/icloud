@@ -7,4 +7,7 @@ package cn.isqing.icloud.common.utils.constants;
 public class StrConstants {
 
     public static final String SEPARATOR = ":";
+    public static final String EMPTY_STR = "";
+    public static final String EMPTY_JSON_OBJ = "{}";
+    public static final String EMPTY_JSON_ARR = "[]";
 }

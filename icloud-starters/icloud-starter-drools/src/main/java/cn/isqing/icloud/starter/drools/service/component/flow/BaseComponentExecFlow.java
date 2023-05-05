@@ -1,6 +1,7 @@
 package cn.isqing.icloud.starter.drools.service.component.flow;
 
 import cn.isqing.icloud.common.utils.constants.SqlConstants;
+import cn.isqing.icloud.common.utils.constants.StrConstants;
 import cn.isqing.icloud.common.utils.dto.Response;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
@@ -51,7 +52,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     @Autowired
     private VariableInterface api;
 
-    // 提前组件结果的jsonPath分为三部分
+    // 组件结果的jsonPath分为三部分
     private Pattern cresPathPattern = Pattern.compile("^(\\$)\\.(\\d+)\\.([^\\s]+)$");
 
     protected BaseComponentExecFlow() {
@@ -253,7 +254,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         List<String> keyList = new ArrayList<>(context.getConstantsValue().values());
         CommonConfigCondition config = new CommonConfigCondition();
         config.setGroup(CommonConfigGroupConstants.VSET_DEFINITION_QUERY);
-        config.setKeyCondtion(keyList);
+        config.setKeyCondition(keyList);
         config.setOrderBy(SqlConstants.ID_ASC);
         List<CommonConfig> list = configMapper.selectByCondition(config);
         Map<String, String> map = list.stream().collect(Collectors.groupingBy(CommonConfig::getKey,
@@ -270,34 +271,34 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         Map<Integer, String> map = list.stream().collect(Collectors.groupingBy(ComponentText::getType,
                 Collectors.mapping(ComponentText::getText, Collectors.joining())));
 
-        context.setDialectConfig(map.get(ComponentTextTypeConstants.DIALECT_CONFIG));
-        context.setDependInputParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_INPUT_PARAMS),
+        context.setDialectConfig(map.getOrDefault(ComponentTextTypeConstants.DIALECT_CONFIG,StrConstants.EMPTY_STR));
+        context.setDependInputParams(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_INPUT_PARAMS,StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setDependCRes(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_C_RES),
+        context.setDependCRes(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_C_RES,StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setDependConstants(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_CONSTANTS),
+        context.setDependConstants(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_CONSTANTS,StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setDependSystemVars(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_SYSTEM_VARS),
+        context.setDependSystemVars(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_SYSTEM_VARS,StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setSelfConstants(JSONObject.parseObject(map.get(ComponentTextTypeConstants.SELF_CONSTANTS),
+        context.setSelfConstants(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.SELF_CONSTANTS,StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setDependRunRes(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_RUN_RES),
+        context.setDependRunRes(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_RUN_RES,StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 }));
-        context.setDependVariables(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_VARIABLES),
+        context.setDependVariables(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_VARIABLES,StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, Long>>() {
                 }));
-        context.setResJudge(JSON.parseArray(map.get(ComponentTextTypeConstants.RES_JUDGE)).toArray(new String[0]));
+        context.setResJudge(JSON.parseArray(map.getOrDefault(ComponentTextTypeConstants.RES_JUDGE, StrConstants.EMPTY_JSON_ARR)).toArray(new String[0]));
     }
 
 

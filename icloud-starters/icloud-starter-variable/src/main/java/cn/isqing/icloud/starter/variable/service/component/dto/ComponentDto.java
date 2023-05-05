@@ -2,7 +2,6 @@ package cn.isqing.icloud.starter.variable.service.component.dto;
 
 import cn.isqing.icloud.common.utils.validation.group.AddGroup;
 import cn.isqing.icloud.common.utils.validation.group.EditGroup;
-import cn.isqing.icloud.starter.variable.common.constants.ComponentTextTypeConstants;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;

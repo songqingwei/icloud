@@ -10,6 +10,6 @@ public class CommonConfigCondition extends BaseCondition {
 
     private Integer group;
 
-    private List<String> keyCondtion;
+    private List<String> keyCondition;
 
 }

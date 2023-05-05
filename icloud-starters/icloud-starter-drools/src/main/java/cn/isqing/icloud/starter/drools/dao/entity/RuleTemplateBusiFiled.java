@@ -5,7 +5,7 @@ public class RuleTemplateBusiFiled {
 
     public static String ID = "Id";
 
-    public static String TID = "tidCondtion";
+    public static String TID = "tidCondition";
 
     public static String BUSI_CODE = "busi_code";
 

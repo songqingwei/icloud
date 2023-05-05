@@ -4,7 +4,7 @@ import cn.isqing.icloud.common.utils.dto.BaseCondition;
 import lombok.Data;
 
 @Data
-public class RuleCoreCondtion extends BaseCondition {
+public class RuleCoreCondition extends BaseCondition {
 
     // 域
     private Integer domain;

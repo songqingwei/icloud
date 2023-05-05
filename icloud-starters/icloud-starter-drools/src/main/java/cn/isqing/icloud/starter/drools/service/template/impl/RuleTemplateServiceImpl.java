@@ -171,7 +171,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     private List<RuleTemplateDto> getDtoList(RuleTemplateListReq req, PageReqDto.PageInfo pageInfo) {
         List<RuleTemplate> res = mapper.selectWithBusi(req, pageInfo, pageInfo.getOffset());
         RuleTemplateBusiCondition busiCondition = new RuleTemplateBusiCondition();
-        busiCondition.setTidCondtion(res.stream().map(RuleTemplate::getId).collect(Collectors.toList()));
+        busiCondition.setTidCondition(res.stream().map(RuleTemplate::getId).collect(Collectors.toList()));
         List<RuleTemplateBusi> resBusi = busiMapper.selectByCondition(busiCondition);
 
         Map<Long, Map<String, String>> busiMap =
