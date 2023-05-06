@@ -69,7 +69,7 @@ public class VsetChangeFlow extends FlowTemplate<VsetChangeContext, Object> impl
         condition.setIdCondition(context.getVidList());
         condition.setSelectFiled(VariableFiled.ID, VariableFiled.CID, VariableFiled.C_RES_PATH);
         List<Variable> list = mapper.selectByCondition(condition);
-        Map<Long, VariableSimpleDto> map = list.stream().collect(Collectors.toMap(v -> v.getId(), v -> {
+        Map<Long, VariableSimpleDto> map = list.stream().collect(Collectors.toMap(Variable::getId, v -> {
             VariableSimpleDto simpleDto = new VariableSimpleDto();
             SpringBeanUtils.copyProperties(v, simpleDto);
             return simpleDto;

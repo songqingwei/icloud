@@ -239,6 +239,17 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         List<ComponentText> list = textMapper.selectByCondition(condition);
         Map<Integer, String> map = list.stream().collect(Collectors.groupingBy(ComponentText::getType,
                 Collectors.mapping(ComponentText::getText, Collectors.joining())));
+        Set<Long> cids = JSON.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_CIDS,StrConstants.EMPTY_JSON_ARR), new TypeReference<Set<Long>>() {});
+
+        // 判断依赖项是否正常完成
+        Set<Long> aboveCids = context.getExecDto().getAboveResMap().keySet();
+        Set<Long> difference = new HashSet<>(aboveCids);
+        difference.removeAll(cids);
+        if(!difference.isEmpty()){
+            log.warn("缺少依赖组件结果集:{}",difference);
+            interrupt(context,Response.error("缺少依赖组件结果集，取消执行"));
+            return;
+        }
 
         context.setDialectConfig(map.getOrDefault(ComponentTextTypeConstants.DIALECT_CONFIG, StrConstants.EMPTY_STR));
         context.setDependInputParams(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_INPUT_PARAMS,StrConstants.EMPTY_JSON_OBJ),
