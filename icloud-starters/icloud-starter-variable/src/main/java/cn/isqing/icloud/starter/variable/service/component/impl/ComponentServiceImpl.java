@@ -2,9 +2,9 @@ package cn.isqing.icloud.starter.variable.service.component.impl;
 
 import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
 import cn.isqing.icloud.common.utils.constants.SqlConstants;
-import cn.isqing.icloud.common.utils.dto.PageReqDto;
-import cn.isqing.icloud.common.utils.dto.PageResDto;
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.PageReqDto;
+import cn.isqing.icloud.common.api.dto.PageResDto;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.enums.status.YesOrNo;
 import cn.isqing.icloud.starter.variable.common.constants.ComponentTextTypeConstants;
 import cn.isqing.icloud.starter.variable.common.dto.UpdateStatusDto;

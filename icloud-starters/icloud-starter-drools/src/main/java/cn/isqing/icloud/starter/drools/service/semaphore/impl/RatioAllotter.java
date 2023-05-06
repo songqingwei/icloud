@@ -1,6 +1,6 @@
 package cn.isqing.icloud.starter.drools.service.semaphore.impl;
 
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
 import cn.isqing.icloud.common.utils.kit.LockUtil;
 import cn.isqing.icloud.common.utils.kit.RedisUtil;

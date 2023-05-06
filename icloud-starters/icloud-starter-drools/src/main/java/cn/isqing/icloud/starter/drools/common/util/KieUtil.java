@@ -1,7 +1,7 @@
 package cn.isqing.icloud.starter.drools.common.util;
 
 import cn.isqing.icloud.common.utils.dto.BaseException;
-import cn.isqing.icloud.common.utils.enums.ResCodeEnum;
+import cn.isqing.icloud.common.api.enums.ResCodeEnum;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
 import cn.isqing.icloud.starter.drools.dao.entity.Component;
 import cn.isqing.icloud.starter.drools.dao.entity.RuleTemplate;

@@ -1,8 +1,8 @@
 package cn.isqing.icloud.starter.drools.service.output.flow;
 
 import cn.isqing.icloud.common.utils.annotation.RouteType;
-import cn.isqing.icloud.common.utils.dto.Response;
-import cn.isqing.icloud.common.utils.enums.ResCodeEnum;
+import cn.isqing.icloud.common.api.dto.Response;
+import cn.isqing.icloud.common.api.enums.ResCodeEnum;
 import cn.isqing.icloud.common.utils.enums.status.CommonStatusEnum;
 import cn.isqing.icloud.common.utils.enums.status.SubFlowStatusEnum;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;

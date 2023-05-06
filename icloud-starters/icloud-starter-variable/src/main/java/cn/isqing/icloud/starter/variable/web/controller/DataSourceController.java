@@ -1,8 +1,8 @@
 package cn.isqing.icloud.starter.variable.web.controller;
 
-import cn.isqing.icloud.common.utils.dto.PageReqDto;
-import cn.isqing.icloud.common.utils.dto.PageResDto;
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.PageReqDto;
+import cn.isqing.icloud.common.api.dto.PageResDto;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.starter.variable.common.dto.UpdateStatusDto;
 import cn.isqing.icloud.starter.variable.service.datasource.DataSourceService;
 import cn.isqing.icloud.starter.variable.service.datasource.dto.DataSourceDto;

@@ -2,7 +2,7 @@ package cn.isqing.icloud.common.utils.dao;
 
 import cn.isqing.icloud.common.utils.dto.BaseCondition;
 import cn.isqing.icloud.common.utils.dto.BaseException;
-import cn.isqing.icloud.common.utils.enums.ResCodeEnum;
+import cn.isqing.icloud.common.api.enums.ResCodeEnum;
 import cn.isqing.icloud.common.utils.sql.SqlUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;

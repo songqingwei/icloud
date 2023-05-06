@@ -1,6 +1,6 @@
 package cn.isqing.icloud.policy.engine.dubbo.api;
 
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.Response;
 
 import java.util.Map;
 

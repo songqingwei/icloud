@@ -1,4 +1,4 @@
-package cn.isqing.icloud.common.utils.enums;
+package cn.isqing.icloud.common.api.enums;
 
 import lombok.Getter;
 

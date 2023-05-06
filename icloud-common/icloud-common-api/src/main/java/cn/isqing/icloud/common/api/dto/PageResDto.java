@@ -1,4 +1,4 @@
-package cn.isqing.icloud.common.utils.dto;
+package cn.isqing.icloud.common.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,7 +1,7 @@
 package cn.isqing.icloud.starter.variable.service.component.flow;
 
 import cn.isqing.icloud.common.utils.annotation.RouteType;
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
 import cn.isqing.icloud.starter.variable.common.constants.DataSourceTypeConstatnts;
 import cn.isqing.icloud.starter.variable.common.constants.DubboDSConfigConstatnts;

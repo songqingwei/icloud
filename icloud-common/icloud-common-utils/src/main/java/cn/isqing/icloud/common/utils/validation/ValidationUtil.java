@@ -1,7 +1,7 @@
 package cn.isqing.icloud.common.utils.validation;
 
 import cn.isqing.icloud.common.utils.dto.BaseException;
-import cn.isqing.icloud.common.utils.enums.ResCodeEnum;
+import cn.isqing.icloud.common.api.enums.ResCodeEnum;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
 
 import javax.validation.ConstraintViolation;

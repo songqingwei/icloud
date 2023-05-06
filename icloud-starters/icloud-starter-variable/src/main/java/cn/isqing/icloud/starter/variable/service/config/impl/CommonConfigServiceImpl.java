@@ -1,9 +1,9 @@
 package cn.isqing.icloud.starter.variable.service.config.impl;
 
 import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
-import cn.isqing.icloud.common.utils.dto.PageReqDto;
-import cn.isqing.icloud.common.utils.dto.PageResDto;
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.PageReqDto;
+import cn.isqing.icloud.common.api.dto.PageResDto;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.starter.variable.dao.entity.CommonConfig;
 import cn.isqing.icloud.starter.variable.dao.entity.CommonConfigCondition;
 import cn.isqing.icloud.starter.variable.dao.entity.CommonText;
