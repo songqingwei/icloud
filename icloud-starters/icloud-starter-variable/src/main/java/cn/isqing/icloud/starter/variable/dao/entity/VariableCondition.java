@@ -14,6 +14,7 @@ public class VariableCondition extends BaseCondition {
     private String busiCode;
     private Long cid;
     private List<Long> cidCondition;
+    private List<Long> idCondition;
     private Integer domain;
     private String type;
     private String createTimeConditionMin;

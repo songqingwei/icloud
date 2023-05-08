@@ -1,7 +1,7 @@
 package cn.isqing.icloud.starter.drools.service.semaphore.util;
 
 import cn.isqing.icloud.common.utils.constants.StrConstants;
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
 import cn.isqing.icloud.starter.drools.service.semaphore.dto.AllotterConfigDto;
 import lombok.extern.slf4j.Slf4j;

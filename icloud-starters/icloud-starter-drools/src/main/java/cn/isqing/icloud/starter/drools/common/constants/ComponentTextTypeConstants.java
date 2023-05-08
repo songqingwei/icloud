@@ -25,7 +25,7 @@ public class ComponentTextTypeConstants {
     // Map<placeholder,jsonPath>
     public static final int DEPEND_INPUT_PARAMS = 2;
 
-    // Map<placeholder,[cid,jsonPath]>
+    // Map<placeholder,jsonPath>
     public static final int DEPEND_C_RES = 3;
 
     // 依赖组件id set<Long>

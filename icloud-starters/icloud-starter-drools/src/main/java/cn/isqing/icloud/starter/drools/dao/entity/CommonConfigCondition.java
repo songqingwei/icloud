@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class CommonConfigCondition extends BaseCondition {
 
-    private Integer group;
+    private String group;
 
     private List<String> keyCondition;
 

@@ -7,7 +7,7 @@ public class CommonConfigListReq {
 
     private Long id;
 
-    private Integer group;
+    private String group;
 
     private String keyConditionLike;
 

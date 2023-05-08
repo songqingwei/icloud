@@ -3,8 +3,8 @@ package cn.isqing.icloud.starter.variable.service.event.impl;
 import cn.isqing.icloud.common.utils.annotation.RouteType;
 import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
 import cn.isqing.icloud.common.utils.constants.EventConstants;
-import cn.isqing.icloud.common.utils.dto.Response;
-import cn.isqing.icloud.common.utils.enums.ResCodeEnum;
+import cn.isqing.icloud.common.api.dto.Response;
+import cn.isqing.icloud.common.api.enums.ResCodeEnum;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;
 import cn.isqing.icloud.starter.variable.api.dto.VariableSimpleDto;
 import cn.isqing.icloud.starter.variable.common.constants.EventTypeConstants;
@@ -66,10 +66,10 @@ public class VsetChangeFlow extends FlowTemplate<VsetChangeContext, Object> impl
 
     private void getVarInfo(VsetChangeContext context) {
         VariableCondition condition = new VariableCondition();
-        condition.setCidCondition(context.getVidList());
+        condition.setIdCondition(context.getVidList());
         condition.setSelectFiled(VariableFiled.ID, VariableFiled.CID, VariableFiled.C_RES_PATH);
         List<Variable> list = mapper.selectByCondition(condition);
-        Map<Long, VariableSimpleDto> map = list.stream().collect(Collectors.toMap(v -> v.getId(), v -> {
+        Map<Long, VariableSimpleDto> map = list.stream().collect(Collectors.toMap(Variable::getId, v -> {
             VariableSimpleDto simpleDto = new VariableSimpleDto();
             SpringBeanUtils.copyProperties(v, simpleDto);
             return simpleDto;

@@ -14,7 +14,7 @@ public class CommonConfigDto {
     @NotNull(message = "主键不能为空",groups = {EditGroup.class})
     private Long id;
 
-    private Integer group;
+    private String group;
 
     private String key;
 

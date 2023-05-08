@@ -2,7 +2,7 @@ package cn.isqing.icloud.common.utils.dao;
 
 import cn.isqing.icloud.common.utils.dto.BaseCondition;
 import cn.isqing.icloud.common.utils.dto.BaseException;
-import cn.isqing.icloud.common.utils.enums.ResCodeEnum;
+import cn.isqing.icloud.common.api.enums.ResCodeEnum;
 import cn.isqing.icloud.common.utils.sql.SqlUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +34,7 @@ public class ConditionParser {
     private String tableAliasPre = "";
     // 如id=#{dto.id}
     private String nomalTpl = "%s`%s`=#{%s%s}";
+    private String inTpl = "%s`%s` in %s";
     private final Map<String, String> specialTplMap = new HashMap<>();
 
     {
@@ -134,7 +135,7 @@ public class ConditionParser {
     }
 
     private void dealList(String column) {
-        list.add(column + " in " + getSqlIn());
+        list.add(String.format(inTpl, tableAliasPre, column, getSqlIn()));
     }
 
     private String getSqlIn() {

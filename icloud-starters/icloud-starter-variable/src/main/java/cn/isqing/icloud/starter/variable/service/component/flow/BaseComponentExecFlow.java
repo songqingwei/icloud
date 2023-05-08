@@ -2,7 +2,7 @@ package cn.isqing.icloud.starter.variable.service.component.flow;
 
 import cn.isqing.icloud.common.utils.constants.SqlConstants;
 import cn.isqing.icloud.common.utils.constants.StrConstants;
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
 import cn.isqing.icloud.common.utils.time.TimeUtil;
@@ -158,7 +158,10 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
                 interrupt(context, Response.error("DependCRes的JsonPath不规范,请重新配置"));
                 return;
             }
-            Object value = JSONPath.extract(aboveResMap.get(matcher.group(2)), "$."+matcher.group(3));
+            String cid = matcher.group(2);
+            String path = "$." + matcher.group(3);
+            String jsonStr = aboveResMap.get(Long.valueOf(cid));
+            Object value = JSONPath.extract(jsonStr, path);
             Response<Object> res = replace(tpl, placeholder, value);
             if (!res.isSuccess()) {
                 interrupt(context, res);
@@ -236,6 +239,17 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         List<ComponentText> list = textMapper.selectByCondition(condition);
         Map<Integer, String> map = list.stream().collect(Collectors.groupingBy(ComponentText::getType,
                 Collectors.mapping(ComponentText::getText, Collectors.joining())));
+        Set<Long> cids = JSON.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_CIDS,StrConstants.EMPTY_JSON_ARR), new TypeReference<Set<Long>>() {});
+
+        // 判断依赖项是否正常完成
+        Set<Long> aboveCids = context.getExecDto().getAboveResMap().keySet();
+        Set<Long> difference = new HashSet<>(aboveCids);
+        difference.removeAll(cids);
+        if(!difference.isEmpty()){
+            log.warn("缺少依赖组件结果集:{}",difference);
+            interrupt(context,Response.error("缺少依赖组件结果集，取消执行"));
+            return;
+        }
 
         context.setDialectConfig(map.getOrDefault(ComponentTextTypeConstants.DIALECT_CONFIG, StrConstants.EMPTY_STR));
         context.setDependInputParams(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_INPUT_PARAMS,StrConstants.EMPTY_JSON_OBJ),

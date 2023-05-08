@@ -10,7 +10,7 @@ rocketmq:
     group: test_group
 dubbo:
   scan:
-    basePackages: cn.isqing.icloud.starter.variable
+    basePackages: cn.isqing.icloud.starter.variable,cn.isqing.icloud.policy.engine.dubbo.impl
   application:
     name: policy-engine
   protocol:

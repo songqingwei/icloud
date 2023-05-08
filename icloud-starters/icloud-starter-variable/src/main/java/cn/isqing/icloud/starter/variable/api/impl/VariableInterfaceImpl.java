@@ -2,10 +2,11 @@ package cn.isqing.icloud.starter.variable.api.impl;
 
 import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
 import cn.isqing.icloud.common.utils.dto.BaseException;
-import cn.isqing.icloud.common.utils.dto.PageReqDto;
-import cn.isqing.icloud.common.utils.dto.PageResDto;
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.PageReqDto;
+import cn.isqing.icloud.common.api.dto.PageResDto;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.kit.ParallelStreamUtil;
+import cn.isqing.icloud.common.utils.kit.StrUtil;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.VariableDto;
 import cn.isqing.icloud.starter.variable.api.dto.VariableListReq;
@@ -43,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -95,17 +97,23 @@ public class VariableInterfaceImpl implements VariableInterface {
         resDto.setAboveResMap(resMap);
         resDto.setInputParams(reqDto.getInputParams());
         AtomicBoolean end = new AtomicBoolean(false);
+        AtomicInteger total = new AtomicInteger(0);
+        AtomicBoolean hasError = new AtomicBoolean(false);
         Consumer<Component> consumer = (c) -> {
             if (resMap.get(c.getId()) != null){
+                total.incrementAndGet();
                 return;
             }
             ComponentExecService service = execFactory.getSingle(c.getDataSourceType().toString());
             Response<Object> res = service.exec(c, resDto);
             if (!res.isSuccess()) {
                 log.error(res.getMsg());
-                end.set(true);
+                hasError.set(true);
+            }else {
+                total.incrementAndGet();
             }
         };
+
         componentList.forEach(list -> {
             if (end.get()) {
                 return;
@@ -113,11 +121,15 @@ public class VariableInterfaceImpl implements VariableInterface {
             try {
                 ParallelStreamUtil.exec(list, consumer, execCompoentTimeOut);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                log.error(e.getMessage(),e);
+            }
+            // 判断整个层级是否都失败了
+            if(total.intValue()==0){
+                end.set(true);
             }
         });
-        if (end.get()) {
-            return Response.error("获取变量值异常");
+        if (hasError.get() || end.get()) {
+            return Response.error("获取变量值异常",resDto.getAboveResMap());
         }
         return Response.success(resDto.getAboveResMap());
     }
@@ -140,7 +152,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         if (c == null) {
             return Response.error("缺少组件配置,请联系管理员");
         }
-        // 执行组件
+        // 执行组件获取变量id
         List<Long> vidList = getVidList(reqDto, conf, c);
         // 变更事件
         vsetChangeEvent(reqDto, vidList);
@@ -150,7 +162,6 @@ public class VariableInterfaceImpl implements VariableInterface {
 
     private List<Long> getVidList(VariablesValueReqDto reqDto, VsetDefQueryConf conf, Component c) {
         ComponentExecDto resDto = new ComponentExecDto();
-        resDto.setAboveResMap(new HashMap<>());
         resDto.setInputParams(reqDto.getInputParams());
         ComponentExecService service = execFactory.getSingle(c.getDataSourceType().toString());
         Response<Object> res = service.exec(c, resDto);
@@ -164,8 +175,8 @@ public class VariableInterfaceImpl implements VariableInterface {
 
     private VsetDefQueryConf getCommonConfig(VariablesValueReqDto reqDto) {
         CommonConfig config = new CommonConfig();
-        config.setGroup(CommonConfigGroupConstants.VSET_DEFINITION_QUERY);
-        config.setKey(reqDto.getDomain().toString());
+        config.setGroup(StrUtil.assembleKey(CommonConfigGroupConstants.VSET_DEFINITION_QUERY,reqDto.getDomain().toString()));
+        config.setKey(reqDto.getCoreId().toString());
         CommonConfig first = configMapper.first(config, null);
         if (first == null) {
             throw new BaseException("缺少变量集查询配置,请联系管理员");
@@ -190,14 +201,19 @@ public class VariableInterfaceImpl implements VariableInterface {
     @Override
     public Response<Map<Long, Object>> getValues(VariablesValueReqDto reqDto) {
         Response<Map<Long, String>> res = getComponentRes(reqDto);
-        if (!res.isSuccess()) {
-            return Response.info(res.getCode(), res.getMsg());
-        }
         ActuatorDto actuatorDto = VariableCacheUtil.actuatorMap.get(reqDto.getCoreId());
+        if(actuatorDto==null){
+            return Response.error("系统繁忙");
+        }
         Map<Long, String> data = res.getData();
-        Map<Long, Object> map = actuatorDto.getVariableMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-                e -> VariableUtil.getValue(e.getValue(), data)));
 
+        Map<Long, Object> map = new HashMap<>();
+        actuatorDto.getVariableMap().forEach((k,v)->{
+            map.put(k,VariableUtil.getValue(v, data));
+        });
+        if (!res.isSuccess()) {
+            return Response.info(res.getCode(), res.getMsg(),map);
+        }
         return Response.success(map);
     }
 

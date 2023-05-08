@@ -1,6 +1,6 @@
 package cn.isqing.icloud.starter.variable.service.component;
 
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.starter.variable.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.variable.dao.entity.Component;
 

@@ -1,8 +1,8 @@
 package cn.isqing.icloud.starter.variable.api;
 
-import cn.isqing.icloud.common.utils.dto.PageReqDto;
-import cn.isqing.icloud.common.utils.dto.PageResDto;
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.PageReqDto;
+import cn.isqing.icloud.common.api.dto.PageResDto;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.starter.variable.api.dto.VariableDto;
 import cn.isqing.icloud.starter.variable.api.dto.VariableListReq;
 import cn.isqing.icloud.starter.variable.api.dto.VariablesValueReqDto;

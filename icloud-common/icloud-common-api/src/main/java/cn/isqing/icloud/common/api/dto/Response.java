@@ -1,6 +1,6 @@
-package cn.isqing.icloud.common.utils.dto;
+package cn.isqing.icloud.common.api.dto;
 
-import cn.isqing.icloud.common.utils.enums.ResCodeEnum;
+import cn.isqing.icloud.common.api.enums.ResCodeEnum;
 import lombok.Data;
 
 import java.io.Serializable;

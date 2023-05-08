@@ -1,6 +1,6 @@
 package cn.isqing.icloud.starter.drools.web.controller;
 
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.starter.drools.service.input.dto.InputDto;
 import cn.isqing.icloud.starter.drools.service.input.flow.InputFlow;
 import cn.isqing.icloud.starter.drools.service.input.flow.InputFlowContext;

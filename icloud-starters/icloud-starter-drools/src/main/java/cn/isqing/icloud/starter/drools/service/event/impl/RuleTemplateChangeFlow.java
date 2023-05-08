@@ -6,7 +6,7 @@ import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
 import cn.isqing.icloud.common.utils.constants.EventConstants;
 import cn.isqing.icloud.common.utils.constants.SqlConstants;
 import cn.isqing.icloud.common.utils.dto.BaseException;
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;
 import cn.isqing.icloud.common.utils.kit.LockUtil;
 import cn.isqing.icloud.common.utils.kit.RedisUtil;

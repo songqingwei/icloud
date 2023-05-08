@@ -1,8 +1,8 @@
 package cn.isqing.icloud.starter.variable.web.controller;
 
-import cn.isqing.icloud.common.utils.dto.PageReqDto;
-import cn.isqing.icloud.common.utils.dto.PageResDto;
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.PageReqDto;
+import cn.isqing.icloud.common.api.dto.PageResDto;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.starter.variable.common.dto.UpdateStatusDto;
 import cn.isqing.icloud.starter.variable.service.component.ComponentService;
 import cn.isqing.icloud.starter.variable.service.component.dto.ComponentDto;
@@ -47,6 +47,11 @@ public class ComponentController {
     @PostMapping(value = "/del")
     public Response<Object> sw(@RequestParam("id") Long id){
         return service.del(id);
+    }
+
+    @PostMapping(value = "/getText")
+    public Response<ComponentDto> getText(@RequestParam("id") Long id){
+        return service.getText(id);
     }
 
 }

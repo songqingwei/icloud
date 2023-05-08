@@ -1,6 +1,6 @@
 package cn.isqing.icloud.starter.variable.service.component.flow;
 
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;
 import cn.isqing.icloud.common.utils.kit.Digraph;
 import cn.isqing.icloud.common.utils.kit.TopologicalSort;
