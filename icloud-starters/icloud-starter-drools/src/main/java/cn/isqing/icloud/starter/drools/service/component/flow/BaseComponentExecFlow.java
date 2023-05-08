@@ -236,7 +236,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         context.getDependSystemVars().values().forEach(v -> {
             switch (v) {
                 case "uuid":
-                    map.put(v, UuidUtil.randomNum_6());
+                    map.put(v, UuidUtil.uuid());
                     break;
                 case "nowDate":
                     map.put(v, TimeUtil.now().format(TimeUtil.dateFormatter));

@@ -1,7 +1,7 @@
 package cn.isqing.icloud.starter.variable.service.component.flow;
 
 import cn.isqing.icloud.common.utils.annotation.RouteType;
-import cn.isqing.icloud.common.utils.dto.Response;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
 import cn.isqing.icloud.starter.variable.common.constants.DataSourceTypeConstatnts;
 import cn.isqing.icloud.starter.variable.common.constants.DubboDSConfigConstatnts;
@@ -40,7 +40,7 @@ public class DubboComponentExecFlow extends BaseComponentExecFlow {
         String v = String.valueOf(value);
         if (path.startsWith("##{")) {
             v = "\"" + v + "\"";
-        } else if(path.startsWith("#{")) {
+        } else if (path.startsWith("#{")) {
             v = "\'" + v + "\'";
         }
         requestParams[0] = requestParams[0].replace("#{" + path + "}", v);
@@ -80,12 +80,16 @@ public class DubboComponentExecFlow extends BaseComponentExecFlow {
         GenericService genericService = cache.get(referenceConfig);
         try {
             Object res = genericService.$invoke(dto.getMethodName(), dto.getMethodType(), dto.getParamObj());
-            context.setExecRes(JSON.toJSONString(res));
+            if (res instanceof String) {
+                context.setExecRes((String) res);
+            } else {
+                context.setExecRes(JSON.toJSONString(res));
+            }
         } catch (Exception e) {
             referenceConfig.destroy();
             cache.destroy(referenceConfig);
-            log.error(e.getMessage(),e);
-            interrupt(context,Response.error("调用dubbo接口异常"));
+            log.error(e.getMessage(), e);
+            interrupt(context, Response.error("调用dubbo接口异常"));
             return;
         }
     }
