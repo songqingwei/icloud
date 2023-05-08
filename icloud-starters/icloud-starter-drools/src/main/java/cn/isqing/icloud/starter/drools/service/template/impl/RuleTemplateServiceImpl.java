@@ -15,7 +15,7 @@ import cn.isqing.icloud.starter.drools.common.constants.CommonTextTypeConstants;
 import cn.isqing.icloud.starter.drools.common.constants.EventTypeConstants;
 import cn.isqing.icloud.starter.drools.common.dto.RuleH5Dto;
 import cn.isqing.icloud.starter.drools.common.dto.UpdateStatusDto;
-import cn.isqing.icloud.starter.drools.common.enums.VariableType;
+import cn.isqing.icloud.starter.variable.api.enums.VariableType;
 import cn.isqing.icloud.starter.drools.common.util.TextSqlUtil;
 import cn.isqing.icloud.starter.drools.dao.entity.*;
 import cn.isqing.icloud.starter.drools.dao.mapper.CommonTextMapper;

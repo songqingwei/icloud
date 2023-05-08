@@ -55,8 +55,8 @@ public class Response<T> implements Serializable {
         return new Response<>(ResCodeEnum.ERROR.getCode(), msg, data);
     }
 
-    public static <R> Response<R> cleanData(Response res) {
-        res.setData(null);
+    public static <R> Response<R> withData(Response res,R data) {
+        res.setData(data);
         return res;
     }
 

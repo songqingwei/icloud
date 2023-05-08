@@ -8,9 +8,7 @@ import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.kit.ParallelStreamUtil;
 import cn.isqing.icloud.common.utils.kit.StrUtil;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
-import cn.isqing.icloud.starter.variable.api.dto.VariableDto;
-import cn.isqing.icloud.starter.variable.api.dto.VariableListReq;
-import cn.isqing.icloud.starter.variable.api.dto.VariablesValueReqDto;
+import cn.isqing.icloud.starter.variable.api.dto.*;
 import cn.isqing.icloud.starter.variable.api.util.VariableUtil;
 import cn.isqing.icloud.starter.variable.common.constants.CommonConfigGroupConstants;
 import cn.isqing.icloud.starter.variable.common.constants.EventTypeConstants;
@@ -21,6 +19,7 @@ import cn.isqing.icloud.starter.variable.common.util.VariableCacheUtil;
 import cn.isqing.icloud.starter.variable.dao.entity.CommonConfig;
 import cn.isqing.icloud.starter.variable.dao.entity.Component;
 import cn.isqing.icloud.starter.variable.dao.entity.Variable;
+import cn.isqing.icloud.starter.variable.dao.entity.VariableCondition;
 import cn.isqing.icloud.starter.variable.dao.mapper.CommonConfigMapper;
 import cn.isqing.icloud.starter.variable.dao.mapper.ComponentMapper;
 import cn.isqing.icloud.starter.variable.dao.mapper.VariableMapper;
@@ -84,7 +83,7 @@ public class VariableInterfaceImpl implements VariableInterface {
     public Response<Map<Long, String>> getComponentRes(VariablesValueReqDto reqDto) {
         Response<ActuatorDto> actuatorRes = getActuatorDto(reqDto);
         if (!actuatorRes.isSuccess()) {
-            return Response.cleanData(actuatorRes);
+            return Response.withData(actuatorRes, null);
         }
         ActuatorDto actuatorDto = actuatorRes.getData();
         List<List<Component>> componentList = actuatorDto.getComponentList();
@@ -100,7 +99,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         AtomicInteger total = new AtomicInteger(0);
         AtomicBoolean hasError = new AtomicBoolean(false);
         Consumer<Component> consumer = (c) -> {
-            if (resMap.get(c.getId()) != null){
+            if (resMap.get(c.getId()) != null) {
                 total.incrementAndGet();
                 return;
             }
@@ -109,7 +108,7 @@ public class VariableInterfaceImpl implements VariableInterface {
             if (!res.isSuccess()) {
                 log.error(res.getMsg());
                 hasError.set(true);
-            }else {
+            } else {
                 total.incrementAndGet();
             }
         };
@@ -121,15 +120,15 @@ public class VariableInterfaceImpl implements VariableInterface {
             try {
                 ParallelStreamUtil.exec(list, consumer, execCompoentTimeOut);
             } catch (Exception e) {
-                log.error(e.getMessage(),e);
+                log.error(e.getMessage(), e);
             }
             // 判断整个层级是否都失败了
-            if(total.intValue()==0){
+            if (total.intValue() == 0) {
                 end.set(true);
             }
         });
         if (hasError.get() || end.get()) {
-            return Response.error("获取变量值异常",resDto.getAboveResMap());
+            return Response.error("获取变量值异常", resDto.getAboveResMap());
         }
         return Response.success(resDto.getAboveResMap());
     }
@@ -175,7 +174,7 @@ public class VariableInterfaceImpl implements VariableInterface {
 
     private VsetDefQueryConf getCommonConfig(VariablesValueReqDto reqDto) {
         CommonConfig config = new CommonConfig();
-        config.setGroup(StrUtil.assembleKey(CommonConfigGroupConstants.VSET_DEFINITION_QUERY,reqDto.getDomain().toString()));
+        config.setGroup(StrUtil.assembleKey(CommonConfigGroupConstants.VSET_DEFINITION_QUERY, reqDto.getDomain().toString()));
         config.setKey(reqDto.getCoreId().toString());
         CommonConfig first = configMapper.first(config, null);
         if (first == null) {
@@ -202,19 +201,42 @@ public class VariableInterfaceImpl implements VariableInterface {
     public Response<Map<Long, Object>> getValues(VariablesValueReqDto reqDto) {
         Response<Map<Long, String>> res = getComponentRes(reqDto);
         ActuatorDto actuatorDto = VariableCacheUtil.actuatorMap.get(reqDto.getCoreId());
-        if(actuatorDto==null){
+        if (actuatorDto == null) {
             return Response.error("系统繁忙");
         }
         Map<Long, String> data = res.getData();
 
         Map<Long, Object> map = new HashMap<>();
-        actuatorDto.getVariableMap().forEach((k,v)->{
-            map.put(k,VariableUtil.getValue(v, data));
+        actuatorDto.getVariableMap().forEach((k, v) -> {
+            map.put(k, VariableUtil.getValue(v, data));
         });
         if (!res.isSuccess()) {
-            return Response.info(res.getCode(), res.getMsg(),map);
+            return Response.info(res.getCode(), res.getMsg(), map);
         }
         return Response.success(map);
+    }
+
+    @Override
+    public Response<List<VariableValueDto>> getVarValue(VariablesValueReqDto reqDto) {
+        Response<Map<Long, String>> res = getComponentRes(reqDto);
+        ActuatorDto actuatorDto = VariableCacheUtil.actuatorMap.get(reqDto.getCoreId());
+        if (actuatorDto == null) {
+            return Response.error("系统繁忙");
+        }
+        Map<Long, String> data = res.getData();
+        if (data == null) {
+            return Response.withData(res, null);
+        }
+        VariableCondition condition = new VariableCondition();
+        condition.setCidCondition(data.keySet());
+        List<Variable> variables = mapper.selectByCondition(condition);
+        List<VariableValueDto> resData = variables.stream().map(var -> {
+            VariableValueDto dto = new VariableValueDto();
+            SpringBeanUtils.copyProperties(var, dto);
+            dto.setValue(VariableUtil.getValue(var.getCid(), var.getCresPath(), data));
+            return dto;
+        }).collect(Collectors.toList());
+        return Response.withData(res, resData);
     }
 
     @Override

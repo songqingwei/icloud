@@ -29,6 +29,6 @@ public class VariableDto {
 
     private String busiCode;
 
-    private Long actionId;
+    private String note;
 
 }

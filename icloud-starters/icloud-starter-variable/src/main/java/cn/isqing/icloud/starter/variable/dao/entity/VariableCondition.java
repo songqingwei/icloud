@@ -13,7 +13,7 @@ public class VariableCondition extends BaseCondition {
     private String name;
     private String busiCode;
     private Long cid;
-    private List<Long> cidCondition;
+    private Object cidCondition;
     private List<Long> idCondition;
     private Integer domain;
     private String type;

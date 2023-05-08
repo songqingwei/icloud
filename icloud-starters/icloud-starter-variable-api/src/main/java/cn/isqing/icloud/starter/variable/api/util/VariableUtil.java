@@ -25,15 +25,20 @@ public class VariableUtil {
      * 获取变量值
      *
      * @param v
-     * @param resMap
-     * @return
      */
     public static Object getValue(VariableSimpleDto v, Map<Long, String> resMap) {
         String s = resMap.get(v.getCid());
         if (s == null) {
             return null;
         }
-        Object value = JSONPath.extract(s, v.getCresPath());
-        return value;
+        return JSONPath.extract(s, v.getCresPath());
+    }
+
+    public static Object getValue(Long cid, String cresPath, Map<Long, String> resMap) {
+        String s = resMap.get(cid);
+        if (s == null) {
+            return null;
+        }
+        return JSONPath.extract(s, cresPath);
     }
 }

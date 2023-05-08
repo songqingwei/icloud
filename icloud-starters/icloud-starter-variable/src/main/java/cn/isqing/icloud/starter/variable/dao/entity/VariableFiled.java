@@ -29,4 +29,6 @@ public class VariableFiled {
 
     public static String BUSI_CODE = "busi_code";
 
+    public static String NOTE = "note";
+
 }

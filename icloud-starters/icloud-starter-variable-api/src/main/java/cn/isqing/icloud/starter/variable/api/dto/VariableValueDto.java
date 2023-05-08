@@ -1,12 +1,9 @@
-package cn.isqing.icloud.starter.variable.dao.entity;
+package cn.isqing.icloud.starter.variable.api.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
-public class Variable {
+public class VariableValueDto {
 
     private Long id;
 
@@ -29,16 +26,10 @@ public class Variable {
 
     private Integer domain;
 
-    private Integer isDel;
-
-    private Integer isActive;
-
-    private LocalDateTime createTime;
-
-    private LocalDateTime updateTime;
-
     private String busiCode;
 
     private String note;
+
+    private Object value;
 
 }

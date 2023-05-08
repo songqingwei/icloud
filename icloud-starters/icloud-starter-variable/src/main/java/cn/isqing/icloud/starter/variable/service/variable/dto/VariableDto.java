@@ -34,10 +34,12 @@ public class VariableDto {
 
     private Integer domain;
 
-    private String busiCode;
-
     private Integer isDel;
 
     private Integer isActive;
+
+    private String busiCode;
+
+    private String note;
 
 }
