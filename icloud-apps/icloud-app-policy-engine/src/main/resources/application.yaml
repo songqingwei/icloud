@@ -2,10 +2,10 @@ server:
   port: 80
 spring:
   redis:
-    host: localhost
+    host: 172.16.2.119
     port: 6379
 rocketmq:
-  name-server: localhost:9876 # 访问地址
+  name-server: 172.16.2.119:9876 # 访问地址
   producer:
     group: test_group
 dubbo:
@@ -17,7 +17,7 @@ dubbo:
     name: dubbo
     port: 20880
   registry:
-    address: zookeeper://localhost:2181
+    address: zookeeper://172.16.2.119:2181
   consumer:
     check: false
 logging:
@@ -32,7 +32,7 @@ i:
     datasource:
       type: com.alibaba.druid.pool.DruidDataSource
       driverClassName: com.mysql.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/drools?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&useAffectedRows=true&useSSL=false
+      url: jdbc:mysql://172.16.2.119:3306/drools?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&useAffectedRows=true&useSSL=false
       username: root
       # 1.配置生成的password
       password: root
@@ -70,7 +70,7 @@ i:
     datasource:
       type: com.alibaba.druid.pool.DruidDataSource
       driverClassName: com.mysql.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/variable?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&useAffectedRows=true&useSSL=false
+      url: jdbc:mysql://172.16.2.119:3306/variable?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&useAffectedRows=true&useSSL=false
       username: root
       # 1.配置生成的password
       password: root

@@ -37,8 +37,14 @@ public class DubboComponentExecFlow extends BaseComponentExecFlow {
 
     @Override
     protected Response<Object> replace(String[] requestParams, String path, Object value) {
-        requestParams[0] = requestParams[0].replace("#{" + path + "}", "\'" + value + "\'");
-        requestParams[0] = requestParams[0].replace("${" + path + "}", (String) value);
+        String v = String.valueOf(value);
+        if (path.startsWith("##{")) {
+            v = "\"" + v + "\"";
+        } else if(path.startsWith("#{")) {
+            v = "\'" + v + "\'";
+        }
+        requestParams[0] = requestParams[0].replace("#{" + path + "}", v);
+
         return Response.SUCCESS;
     }
 

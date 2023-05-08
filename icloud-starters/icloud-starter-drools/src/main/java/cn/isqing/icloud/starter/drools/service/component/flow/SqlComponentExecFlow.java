@@ -47,18 +47,18 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
     @Override
     protected Response<Object> replace(String[] requestParams, String path, Object value) {
         String[] sqlArr = requestParams;
-        String v;
-        v = v = SqlUtil.escapeSqlValue(String.valueOf(value));;
-
-        sqlArr[0] = sqlArr[0].replace("#{" + path + "}", "\'" + v + "\'");
-        String placeholder = "${" + path + "}";
-        if (sqlArr[0].indexOf(placeholder) > -1) {
+        String v = SqlUtil.escapeSqlValue(String.valueOf(value));
+        if (path.startsWith("${")) {
             boolean b = StrUtil.isNumber(v);
             if (!b) {
                 return Response.error("检测到sql注入");
             }
+        } else if (path.startsWith("##{")) {
+            v = "\"" + v + "\"";
+        } else {//#{
+            v = "\'" + v + "\'";
         }
-        sqlArr[0] = sqlArr[0].replace(placeholder, v);
+        sqlArr[0] = sqlArr[0].replace(path, v);
         return Response.SUCCESS;
     }
 
