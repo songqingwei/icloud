@@ -280,7 +280,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         condition.setOrderBy(SqlConstants.ID_ASC);
         List<CommonText> texts = textMapper.selectByCondition(condition);
         Map<Long, Map<String, Object>> renderer = texts.stream().collect(Collectors.groupingBy(CommonText::getFid, Collectors.mapping(CommonText::getText,
-                Collectors.collectingAndThen(Collectors.joining(), text -> JSON.parseObject(text, new TypeReference<Map<Long, Object>>() {})))));
+                Collectors.collectingAndThen(Collectors.joining(), text -> JSON.parseObject(text, new TypeReference<Map<String, Object>>() {})))));
         res.getData().setRenderer(renderer);
 
     }
