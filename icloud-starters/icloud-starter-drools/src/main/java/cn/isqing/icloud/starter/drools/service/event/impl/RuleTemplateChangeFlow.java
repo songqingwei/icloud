@@ -28,7 +28,7 @@ import cn.isqing.icloud.starter.drools.service.semaphore.dto.AllotterConfigDto;
 import cn.isqing.icloud.starter.drools.service.semaphore.util.Allotter;
 import cn.isqing.icloud.starter.drools.common.util.ComponentUtil;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
-import cn.isqing.icloud.starter.variable.api.dto.VariableSimpleDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariableSimpleDto;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
@@ -205,7 +205,7 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
     private void dealRecords(RuleTemplateChangeContext context) {
         KieHelper kieHelper = KieUtil.getKieHelper(context.getRuleKeyDto());
         RuleKeyDto ruleKeyDto = context.getRuleKeyDto();
-        Map<String, VariableSimpleDto> map = new HashMap<>();
+        Map<String, ApiVariableSimpleDto> map = new HashMap<>();
         long from = 0;
         Allotter.romoveConfig(context.getCore().getId());
         do {
@@ -222,7 +222,7 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
             Map<Integer, Map<Long, String>> collect = getRuleAndVar(texts);
             // 填充变量集合
             collect.get(CommonTextTypeConstants.RULE_VARIABLE_MAP).values().forEach(s -> {
-                map.putAll(JSON.parseObject(s, new TypeReference<Map<String, VariableSimpleDto>>() {
+                map.putAll(JSON.parseObject(s, new TypeReference<Map<String, ApiVariableSimpleDto>>() {
                 }));
             });
 

@@ -6,7 +6,7 @@ import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.api.enums.ResCodeEnum;
 import cn.isqing.icloud.common.utils.log.MDCUtil;
 import cn.isqing.icloud.common.utils.validation.ValidationUtil;
-import cn.isqing.icloud.starter.variable.api.dto.AuthDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiAuthDto;
 import cn.isqing.icloud.starter.variable.common.constants.CommonConfigGroupConstants;
 import cn.isqing.icloud.starter.variable.dao.entity.CommonConfig;
 import cn.isqing.icloud.starter.variable.dao.mapper.CommonConfigMapper;
@@ -50,14 +50,14 @@ public class ControllerAspect {
         config.setGroup(CommonConfigGroupConstants.DOMAIN_AUTH_CODE);
         for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
-            if (arg instanceof AuthDto) {
-                AuthDto authDto = (AuthDto) arg;
-                config.setKey(authDto.getDomain().toString());
+            if (arg instanceof ApiAuthDto) {
+                ApiAuthDto apiAuthDto = (ApiAuthDto) arg;
+                config.setKey(apiAuthDto.getDomain().toString());
                 CommonConfig first = configMapper.first(config, null);
                 if (first == null) {
                     throw new BaseException(ResCodeEnum.REJECT.getCode(), "不存在对应domain授权");
                 }
-                if (!first.getValue().equals(authDto.getDomainAuthCode())) {
+                if (!first.getValue().equals(apiAuthDto.getDomainAuthCode())) {
                     throw new BaseException(ResCodeEnum.REJECT.getCode(), "domain授权校验不通过");
                 }
 

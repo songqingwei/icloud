@@ -1,7 +1,7 @@
 package cn.isqing.icloud.starter.variable.api.util;
 
-import cn.isqing.icloud.starter.variable.api.dto.VariableDto;
-import cn.isqing.icloud.starter.variable.api.dto.VariableSimpleDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariableSimpleDto;
 import com.alibaba.fastjson2.JSONPath;
 
 import java.util.Map;
@@ -13,11 +13,11 @@ public class VariableUtil {
 
     public static final String uniNameTpl = "v_%d";
 
-    public static String getUniName(VariableSimpleDto v) {
+    public static String getUniName(ApiVariableSimpleDto v) {
         return String.format(uniNameTpl, v.getId());
     }
 
-    public static String getUniName(VariableDto v) {
+    public static String getUniName(ApiVariableDto v) {
         return String.format(uniNameTpl, v.getId());
     }
 
@@ -26,7 +26,7 @@ public class VariableUtil {
      *
      * @param v
      */
-    public static Object getValue(VariableSimpleDto v, Map<Long, String> resMap) {
+    public static Object getValue(ApiVariableSimpleDto v, Map<Long, String> resMap) {
         String s = resMap.get(v.getCid());
         if (s == null) {
             return null;

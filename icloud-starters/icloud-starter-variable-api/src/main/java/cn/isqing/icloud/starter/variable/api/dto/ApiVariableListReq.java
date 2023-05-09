@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class VariableListReq extends AuthDto {
+public class ApiVariableListReq extends ApiAuthDto {
     /**
      * 名称
      */

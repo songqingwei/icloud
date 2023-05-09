@@ -42,4 +42,6 @@ public class VariableDto {
 
     private String note;
 
+    private Long rendererId;
+
 }

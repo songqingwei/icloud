@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Data
-public class VariablesValueReqDto extends AuthDto {
+public class ApiVariablesValueReqDtoApi extends ApiAuthDto {
 
     @NotNull
     private String coreId;

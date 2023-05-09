@@ -4,8 +4,10 @@ import cn.isqing.icloud.common.api.dto.PageReqDto;
 import cn.isqing.icloud.common.api.dto.PageResDto;
 import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
-import cn.isqing.icloud.starter.variable.api.dto.VariableDto;
-import cn.isqing.icloud.starter.variable.api.dto.VariablesValueReqDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariableListReq;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariablesValueReqDtoApi;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVaroablePageResDto;
 import com.alibaba.dubbo.config.annotation.Reference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -47,7 +49,7 @@ public class DemoController {
      * @return
      */
     @PostMapping(value = "/getCRes")
-    public Response<Map<Long, String>> getComponentRes(@RequestBody VariablesValueReqDto reqDto){
+    public Response<Map<Long, String>> getComponentRes(@RequestBody ApiVariablesValueReqDtoApi reqDto){
         return api.getComponentRes(reqDto);
     }
 
@@ -58,7 +60,7 @@ public class DemoController {
      * @return
      */
     @PostMapping(value = "/getV")
-    public Response<Map<Long, Object>> getValues(@RequestBody VariablesValueReqDto reqDto){
+    public Response<Map<Long, Object>> getValues(@RequestBody ApiVariablesValueReqDtoApi reqDto){
         return api.getValues(reqDto);
     }
 
@@ -69,7 +71,7 @@ public class DemoController {
      * @return
      */
     @PostMapping(value = "/getOne")
-    public Response<cn.isqing.icloud.starter.variable.api.dto.VariableDto> getVariableById(@RequestParam("id") Long id){
+    public Response<ApiVariableDto> getVariableById(@RequestParam("id") Long id){
         return api.getVariableById(id);
     }
 
@@ -80,7 +82,7 @@ public class DemoController {
      * @return
      */
     @PostMapping(value = "/list")
-    Response<PageResDto<VariableDto>> list(@RequestBody PageReqDto<cn.isqing.icloud.starter.variable.api.dto.VariableListReq> req){
+    Response<ApiVaroablePageResDto<ApiVariableDto>> list(@RequestBody PageReqDto<ApiVariableListReq> req){
         return api.list(req);
     }
 

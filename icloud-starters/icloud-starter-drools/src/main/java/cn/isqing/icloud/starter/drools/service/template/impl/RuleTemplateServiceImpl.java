@@ -28,7 +28,7 @@ import cn.isqing.icloud.starter.drools.service.template.RuleTemplateService;
 import cn.isqing.icloud.starter.drools.service.template.dto.RuleTemplateDto;
 import cn.isqing.icloud.starter.drools.service.template.dto.RuleTemplateListReq;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
-import cn.isqing.icloud.starter.variable.api.dto.VariableDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
 import cn.isqing.icloud.starter.variable.api.util.VariableUtil;
 import com.alibaba.fastjson2.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -225,11 +225,11 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
 
         // 解析h5规则
         RuleH5Dto h5Dto = JSON.parseObject(dto.getContent(), RuleH5Dto.class);
-        Map<Long, VariableDto> map = new HashMap<>();
+        Map<Long, ApiVariableDto> map = new HashMap<>();
         String content = dealH5Dto(h5Dto, map);
         insetText(text, content, CommonTextTypeConstants.RULE_CONTENT);
 
-        Map<String, VariableDto> map1 =
+        Map<String, ApiVariableDto> map1 =
                 map.entrySet().stream().collect(Collectors.toMap(a -> VariableUtil.getUniName(a.getValue()), Map.Entry::getValue));
         insetText(text, map1, CommonTextTypeConstants.RULE_VARIABLE_MAP);
     }
@@ -241,16 +241,16 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         });
     }
 
-    private String dealH5Dto(RuleH5Dto h5Dto, Map<Long, VariableDto> map) {
+    private String dealH5Dto(RuleH5Dto h5Dto, Map<Long, ApiVariableDto> map) {
         List<RuleH5Dto.RuleFieldDto> list = h5Dto.getList();
         if (!CollectionUtils.isEmpty(list)) {
             // String.format(format)
             return list.stream().map(d -> {
                 // 字符串类型时要求前端加引号{"value1":"\"null\"","value2":"null",}
                 // value1是字符串null，value2是真null
-                VariableDto variable = map.get(d.getId());
+                ApiVariableDto variable = map.get(d.getId());
                 if (variable == null) {
-                    Response<VariableDto> res = variableInterface.getVariableById(d.getId());
+                    Response<ApiVariableDto> res = variableInterface.getVariableById(d.getId());
                     map.put(d.getId(), res.getData());
                 }
 

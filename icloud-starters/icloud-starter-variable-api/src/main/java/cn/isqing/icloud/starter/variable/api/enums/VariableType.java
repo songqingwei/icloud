@@ -7,6 +7,8 @@ public enum VariableType {
     STRING(1, "java.lang.String", "String"),
     BIG_DECIMAL(2, "java.math.BigDecimal", "BigDecimal"),
     BIG_INTEGER(3, "java.math.BigInteger", "BigInteger"),
+    LIST(4, "java.util.List", "List"),
+    MAP(5, "java.util.Map", "Map"),
     ;
 
     private Integer code;

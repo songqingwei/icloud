@@ -20,4 +20,5 @@ public class UuidUtil {
         }
         return isUpperCase[0]?s.toUpperCase():s.toLowerCase();
     }
+
 }

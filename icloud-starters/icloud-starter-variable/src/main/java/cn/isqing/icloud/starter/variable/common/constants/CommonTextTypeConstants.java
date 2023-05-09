@@ -26,5 +26,6 @@ public class CommonTextTypeConstants {
 
 
     public static final int DATA_SOURCE_CINFIG = 11;
+    public static final int RENDERER = 12;
 
 }

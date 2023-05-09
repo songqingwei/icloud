@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
  * 授权信息
  */
 @Data
-public class AuthDto {
+public class ApiAuthDto {
 
     @NotNull
     private Integer domain;

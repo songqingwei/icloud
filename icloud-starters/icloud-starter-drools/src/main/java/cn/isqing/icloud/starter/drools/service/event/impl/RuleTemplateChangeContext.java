@@ -5,7 +5,7 @@ import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
 import cn.isqing.icloud.starter.drools.dao.entity.Component;
 import cn.isqing.icloud.starter.drools.dao.entity.RuleCore;
 import cn.isqing.icloud.starter.drools.service.msg.dto.TplChangeMsg;
-import cn.isqing.icloud.starter.variable.api.dto.VariableSimpleDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariableSimpleDto;
 import lombok.Data;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class RuleTemplateChangeContext extends FlowContext {
     // 所需要的所有组件map
     Map<Long, Component> allComponent;
 
-    private Map<String,VariableSimpleDto> variableMap;
+    private Map<String, ApiVariableSimpleDto> variableMap;
     private List<Long> actionDepandCids;
 
     private RuleCore core;

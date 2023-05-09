@@ -5,7 +5,7 @@ import cn.isqing.icloud.common.api.enums.ResCodeEnum;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
 import cn.isqing.icloud.starter.drools.dao.entity.Component;
 import cn.isqing.icloud.starter.drools.dao.entity.RuleTemplate;
-import cn.isqing.icloud.starter.variable.api.dto.VariableSimpleDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariableSimpleDto;
 import lombok.extern.slf4j.Slf4j;
 import org.drools.template.ObjectDataCompiler;
 import org.kie.api.KieBase;
@@ -31,7 +31,7 @@ public class KieUtil {
 
     public static final Map<RuleKeyDto, KieHelper> helperMap = new ConcurrentHashMap<>();
     public static final Map<RuleKeyDto, KieBase> baseMap = new ConcurrentHashMap<>();
-    public static final Map<RuleKeyDto, Map<String, VariableSimpleDto>> variableMap = new ConcurrentHashMap<>();
+    public static final Map<RuleKeyDto, Map<String, ApiVariableSimpleDto>> variableMap = new ConcurrentHashMap<>();
     public static final Map<RuleKeyDto, List<List<Component>>> actionMap = new ConcurrentHashMap<>();
 
 

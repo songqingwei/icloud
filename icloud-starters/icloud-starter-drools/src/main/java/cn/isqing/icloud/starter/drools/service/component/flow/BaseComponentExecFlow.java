@@ -18,7 +18,7 @@ import cn.isqing.icloud.starter.drools.dao.mapper.CommonTextMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.ComponentTextMapper;
 import cn.isqing.icloud.starter.drools.service.component.ComponentExecService;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
-import cn.isqing.icloud.starter.variable.api.dto.VariablesValueReqDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariablesValueReqDtoApi;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
@@ -83,7 +83,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
 
     private void getVariablesValue(ComponentExecContext context) {
         ComponentExecDto execDto = context.getExecDto();
-        VariablesValueReqDto reqDto = new VariablesValueReqDto();
+        ApiVariablesValueReqDtoApi reqDto = new ApiVariablesValueReqDtoApi();
         reqDto.setDomain(execDto.getDomain());
         reqDto.setDomainAuthCode(execDto.getDomainAuthCode());
         reqDto.setAboveResMap(execDto.getAboveResMap());

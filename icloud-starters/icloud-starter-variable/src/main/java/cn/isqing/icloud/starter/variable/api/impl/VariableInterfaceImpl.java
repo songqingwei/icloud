@@ -1,6 +1,7 @@
 package cn.isqing.icloud.starter.variable.api.impl;
 
 import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
+import cn.isqing.icloud.common.utils.constants.SqlConstants;
 import cn.isqing.icloud.common.utils.dto.BaseException;
 import cn.isqing.icloud.common.api.dto.PageReqDto;
 import cn.isqing.icloud.common.api.dto.PageResDto;
@@ -11,16 +12,15 @@ import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.*;
 import cn.isqing.icloud.starter.variable.api.util.VariableUtil;
 import cn.isqing.icloud.starter.variable.common.constants.CommonConfigGroupConstants;
+import cn.isqing.icloud.starter.variable.common.constants.CommonTextTypeConstants;
 import cn.isqing.icloud.starter.variable.common.constants.EventTypeConstants;
 import cn.isqing.icloud.starter.variable.common.dto.ActuatorDto;
 import cn.isqing.icloud.starter.variable.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.variable.common.dto.common.config.VsetDefQueryConf;
 import cn.isqing.icloud.starter.variable.common.util.VariableCacheUtil;
-import cn.isqing.icloud.starter.variable.dao.entity.CommonConfig;
-import cn.isqing.icloud.starter.variable.dao.entity.Component;
-import cn.isqing.icloud.starter.variable.dao.entity.Variable;
-import cn.isqing.icloud.starter.variable.dao.entity.VariableCondition;
+import cn.isqing.icloud.starter.variable.dao.entity.*;
 import cn.isqing.icloud.starter.variable.dao.mapper.CommonConfigMapper;
+import cn.isqing.icloud.starter.variable.dao.mapper.CommonTextMapper;
 import cn.isqing.icloud.starter.variable.dao.mapper.ComponentMapper;
 import cn.isqing.icloud.starter.variable.dao.mapper.VariableMapper;
 import cn.isqing.icloud.starter.variable.service.component.ComponentExecService;
@@ -30,17 +30,18 @@ import cn.isqing.icloud.starter.variable.service.event.impl.VsetChangeContext;
 import cn.isqing.icloud.starter.variable.service.event.impl.VsetChangeFlow;
 import cn.isqing.icloud.starter.variable.service.msg.dto.EventMsg;
 import cn.isqing.icloud.starter.variable.service.variable.VariableService;
+import cn.isqing.icloud.starter.variable.service.variable.dto.VariableDto;
+import cn.isqing.icloud.starter.variable.service.variable.dto.VariableListReq;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONPath;
+import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -61,6 +62,8 @@ public class VariableInterfaceImpl implements VariableInterface {
     @Autowired
     private VariableMapper mapper;
     @Autowired
+    private CommonTextMapper textMapper;
+    @Autowired
     private VariableService service;
     @Autowired
     private EventPublisher eventPublisher;
@@ -80,7 +83,7 @@ public class VariableInterfaceImpl implements VariableInterface {
     }
 
     @Override
-    public Response<Map<Long, String>> getComponentRes(VariablesValueReqDto reqDto) {
+    public Response<Map<Long, String>> getComponentRes(ApiVariablesValueReqDtoApi reqDto) {
         Response<ActuatorDto> actuatorRes = getActuatorDto(reqDto);
         if (!actuatorRes.isSuccess()) {
             return Response.withData(actuatorRes, null);
@@ -139,7 +142,7 @@ public class VariableInterfaceImpl implements VariableInterface {
      * @param reqDto
      * @return
      */
-    private Response<ActuatorDto> getActuatorDto(VariablesValueReqDto reqDto) {
+    private Response<ActuatorDto> getActuatorDto(ApiVariablesValueReqDtoApi reqDto) {
         ActuatorDto actuatorDto = VariableCacheUtil.actuatorMap.get(reqDto.getCoreId());
         if (actuatorDto != null) {
             return Response.success(actuatorDto);
@@ -159,7 +162,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         return Response.success(actuatorDto);
     }
 
-    private List<Long> getVidList(VariablesValueReqDto reqDto, VsetDefQueryConf conf, Component c) {
+    private List<Long> getVidList(ApiVariablesValueReqDtoApi reqDto, VsetDefQueryConf conf, Component c) {
         ComponentExecDto resDto = new ComponentExecDto();
         resDto.setInputParams(reqDto.getInputParams());
         ComponentExecService service = execFactory.getSingle(c.getDataSourceType().toString());
@@ -172,7 +175,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         return JSONArray.parseArray(value.toString()).toList(Long.class);
     }
 
-    private VsetDefQueryConf getCommonConfig(VariablesValueReqDto reqDto) {
+    private VsetDefQueryConf getCommonConfig(ApiVariablesValueReqDtoApi reqDto) {
         CommonConfig config = new CommonConfig();
         config.setGroup(StrUtil.assembleKey(CommonConfigGroupConstants.VSET_DEFINITION_QUERY, reqDto.getDomain().toString()));
         config.setKey(reqDto.getCoreId().toString());
@@ -183,7 +186,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         return JSON.parseObject(first.getValue(), VsetDefQueryConf.class);
     }
 
-    private void vsetChangeEvent(VariablesValueReqDto reqDto, List<Long> vidList) {
+    private void vsetChangeEvent(ApiVariablesValueReqDtoApi reqDto, List<Long> vidList) {
         VsetChangeContext context = new VsetChangeContext();
         EventMsg eventMsg = new EventMsg();
         context.setEventMsg(eventMsg);
@@ -198,7 +201,7 @@ public class VariableInterfaceImpl implements VariableInterface {
 
 
     @Override
-    public Response<Map<Long, Object>> getValues(VariablesValueReqDto reqDto) {
+    public Response<Map<Long, Object>> getValues(ApiVariablesValueReqDtoApi reqDto) {
         Response<Map<Long, String>> res = getComponentRes(reqDto);
         ActuatorDto actuatorDto = VariableCacheUtil.actuatorMap.get(reqDto.getCoreId());
         if (actuatorDto == null) {
@@ -217,22 +220,22 @@ public class VariableInterfaceImpl implements VariableInterface {
     }
 
     @Override
-    public Response<VariableDto> getVariableById(Long id) {
+    public Response<ApiVariableDto> getVariableById(Long id) {
         Variable variable = mapper.selectById(id, Variable.class);
-        VariableDto dto = new VariableDto();
+        ApiVariableDto dto = new ApiVariableDto();
         SpringBeanUtils.copyProperties(variable, dto);
         return Response.success(dto);
     }
 
     @Override
-    public Response<PageResDto<VariableDto>> list(PageReqDto<VariableListReq> req) {
-        cn.isqing.icloud.starter.variable.service.variable.dto.VariableListReq condition = new cn.isqing.icloud.starter.variable.service.variable.dto.VariableListReq();
-        PageReqDto<cn.isqing.icloud.starter.variable.service.variable.dto.VariableListReq> reqDto = new PageReqDto<>();
+    public Response<ApiVaroablePageResDto<ApiVariableDto>> list(PageReqDto<ApiVariableListReq> req) {
+        VariableListReq condition = new VariableListReq();
+        PageReqDto<VariableListReq> reqDto = new PageReqDto<>();
         reqDto.setCondition(condition);
         reqDto.setPageInfo(req.getPageInfo());
         SpringBeanUtils.copyProperties(req.getCondition(), condition);
 
-        Response<PageResDto<cn.isqing.icloud.starter.variable.service.variable.dto.VariableDto>> rawRes;
+        Response<PageResDto<VariableDto>> rawRes;
         if (req.getCondition().getActionId() != null) {
             rawRes = service.listWithAction(reqDto);
         } else {
@@ -241,21 +244,44 @@ public class VariableInterfaceImpl implements VariableInterface {
         if (!rawRes.isSuccess()) {
             return Response.info(rawRes.getCode(), rawRes.getMsg());
         }
-        List<cn.isqing.icloud.starter.variable.service.variable.dto.VariableDto> dtoList = rawRes.getData().getList();
+        List<VariableDto> dtoList = rawRes.getData().getList();
 
-        Response<PageResDto<VariableDto>> res = Response.success(new PageResDto<>());
-        PageResDto<VariableDto> data = res.getData();
+        Response<ApiVaroablePageResDto<ApiVariableDto>> res = Response.success(new ApiVaroablePageResDto<>());
+        PageResDto<ApiVariableDto> data = res.getData();
 
         data.setTotal(res.getData().getTotal());
         if (dtoList != null) {
-            List<VariableDto> list = dtoList.stream().map(o -> {
-                VariableDto dto = new VariableDto();
+            Set<Long> set = new HashSet<>();
+            List<ApiVariableDto> list = dtoList.stream().map(o -> {
+                ApiVariableDto dto = new ApiVariableDto();
                 SpringBeanUtils.copyProperties(o, dto);
+                if (o.getRendererId().longValue() > 0) {
+                    set.add(o.getRendererId());
+                }
                 return dto;
             }).collect(Collectors.toList());
             data.setList(list);
+            setRenderer(res, set);
         }
         return res;
+
+    }
+
+    /**
+     * 查询渲染器
+     *
+     * @param res
+     * @param set
+     */
+    private void setRenderer(Response<ApiVaroablePageResDto<ApiVariableDto>> res, Set<Long> set) {
+        CommonTextCondition condition = new CommonTextCondition();
+        condition.setFidCondition(new ArrayList<>(set));
+        condition.setType(CommonTextTypeConstants.RENDERER);
+        condition.setOrderBy(SqlConstants.ID_ASC);
+        List<CommonText> texts = textMapper.selectByCondition(condition);
+        Map<Long, Map<String, Object>> renderer = texts.stream().collect(Collectors.groupingBy(CommonText::getFid, Collectors.mapping(CommonText::getText,
+                Collectors.collectingAndThen(Collectors.joining(), text -> JSON.parseObject(text, new TypeReference<Map<Long, Object>>() {})))));
+        res.getData().setRenderer(renderer);
 
     }
 }

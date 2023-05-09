@@ -6,7 +6,7 @@ import cn.isqing.icloud.common.utils.constants.EventConstants;
 import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.api.enums.ResCodeEnum;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;
-import cn.isqing.icloud.starter.variable.api.dto.VariableSimpleDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariableSimpleDto;
 import cn.isqing.icloud.starter.variable.common.constants.EventTypeConstants;
 import cn.isqing.icloud.starter.variable.common.dto.ActuatorDto;
 import cn.isqing.icloud.starter.variable.common.util.VariableCacheUtil;
@@ -69,8 +69,8 @@ public class VsetChangeFlow extends FlowTemplate<VsetChangeContext, Object> impl
         condition.setIdCondition(context.getVidList());
         condition.setSelectFiled(VariableFiled.ID, VariableFiled.CID, VariableFiled.C_RES_PATH);
         List<Variable> list = mapper.selectByCondition(condition);
-        Map<Long, VariableSimpleDto> map = list.stream().collect(Collectors.toMap(Variable::getId, v -> {
-            VariableSimpleDto simpleDto = new VariableSimpleDto();
+        Map<Long, ApiVariableSimpleDto> map = list.stream().collect(Collectors.toMap(Variable::getId, v -> {
+            ApiVariableSimpleDto simpleDto = new ApiVariableSimpleDto();
             SpringBeanUtils.copyProperties(v, simpleDto);
             return simpleDto;
         }, (key1, key2) -> key1));
