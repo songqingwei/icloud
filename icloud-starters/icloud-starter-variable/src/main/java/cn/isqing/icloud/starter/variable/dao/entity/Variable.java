@@ -24,6 +24,8 @@ public class Variable {
     // 类型：java类路径
     private String typePath;
 
+    private Long rendererId;
+
     // 版本号
     private Integer version;
 

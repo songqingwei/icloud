@@ -217,29 +217,6 @@ public class VariableInterfaceImpl implements VariableInterface {
     }
 
     @Override
-    public Response<List<VariableValueDto>> getVarValue(VariablesValueReqDto reqDto) {
-        Response<Map<Long, String>> res = getComponentRes(reqDto);
-        ActuatorDto actuatorDto = VariableCacheUtil.actuatorMap.get(reqDto.getCoreId());
-        if (actuatorDto == null) {
-            return Response.error("系统繁忙");
-        }
-        Map<Long, String> data = res.getData();
-        if (data == null) {
-            return Response.withData(res, null);
-        }
-        VariableCondition condition = new VariableCondition();
-        condition.setCidCondition(data.keySet());
-        List<Variable> variables = mapper.selectByCondition(condition);
-        List<VariableValueDto> resData = variables.stream().map(var -> {
-            VariableValueDto dto = new VariableValueDto();
-            SpringBeanUtils.copyProperties(var, dto);
-            dto.setValue(VariableUtil.getValue(var.getCid(), var.getCresPath(), data));
-            return dto;
-        }).collect(Collectors.toList());
-        return Response.withData(res, resData);
-    }
-
-    @Override
     public Response<VariableDto> getVariableById(Long id) {
         Variable variable = mapper.selectById(id, Variable.class);
         VariableDto dto = new VariableDto();

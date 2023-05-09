@@ -38,7 +38,7 @@
         <mybatis-spring-boot.version>2.2.1</mybatis-spring-boot.version>
         <curator-framework.version>5.4.0</curator-framework.version>
         <zookeeper.version>3.6.0</zookeeper.version>
-        <lombok.version>1.18.14</lombok.version>
+        <lombok.version>1.18.26</lombok.version>
         <!--插件版本-->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-release-plugin.version>3.0.0-M1</maven-release-plugin.version>

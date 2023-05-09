@@ -73,6 +73,7 @@ public class DataSourceServiceImpl implements DataSourceService {
     @Override
     public Response<DataSourceDto> getText(Long id) {
         CommonTextCondition condition = new CommonTextCondition();
+        condition.setFid(id);
         condition.setType(CommonTextTypeConstants.DATA_SOURCE_CINFIG);
         condition.setOrderBy(SqlConstants.ID_ASC);
         List<CommonText> texts = textMapper.selectByCondition(condition);

@@ -11,6 +11,8 @@ public class VariableFiled {
 
     public static String C_RES_PATH = "cres_path";
 
+    public static String RENDERER_ID = "renderer_id";
+
     public static String TYPE = "type";
 
     public static String TYPE_PATH = "type_path";

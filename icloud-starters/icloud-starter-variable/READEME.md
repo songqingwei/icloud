@@ -83,6 +83,7 @@ CREATE TABLE `variable` (
 `cres_path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT 'json_path',
 `type` int(11) NOT NULL DEFAULT '0',
 `type_path` varchar(300) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '类型：java类路径',
+`renderer_id` bigint default 0 not null comment '渲染器id' after type_path;
 `version` int(11) NOT NULL DEFAULT '0' COMMENT '版本号',
 `domain` int(11) NOT NULL DEFAULT '0',
 `is_del` tinyint(1) NOT NULL DEFAULT '0',

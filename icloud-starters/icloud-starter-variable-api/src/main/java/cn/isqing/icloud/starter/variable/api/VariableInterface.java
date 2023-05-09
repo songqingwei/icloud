@@ -5,7 +5,6 @@ import cn.isqing.icloud.common.api.dto.PageResDto;
 import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.starter.variable.api.dto.VariableDto;
 import cn.isqing.icloud.starter.variable.api.dto.VariableListReq;
-import cn.isqing.icloud.starter.variable.api.dto.VariableValueDto;
 import cn.isqing.icloud.starter.variable.api.dto.VariablesValueReqDto;
 
 import java.util.List;
@@ -41,14 +40,6 @@ public interface VariableInterface {
      * @return
      */
     Response<Map<Long, Object>> getValues(VariablesValueReqDto reqDto);
-
-    /**
-     * 获取变量值
-     *
-     * @param reqDto
-     * @return
-     */
-    Response<List<VariableValueDto>> getVarValue(VariablesValueReqDto reqDto);
 
     /**
      * 获取变量详情

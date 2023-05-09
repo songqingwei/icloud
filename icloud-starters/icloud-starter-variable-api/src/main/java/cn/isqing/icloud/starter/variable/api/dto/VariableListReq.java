@@ -2,6 +2,8 @@ package cn.isqing.icloud.starter.variable.api.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class VariableListReq extends AuthDto {
     /**
@@ -10,6 +12,7 @@ public class VariableListReq extends AuthDto {
     private String name;
 
     private Long cid;
+    private List<Long> idCondition;
     private String busiCode;
     private Long actionId;
 
