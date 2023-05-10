@@ -89,6 +89,14 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
         }
         if (sql.startsWith("select ") || sql.startsWith("SELECT ")) {
             List<Map<String, Object>> list = template.queryForList(sql);
+            if(list.size()==1 && list.get(0)!=null && list.get(0).size()==1){
+                Map<String, Object> map = list.get(0);
+                map.entrySet().stream().findFirst().ifPresent(e->{
+                    Object value = e.getValue();
+                    context.setExecRes(String.valueOf(value));
+                });
+                return;
+            }
             context.setExecRes(JsonUtil.toJsonString(list));
             return;
         }
