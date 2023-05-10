@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * @version 1.0
  **/
 @Slf4j
+@CrossOrigin
 @RestController
 @RequestMapping(value = "/${i.variable.web.pre}/variable",produces = MediaType.APPLICATION_JSON_VALUE)
 public class VariableController {
