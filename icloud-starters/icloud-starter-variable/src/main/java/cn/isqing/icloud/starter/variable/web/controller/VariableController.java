@@ -50,7 +50,7 @@ public class VariableController {
     }
 
     @PostMapping(value = "/del")
-    public Response<Object> sw(@RequestParam("id") Long id){
+    public Response<Object> sw(Long id){
         return service.del(id);
     }
 

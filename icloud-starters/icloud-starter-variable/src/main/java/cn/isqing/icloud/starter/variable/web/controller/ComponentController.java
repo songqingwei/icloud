@@ -46,12 +46,12 @@ public class ComponentController {
     }
 
     @PostMapping(value = "/del")
-    public Response<Object> sw(@RequestParam("id") Long id){
+    public Response<Object> sw(Long id){
         return service.del(id);
     }
 
-    @PostMapping(value = "/getText")
-    public Response<ComponentDto> getText(@RequestParam("id") Long id){
+    @PostMapping(value = "/text")
+    public Response<ComponentDto> getText(Long id){
         return service.getText(id);
     }
 

@@ -10,6 +10,6 @@ public class CorsConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**").allowedOrigins("https://lab.lowcode-engine.cn/").allowCredentials(true).allowedMethods(ORIGINS).maxAge(3600);
+        registry.addMapping("/**").allowedOrigins("*").allowCredentials(true).allowedMethods(ORIGINS).maxAge(3600);
     }
 }

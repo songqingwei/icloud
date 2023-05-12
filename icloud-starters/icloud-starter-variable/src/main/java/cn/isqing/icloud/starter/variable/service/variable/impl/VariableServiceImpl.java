@@ -80,6 +80,7 @@ public class VariableServiceImpl implements VariableService {
         VariableCondition condition = new VariableCondition();
         SpringBeanUtils.copyProperties(req,condition);
         condition.setIsDel(YesOrNo.NO.ordinal());
+        condition.setOrderBy(SqlConstants.ID_ASC);
         PageReqDto.PageInfo pageInfo = dto.getPageInfo();
         PageResDto<VariableDto> resDto = new PageResDto<>();
         if (pageInfo.isNeedList()) {
