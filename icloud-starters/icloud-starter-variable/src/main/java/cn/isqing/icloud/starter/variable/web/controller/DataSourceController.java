@@ -31,7 +31,7 @@ public class DataSourceController {
     }
 
     @PostMapping(value = "/text")
-    public Response<DataSourceDto> getText(Long id) {
+    public Response<DataSourceDto> getText(@RequestParam("id") Long id) {
         return service.getText(id);
     }
 

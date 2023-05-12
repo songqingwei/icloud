@@ -36,7 +36,7 @@ public class CommonConfigController {
     }
 
     @PostMapping(value = "/del")
-    public Response<Object> del(Long id) {
+    public Response<Object> del(@RequestParam("id")Long id) {
         return service.del(id);
     }
 }
