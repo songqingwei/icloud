@@ -1,10 +1,10 @@
 package cn.isqing.icloud.starter.variable.service.datasource.impl;
 
-import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
-import cn.isqing.icloud.common.utils.constants.SqlConstants;
 import cn.isqing.icloud.common.api.dto.PageReqDto;
 import cn.isqing.icloud.common.api.dto.PageResDto;
 import cn.isqing.icloud.common.api.dto.Response;
+import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
+import cn.isqing.icloud.common.utils.constants.SqlConstants;
 import cn.isqing.icloud.starter.variable.common.constants.CommonTextTypeConstants;
 import cn.isqing.icloud.starter.variable.common.constants.TextConstants;
 import cn.isqing.icloud.starter.variable.common.dto.UpdateStatusDto;
@@ -19,6 +19,7 @@ import cn.isqing.icloud.starter.variable.service.datasource.dto.DataSourceDto;
 import cn.isqing.icloud.starter.variable.service.datasource.dto.DataSourceListReq;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +103,7 @@ public class DataSourceServiceImpl implements DataSourceService {
         CommonText text = new CommonText();
         text.setFid(id);
         text.setType(CommonTextTypeConstants.DATA_SOURCE_CINFIG);
-        String[] strings = JSON.toJSONString(dto.getConfig()).split(TextConstants.REGEX_5000);
+        String[] strings = JSON.toJSONString(dto.getConfig(), JSONWriter.Feature.PrettyFormat).split(TextConstants.REGEX_5000);
         for (String string : strings) {
             text.setId(null);
             text.setText(string);

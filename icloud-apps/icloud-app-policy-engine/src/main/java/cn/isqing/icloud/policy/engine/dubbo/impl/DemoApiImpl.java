@@ -5,6 +5,7 @@ import cn.isqing.icloud.policy.engine.dubbo.api.DemoApi;
 import com.alibaba.dubbo.config.annotation.Service;
 
 import java.util.Map;
+
 @Service(group = "demo", timeout = 60000, retries = -1, version = "1.0.0")
 public class DemoApiImpl implements DemoApi {
     @Override

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * @version 1.0
  **/
 @Slf4j
+@CrossOrigin
 @RestController
 @RequestMapping(value = "/${i.variable.web.pre}/variable",produces = MediaType.APPLICATION_JSON_VALUE)
 public class VariableController {
@@ -49,7 +50,7 @@ public class VariableController {
     }
 
     @PostMapping(value = "/del")
-    public Response<Object> sw(@RequestParam("id") Long id){
+    public Response<Object> sw(Long id){
         return service.del(id);
     }
 

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * @version 1.0
  **/
 @Slf4j
+@CrossOrigin
 @RestController
 @RequestMapping(value = "/${i.variable.web.pre}/component",produces = MediaType.APPLICATION_JSON_VALUE)
 public class ComponentController {
@@ -45,12 +46,12 @@ public class ComponentController {
     }
 
     @PostMapping(value = "/del")
-    public Response<Object> sw(@RequestParam("id") Long id){
+    public Response<Object> sw(Long id){
         return service.del(id);
     }
 
-    @PostMapping(value = "/getText")
-    public Response<ComponentDto> getText(@RequestParam("id") Long id){
+    @PostMapping(value = "/text")
+    public Response<ComponentDto> getText(Long id){
         return service.getText(id);
     }
 
