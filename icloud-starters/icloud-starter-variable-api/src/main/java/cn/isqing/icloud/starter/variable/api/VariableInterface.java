@@ -4,7 +4,7 @@ import cn.isqing.icloud.common.api.dto.PageReqDto;
 import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariableListReq;
-import cn.isqing.icloud.starter.variable.api.dto.ApiVariablesValueReqDtoApi;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariablesValueReqDto;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariablePageResDto;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public interface VariableInterface {
      * @param reqDto
      * @return
      */
-    Response<Map<Long, String>> getComponentRes(ApiVariablesValueReqDtoApi reqDto);
+    Response<Map<Long, String>> getComponentRes(ApiVariablesValueReqDto reqDto);
 
     /**
      * 获取变量集对应值
@@ -39,7 +39,7 @@ public interface VariableInterface {
      * @param reqDto
      * @return
      */
-    Response<Map<Long, Object>> getValues(ApiVariablesValueReqDtoApi reqDto);
+    Response<Map<Long, Object>> getValues(ApiVariablesValueReqDto reqDto);
 
     /**
      * 获取变量详情

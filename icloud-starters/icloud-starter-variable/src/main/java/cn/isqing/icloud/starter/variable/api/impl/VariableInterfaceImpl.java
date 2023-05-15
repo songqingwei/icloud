@@ -83,7 +83,7 @@ public class VariableInterfaceImpl implements VariableInterface {
     }
 
     @Override
-    public Response<Map<Long, String>> getComponentRes(ApiVariablesValueReqDtoApi reqDto) {
+    public Response<Map<Long, String>> getComponentRes(ApiVariablesValueReqDto reqDto) {
         Response<ActuatorDto> actuatorRes = getActuatorDto(reqDto);
         if (!actuatorRes.isSuccess()) {
             return Response.withData(actuatorRes, null);
@@ -142,7 +142,7 @@ public class VariableInterfaceImpl implements VariableInterface {
      * @param reqDto
      * @return
      */
-    private Response<ActuatorDto> getActuatorDto(ApiVariablesValueReqDtoApi reqDto) {
+    private Response<ActuatorDto> getActuatorDto(ApiVariablesValueReqDto reqDto) {
         ActuatorDto actuatorDto = VariableCacheUtil.actuatorMap.get(reqDto.getCoreId());
         if (actuatorDto != null) {
             return Response.success(actuatorDto);
@@ -162,7 +162,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         return Response.success(actuatorDto);
     }
 
-    private List<Long> getVidList(ApiVariablesValueReqDtoApi reqDto, VsetDefQueryConf conf, Component c) {
+    private List<Long> getVidList(ApiVariablesValueReqDto reqDto, VsetDefQueryConf conf, Component c) {
         ComponentExecDto resDto = new ComponentExecDto();
         resDto.setInputParams(reqDto.getInputParams());
         ComponentExecService service = execFactory.getSingle(c.getDataSourceType().toString());
@@ -175,7 +175,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         return JSONArray.parseArray(value.toString()).toList(Long.class);
     }
 
-    private VsetDefQueryConf getCommonConfig(ApiVariablesValueReqDtoApi reqDto) {
+    private VsetDefQueryConf getCommonConfig(ApiVariablesValueReqDto reqDto) {
         CommonConfig config = new CommonConfig();
         config.setGroup(StrUtil.assembleKey(CommonConfigGroupConstants.VSET_DEFINITION_QUERY, reqDto.getDomain().toString()));
         config.setKey(reqDto.getCoreId().toString());
@@ -186,7 +186,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         return JSON.parseObject(first.getValue(), VsetDefQueryConf.class);
     }
 
-    private void vsetChangeEvent(ApiVariablesValueReqDtoApi reqDto, List<Long> vidList) {
+    private void vsetChangeEvent(ApiVariablesValueReqDto reqDto, List<Long> vidList) {
         VsetChangeContext context = new VsetChangeContext();
         EventMsg eventMsg = new EventMsg();
         context.setEventMsg(eventMsg);
@@ -201,7 +201,7 @@ public class VariableInterfaceImpl implements VariableInterface {
 
 
     @Override
-    public Response<Map<Long, Object>> getValues(ApiVariablesValueReqDtoApi reqDto) {
+    public Response<Map<Long, Object>> getValues(ApiVariablesValueReqDto reqDto) {
         Response<Map<Long, String>> res = getComponentRes(reqDto);
         ActuatorDto actuatorDto = VariableCacheUtil.actuatorMap.get(reqDto.getCoreId());
         if (actuatorDto == null) {
