@@ -11,7 +11,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ApiVaroablePageResDto<T> extends PageResDto<T> {
+public class ApiVariablePageResDto<T> extends PageResDto<T> {
 
     private Map<Long,Map<String,Object>> renderer = Collections.emptyMap();
 }

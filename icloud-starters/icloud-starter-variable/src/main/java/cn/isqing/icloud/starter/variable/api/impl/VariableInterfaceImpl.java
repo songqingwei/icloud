@@ -228,7 +228,7 @@ public class VariableInterfaceImpl implements VariableInterface {
     }
 
     @Override
-    public Response<ApiVaroablePageResDto<ApiVariableDto>> list(PageReqDto<ApiVariableListReq> req) {
+    public Response<ApiVariablePageResDto<ApiVariableDto>> list(PageReqDto<ApiVariableListReq> req) {
         VariableListReq condition = new VariableListReq();
         PageReqDto<VariableListReq> reqDto = new PageReqDto<>();
         reqDto.setCondition(condition);
@@ -246,7 +246,7 @@ public class VariableInterfaceImpl implements VariableInterface {
         }
         List<VariableDto> dtoList = rawRes.getData().getList();
 
-        Response<ApiVaroablePageResDto<ApiVariableDto>> res = Response.success(new ApiVaroablePageResDto<>());
+        Response<ApiVariablePageResDto<ApiVariableDto>> res = Response.success(new ApiVariablePageResDto<>());
         PageResDto<ApiVariableDto> data = res.getData();
 
         data.setTotal(res.getData().getTotal());
@@ -273,7 +273,7 @@ public class VariableInterfaceImpl implements VariableInterface {
      * @param res
      * @param set
      */
-    private void setRenderer(Response<ApiVaroablePageResDto<ApiVariableDto>> res, Set<Long> set) {
+    private void setRenderer(Response<ApiVariablePageResDto<ApiVariableDto>> res, Set<Long> set) {
         CommonTextCondition condition = new CommonTextCondition();
         condition.setFidCondition(new ArrayList<>(set));
         condition.setType(CommonTextTypeConstants.RENDERER);
