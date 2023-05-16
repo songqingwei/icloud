@@ -33,6 +33,6 @@ public class MyWebMvcConfigurer implements WebMvcConfigurer {
         myBasicAuthInterceptor.setUsername(username);
         myBasicAuthInterceptor.setPassword(password);
         //注册拦截器，并设置拦截路径为静态资源路径
-        registry.addInterceptor(myBasicAuthInterceptor).addPathPatterns("/"+pre+"/h5/**");
+        registry.addInterceptor(myBasicAuthInterceptor).addPathPatterns("/"+pre+"/**");
     }
 }
