@@ -178,7 +178,7 @@ public class VariableInterfaceImpl implements VariableInterface {
     private VsetDefQueryConf getCommonConfig(ApiVariablesValueReqDto reqDto) {
         CommonConfig config = new CommonConfig();
         config.setGroup(StrUtil.assembleKey(CommonConfigGroupConstants.VSET_DEFINITION_QUERY, reqDto.getDomain().toString()));
-        config.setKey(reqDto.getCoreId().toString());
+        config.setKey(reqDto.getCoreId());
         CommonConfig first = configMapper.first(config, null);
         if (first == null) {
             throw new BaseException("缺少变量集查询配置,请联系管理员");
