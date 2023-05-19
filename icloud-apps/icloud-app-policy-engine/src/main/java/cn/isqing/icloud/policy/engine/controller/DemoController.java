@@ -1,13 +1,12 @@
 package cn.isqing.icloud.policy.engine.controller;
 
 import cn.isqing.icloud.common.api.dto.PageReqDto;
-import cn.isqing.icloud.common.api.dto.PageResDto;
 import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariableListReq;
-import cn.isqing.icloud.starter.variable.api.dto.ApiVariablesValueReqDtoApi;
-import cn.isqing.icloud.starter.variable.api.dto.ApiVaroablePageResDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariablesValueReqDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariablePageResDto;
 import com.alibaba.dubbo.config.annotation.Reference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -49,7 +48,7 @@ public class DemoController {
      * @return
      */
     @PostMapping(value = "/getCRes")
-    public Response<Map<Long, String>> getComponentRes(@RequestBody ApiVariablesValueReqDtoApi reqDto){
+    public Response<Map<Long, String>> getComponentRes(@RequestBody ApiVariablesValueReqDto reqDto){
         return api.getComponentRes(reqDto);
     }
 
@@ -60,7 +59,7 @@ public class DemoController {
      * @return
      */
     @PostMapping(value = "/getV")
-    public Response<Map<Long, Object>> getValues(@RequestBody ApiVariablesValueReqDtoApi reqDto){
+    public Response<Map<Long, Object>> getValues(@RequestBody ApiVariablesValueReqDto reqDto){
         return api.getValues(reqDto);
     }
 
@@ -82,7 +81,7 @@ public class DemoController {
      * @return
      */
     @PostMapping(value = "/list")
-    Response<ApiVaroablePageResDto<ApiVariableDto>> list(@RequestBody PageReqDto<ApiVariableListReq> req){
+    Response<ApiVariablePageResDto<ApiVariableDto>> list(@RequestBody PageReqDto<ApiVariableListReq> req){
         return api.list(req);
     }
 

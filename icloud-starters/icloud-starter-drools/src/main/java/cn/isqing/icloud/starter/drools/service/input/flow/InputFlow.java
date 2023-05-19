@@ -27,7 +27,7 @@ import cn.isqing.icloud.starter.drools.service.component.factory.ComponentExecFa
 import cn.isqing.icloud.starter.drools.service.event.EventPublisher;
 import cn.isqing.icloud.starter.drools.service.input.dto.InputDto;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
-import cn.isqing.icloud.starter.variable.api.dto.ApiVariablesValueReqDtoApi;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariablesValueReqDto;
 import cn.isqing.icloud.starter.variable.api.util.VariableUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -175,7 +175,7 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
     }
 
     private void getVariables(InputFlowContext context) {
-        ApiVariablesValueReqDtoApi reqDto = new ApiVariablesValueReqDtoApi();
+        ApiVariablesValueReqDto reqDto = new ApiVariablesValueReqDto();
         reqDto.setCoreId(context.getCoreId().toString());
         reqDto.setInputParams(context.getInputDto().getParams());
         Response<Map<Long, String>> res = variableInterface.getComponentRes(reqDto);

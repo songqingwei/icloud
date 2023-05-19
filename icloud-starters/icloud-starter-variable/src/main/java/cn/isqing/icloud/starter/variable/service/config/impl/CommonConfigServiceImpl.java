@@ -57,13 +57,16 @@ public class CommonConfigServiceImpl implements CommonConfigService {
     public Response<Object> add(CommonConfigDto dto) {
         CommonConfig data = new CommonConfig();
         SpringBeanUtils.copyProperties(dto, data);
-        mapper.update(data);
+        mapper.insert(data);
         return Response.SUCCESS;
     }
 
     @Override
     public Response<Object> edit(CommonConfigDto dto) {
-        return null;
+        CommonConfig data = new CommonConfig();
+        SpringBeanUtils.copyProperties(dto, data);
+        mapper.update(data);
+        return Response.SUCCESS;
     }
 
     @Override

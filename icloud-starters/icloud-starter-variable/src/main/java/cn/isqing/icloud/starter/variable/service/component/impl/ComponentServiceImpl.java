@@ -96,7 +96,7 @@ public class ComponentServiceImpl implements ComponentService {
                 new TypeReference<Map<String,String>>() {
                 })
         );
-        dto.setDependConstantParams(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_CONSTANTS),
+        dto.setDependSystemVars(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_SYSTEM_VARS),
                 new TypeReference<Map<String,String>>() {
                 })
         );
