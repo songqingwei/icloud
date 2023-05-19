@@ -42,8 +42,8 @@ public class DubboComponentExecFlow extends BaseComponentExecFlow {
             v = "\"" + v + "\"";
         } else if (path.startsWith("#{")) {
             v = "\'" + v + "\'";
-        }
-        requestParams[0] = requestParams[0].replace("#{" + path + "}", v);
+
+        requestParams[0] = requestParams[0].replace(path, v);
 
         return Response.SUCCESS;
     }
