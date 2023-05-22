@@ -164,7 +164,7 @@ CREATE TABLE `run_log` (
 `action_id` bigint(20) NOT NULL DEFAULT '0',
 PRIMARY KEY (`id`),
 UNIQUE KEY `uniq_one` (`busi_date`,`core_id`,`source_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `run_log_text` (
 `id` bigint(20) NOT NULL AUTO_INCREMENT,

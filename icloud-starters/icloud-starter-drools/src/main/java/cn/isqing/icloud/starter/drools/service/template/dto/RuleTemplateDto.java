@@ -43,7 +43,7 @@ public class RuleTemplateDto {
     @NotBlank
     private String targetName;
 
-    // 分配算法:1固定数量2比例
+    // 分配算法:1:固定数量 2:比例 3:高精度比例
     @NotNull
     private Integer allocationModel;
 
@@ -51,8 +51,6 @@ public class RuleTemplateDto {
     @NotBlank
     private String content;
 
-    // 0未启用 1启用
-    @NotBlank(message = "版本号不能为空",groups = {EditGroup.class})
     private Integer version;
 
     // 0未启用 1启用
@@ -61,5 +59,8 @@ public class RuleTemplateDto {
     // 关联业务
     @NotEmpty
     private Map<String,String> busiMap;
+
+    // 蛇形算法参照物
+    private String ref;
 
 }
