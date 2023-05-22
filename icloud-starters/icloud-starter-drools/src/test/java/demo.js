@@ -301,11 +301,11 @@ export function onTabChange(activeIndex, key) {
             this.state.addJsonObjField = ["targetRatio","targetName","busiMap"];
 
             this.state.urls = {
-                listUrl: "variable/list",
-                editUrl: "variable/edit",
-                addUrl: "variable/add",
-                delUrl: "variable/del",
-                infoUrl: null,
+                listUrl: "template/list",
+                editUrl: "template/edit",
+                addUrl: "template/add",
+                delUrl: "template/del",
+                infoUrl: "template/text",
             }
             break;
     }
