@@ -308,7 +308,7 @@ public class BaseProvider<T> {
     }
 
     private String[] getConditionKV(SQL sql, Object object, String parameterName, String tableAlais) {
-        return getConditionKV(sql, object, parameterName, null, false);
+        return getConditionKV(sql, object, parameterName, tableAlais, false);
     }
 
     private String[] getConditionKV(SQL sql, Object object, String parameterName, String tableAlais, boolean isCount) {

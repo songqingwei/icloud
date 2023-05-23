@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @CrossOrigin
 @RestController
-@RequestMapping(value = "/${i.variable.web.pre}/common_config", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/${i.drools.web.pre}/common_config", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CommonConfigController {
 
     @Autowired

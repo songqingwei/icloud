@@ -33,7 +33,7 @@
         <hutool.version>5.8.15</hutool.version>
         <rocketmq-spring-boot.version>2.0.1</rocketmq-spring-boot.version>
         <redisson-spring-boot.version>3.9.1</redisson-spring-boot.version>
-        <xxl-job.version>2.3.1</xxl-job.version>
+        <xxl-job.version>2.4.0</xxl-job.version>
         <druid-spring-boot.version>1.1.21</druid-spring-boot.version>
         <mybatis-spring-boot.version>2.2.1</mybatis-spring-boot.version>
         <curator-framework.version>5.4.0</curator-framework.version>

@@ -5,9 +5,20 @@ spring:
     host: 172.16.1.73
     port: 6379
 rocketmq:
-  name-server: 172.16.1.73:9876 # 访问地址
+  name-server: 127.0.0.1:9876 # 访问地址
   producer:
     group: test_group
+xxl:
+  job:
+    accessToken: 123456
+    admin:
+      addresses: http://127.0.0.1:2222/xxl-job-admin
+    executor:
+      logpath: /logs/xxl-job
+      logretentiondays: 7
+      appname: policy-engine
+      ip: 172.16.0.108
+      port: 9999
 dubbo:
   scan:
     basePackages: cn.isqing.icloud.starter.variable,cn.isqing.icloud.policy.engine.dubbo.impl
@@ -17,7 +28,7 @@ dubbo:
     name: dubbo
     port: 20880
   registry:
-    address: zookeeper://172.16.1.73:2181
+    address: zookeeper://127.0.0.1:2181
   consumer:
     check: false
 logging:
@@ -60,6 +71,22 @@ i:
       maxPoolPreparedStatementPerConnectionSize: 20
       #   配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
       filters: stat,wall,slf4j
+      filter:
+        slf4j:
+          enabled: true
+          statement-create-after-log-enabled: false
+          statement-parameter-set-log-enabled: false
+          statement-parameter-clear-log-enable: false
+          statement-prepare-after-log-enabled: false
+          statement-execute-after-log-enabled: false
+          statement-prepare-call-after-log-enabled: false
+          connection-close-after-log-enabled: false
+          # 这个必须打开
+          statement-log-enabled: true
+          # 这里是直接赋值可以 -Ddruid.log.stmt.executableSql=true
+          statement-executable-sql-log-enable: true
+          statement-log-error-enabled: true
+          result-set-log-enabled: false
       #合并多个DruidDatasource的监控数据
       useGlobalDataSourceStat: true
       #通过connectProperties属性来打开mergesql功能罗慢sQL记录

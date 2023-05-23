@@ -39,6 +39,7 @@ public class ControllerAspect {
         } catch (BaseException e) {
             return Response.error(e.getCode(), e.getMessage());
         } catch (Throwable e) {
+            log.error(e.getMessage(),e);
             return Response.ERROR;
         } finally {
             MDCUtil.cancelAppendTraceId();

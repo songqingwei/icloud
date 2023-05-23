@@ -13,6 +13,7 @@ import cn.isqing.icloud.common.utils.validation.group.AddGroup;
 import cn.isqing.icloud.common.utils.validation.group.EditGroup;
 import cn.isqing.icloud.starter.drools.common.constants.CommonTextTypeConstants;
 import cn.isqing.icloud.starter.drools.common.constants.EventTypeConstants;
+import cn.isqing.icloud.starter.drools.common.constants.TableJoinConstants;
 import cn.isqing.icloud.starter.drools.common.dto.RuleH5Dto;
 import cn.isqing.icloud.starter.drools.common.dto.UpdateStatusDto;
 import cn.isqing.icloud.starter.variable.api.enums.VariableType;
@@ -81,20 +82,15 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
      * @return
      */
     @Override
-    public Response<PageResDto<RuleTemplateDto>> list(@Valid PageReqDto<RuleTemplateListReq> dto) {
-        RuleTemplateListReq req = dto.getCondition();
-        PageReqDto.PageInfo pageInfo = dto.getPageInfo();
-        PageResDto<RuleTemplateDto> resDto = new PageResDto<>();
-        if (pageInfo.isNeedList()) {
-            //组装结果dto
-            List<RuleTemplateDto> dtoList = getDtoList(req, pageInfo);
-            resDto.setList(dtoList);
+    public Response<PageResDto<RuleTemplateDto>> list(PageReqDto<RuleTemplateListReq> dto) {
+        Response<PageResDto<RuleTemplateDto>> res = baseList(dto);
+        if(!res.isSuccess()){
+            return Response.withData(res,null);
         }
-        if (pageInfo.isNeedTotal()) {
-            Long count = mapper.countWithBusi(req);
-            resDto.setTotal(count);
+        if (dto.getPageInfo().isNeedList()) {
+            setBusiMap(res.getData().getList());
         }
-        return Response.success(resDto);
+        return res;
     }
 
     /**
@@ -107,19 +103,27 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     public Response<PageResDto<RuleTemplateDto>> baseList(PageReqDto<RuleTemplateListReq> dto) {
         RuleTemplateListReq req = dto.getCondition();
         PageReqDto.PageInfo pageInfo = dto.getPageInfo();
+
+        RuleTemplateCondition left = new RuleTemplateCondition();
+        SpringBeanUtils.copyProperties(req, left);
+        left.setOrderBy(SqlConstants.ID_ASC);
+        left.setSelectFiled(SqlConstants.ALL_FIELD);
+        Optional.ofNullable(pageInfo.getFromId()).ifPresent(left::setIdConditionMin);
+
+        RuleTemplateBusiCondition right = new RuleTemplateBusiCondition();
+        right.setBusiCode(req.getBusiCode());
+        right.setGroupBy(RuleTemplateBusiFiled.TID);
+
         PageResDto<RuleTemplateDto> resDto = new PageResDto<>();
         if (pageInfo.isNeedList()) {
             //组装结果dto
-            List<RuleTemplate> res = mapper.selectWithBusi(req, pageInfo, pageInfo.getOffset());
-            List<RuleTemplateDto> dtoList = res.stream().map(t -> {
-                RuleTemplateDto dto1 = new RuleTemplateDto();
-                SpringBeanUtils.copyProperties(t, dto1);
-                return dto1;
-            }).collect(Collectors.toList());
+            left.setLimit(pageInfo.getPageSize());
+            left.setOffset(pageInfo.getOffset());
+            List<RuleTemplateDto> dtoList = mapper.leftJoinSelect(left, right, TableJoinConstants.RTPL_BUSI);
             resDto.setList(dtoList);
         }
         if (pageInfo.isNeedTotal()) {
-            Long count = mapper.countWithBusi(req);
+            Long count = mapper.leftJoinCount(left, right, TableJoinConstants.RTPL_BUSI);
             resDto.setTotal(count);
         }
         return Response.success(resDto);
@@ -168,23 +172,17 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         return Response.success(busiMap);
     }
 
-    private List<RuleTemplateDto> getDtoList(RuleTemplateListReq req, PageReqDto.PageInfo pageInfo) {
-        List<RuleTemplate> res = mapper.selectWithBusi(req, pageInfo, pageInfo.getOffset());
+    private void setBusiMap(List<RuleTemplateDto> res) {
         RuleTemplateBusiCondition busiCondition = new RuleTemplateBusiCondition();
-        busiCondition.setTidCondition(res.stream().map(RuleTemplate::getId).collect(Collectors.toList()));
+        busiCondition.setTidCondition(res.stream().map(RuleTemplateDto::getId).collect(Collectors.toList()));
         List<RuleTemplateBusi> resBusi = busiMapper.selectByCondition(busiCondition);
 
         Map<Long, Map<String, String>> busiMap =
                 resBusi.stream().collect(Collectors.groupingBy(RuleTemplateBusi::getTid,
                         Collectors.toMap(RuleTemplateBusi::getBusiCode, b -> b.getBusiName())));
 
-        List<RuleTemplateDto> dtoList = res.stream().map(t -> {
-            RuleTemplateDto dto1 = new RuleTemplateDto();
-            SpringBeanUtils.copyProperties(t, dto1);
-            dto1.setBusiMap(busiMap.get(t.getId()));
-            return dto1;
-        }).collect(Collectors.toList());
-        return dtoList;
+        res.forEach(d -> d.setBusiMap(busiMap.get(d.getId())));
+
     }
 
     @Override
@@ -333,7 +331,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
 
     @Override
     @Transactional
-    public Response<Object> sw(@Valid UpdateStatusDto dto) {
+    public Response<Object> sw(UpdateStatusDto dto) {
         RuleTemplate template = new RuleTemplate();
         RuleTemplate condition = new RuleTemplate();
         template.setVersion(dto.getVersion() + 1);
@@ -361,7 +359,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         msg.setCreateTime(TimeUtil.now());
         codes.forEach(k -> {
             msg.setBusiCode(k);
-            eventPublisher.publishBcEvent(null, EventTypeConstants.TPL_CHANGE,msg);
+            eventPublisher.publishBcEvent(null, EventTypeConstants.TPL_CHANGE, msg);
         });
     }
 
@@ -373,15 +371,15 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         Map<String, String> busiMap = dto.getBusiMap();
         busiMap.forEach((k, v) -> {
             msg.setBusiCode(k);
-            eventPublisher.publishBcEvent(null, EventTypeConstants.TPL_CHANGE,msg);
+            eventPublisher.publishBcEvent(null, EventTypeConstants.TPL_CHANGE, msg);
         });
-        Optional.ofNullable(oldCodes).ifPresent(codes->{
-            codes.forEach(k->{
-                if(busiMap.containsKey(k)){
+        Optional.ofNullable(oldCodes).ifPresent(codes -> {
+            codes.forEach(k -> {
+                if (busiMap.containsKey(k)) {
                     return;
                 }
                 msg.setBusiCode(k);
-                eventPublisher.publishBcEvent(null, EventTypeConstants.TPL_CHANGE,msg);
+                eventPublisher.publishBcEvent(null, EventTypeConstants.TPL_CHANGE, msg);
             });
         });
     }
