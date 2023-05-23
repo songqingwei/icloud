@@ -32,6 +32,8 @@ dubbo:
   consumer:
     check: false
 logging:
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}) %clr([%thread]){faint} %clr(%-5level){faint} %clr([%X{oid}]){yellow} %clr(%logger{36}){cyan}:%clr(%msg%n){faint}"
   level:
     druid:
       sql:
