@@ -2,6 +2,7 @@ package cn.isqing.icloud.starter.drools.service.template.dto;
 
 import cn.isqing.icloud.common.utils.validation.group.AddGroup;
 import cn.isqing.icloud.common.utils.validation.group.EditGroup;
+import cn.isqing.icloud.starter.drools.common.dto.RuleH5Dto;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -37,19 +38,19 @@ public class RuleTemplateDto {
 
     // 目标分配比例 json Map<Long, String>
     @NotBlank
-    private String targetRatio;
+    private Map<Long, String> targetRatio;
 
-    // 目标名称映射 json Map<Long, String>
+    // 目标名称映射
     @NotBlank
-    private String targetName;
+    private Map<Long, String> targetName;
 
     // 分配算法:1:固定数量 2:比例 3:高精度比例
     @NotNull
     private Integer allocationModel;
 
     // 规则内容
-    @NotBlank
-    private String content;
+    @NotNull
+    private RuleH5Dto content;
 
     private Integer version;
 

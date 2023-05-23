@@ -2,6 +2,7 @@ package cn.isqing.icloud.starter.drools.service.template.impl;
 
 import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
 import cn.isqing.icloud.common.utils.constants.SqlConstants;
+import cn.isqing.icloud.common.utils.constants.StrConstants;
 import cn.isqing.icloud.common.utils.dao.MybatisUtils;
 import cn.isqing.icloud.common.utils.dto.BaseException;
 import cn.isqing.icloud.common.api.dto.PageReqDto;
@@ -31,10 +32,13 @@ import cn.isqing.icloud.starter.drools.service.template.dto.RuleTemplateListReq;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
 import cn.isqing.icloud.starter.variable.api.util.VariableUtil;
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -69,7 +73,8 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
 
     @Resource(name = "iDroolsSqlSessionFactory")
     private SqlSessionFactory sqlSessionFactory;
-    @Autowired
+    @Reference(group = "${i.variable.dubbo.group:iVariable}", timeout = -1, retries = -1, version = "1.0.0")
+    @Lazy
     private VariableInterface variableInterface;
 
     private String format = "(%s)";
@@ -141,9 +146,9 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         Map<Integer, String> map = texts.stream().collect(Collectors.groupingBy(CommonText::getType,
                 Collectors.mapping(CommonText::getText, Collectors.joining())));
         RuleTemplateDto dto = new RuleTemplateDto();
-        dto.setTargetRatio(map.get(CommonTextTypeConstants.TARGET_RATIO));
-        dto.setTargetName(map.get(CommonTextTypeConstants.TARGET_NAME));
-        dto.setContent(map.get(CommonTextTypeConstants.RULE_CONTENT_H5));
+        dto.setTargetRatio(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.TARGET_RATIO, StrConstants.EMPTY_JSON_OBJ),new TypeReference<Map<Long,String>>(){}));
+        dto.setTargetName(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.TARGET_NAME, StrConstants.EMPTY_JSON_OBJ),new TypeReference<Map<Long,String>>(){}));
+        dto.setContent(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.RULE_CONTENT_H5, StrConstants.EMPTY_JSON_OBJ), RuleH5Dto.class));
         return Response.success(dto);
     }
 
@@ -222,7 +227,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         insetText(text, dto.getContent(), CommonTextTypeConstants.RULE_CONTENT_H5);
 
         // 解析h5规则
-        RuleH5Dto h5Dto = JSON.parseObject(dto.getContent(), RuleH5Dto.class);
+        RuleH5Dto h5Dto = dto.getContent();
         Map<Long, ApiVariableDto> map = new HashMap<>();
         String content = dealH5Dto(h5Dto, map);
         insetText(text, content, CommonTextTypeConstants.RULE_CONTENT);
@@ -244,27 +249,30 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         if (!CollectionUtils.isEmpty(list)) {
             // String.format(format)
             return list.stream().map(d -> {
+                if (d.getValue().contains("eval")) {
+                    log.error("检测到异常入侵条件:{}", d);
+                    throw new BaseException("检测到异常入侵条件");
+                }
                 // 字符串类型时要求前端加引号{"value1":"\"null\"","value2":"null",}
                 // value1是字符串null，value2是真null
                 ApiVariableDto variable = map.get(d.getId());
                 if (variable == null) {
                     Response<ApiVariableDto> res = variableInterface.getVariableById(d.getId());
+                    if(!res.isSuccess()){
+                        log.error("获取变量{}异常:{}",d.getId(),res);
+                        throw new BaseException("获取变量异常");
+                    }
                     map.put(d.getId(), res.getData());
+                    variable = res.getData();
                 }
-
-                if (variable.getTypePath().equals(VariableType.BIG_DECIMAL.getName())) {
+                if (variable.getType().equals(VariableType.BIG_DECIMAL.getCode())) {
                     if (!"null".equals(d.getValue()) && (!d.getValue().startsWith("\"")) || !d.getValue().endsWith(
                             "\"")) {
                         log.error("异常字符串条件:{}", d);
                         throw new BaseException("异常字符串条件");
                     }
-                } else {
-                    if (d.getValue().contains("eval")) {
-                        log.error("检测到异常入侵条件:{}", d);
-                        throw new BaseException("检测到异常入侵条件");
-                    }
                 }
-                if (variable.getTypePath().equals(VariableType.BIG_DECIMAL.getName()) || variable.getTypePath().equals(VariableType.BIG_INTEGER.getName())) {
+                if (variable.getType().equals(VariableType.BIG_DECIMAL.getCode()) || variable.getType().equals(VariableType.BIG_INTEGER.getCode())) {
                     if (!"null".equals(d.getValue())) {
                         d.setValue(d.getValue() + "B");
                     }

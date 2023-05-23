@@ -60,8 +60,8 @@ public class DubboComponentExecFlow extends BaseComponentExecFlow {
         methodDto.setInterfaceName((String) JsonUtil.extract(config,
                 DubboComponentDialectType.INTERFACENAME.getJsonPath()));
         methodDto.setMethodName((String) JsonUtil.extract(config, DubboComponentDialectType.METHOD_NAME.getJsonPath()));
-        methodDto.setMethodType((String[]) JsonUtil.extract(config,
-                DubboComponentDialectType.METHOD_TYPE.getJsonPath()));
+        methodDto.setMethodType(((JSONArray) JsonUtil.extract(config,
+                DubboComponentDialectType.METHOD_TYPE.getJsonPath())).toArray(new String[0]));
         methodDto.setGroup((String) JsonUtil.extract(config, DubboComponentDialectType.GROUP.getJsonPath()));
         methodDto.setVersion((String) JsonUtil.extract(config, DubboComponentDialectType.VERSION.getJsonPath()));
         context.setRequestDto(methodDto);
