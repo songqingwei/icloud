@@ -186,7 +186,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     }
 
     @Override
-    @Transactional
+    @Transactional(transactionManager = "iDroolsTransactionManager")
     public Response<Object> add(@Validated({AddGroup.class, Default.class}) RuleTemplateDto dto) {
         RuleTemplate template = new RuleTemplate();
         SpringBeanUtils.copyProperties(dto, template);
@@ -280,7 +280,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     }
 
     @Override
-    @Transactional
+    @Transactional(transactionManager = "iDroolsTransactionManager")
     public Response<Object> edit(@Validated({EditGroup.class, Default.class}) RuleTemplateDto dto) {
         RuleTemplate template = new RuleTemplate();
         RuleTemplate condition = new RuleTemplate();
@@ -330,7 +330,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     }
 
     @Override
-    @Transactional
+    @Transactional(transactionManager = "iDroolsTransactionManager")
     public Response<Object> sw(UpdateStatusDto dto) {
         RuleTemplate template = new RuleTemplate();
         RuleTemplate condition = new RuleTemplate();
@@ -385,7 +385,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     }
 
     @Override
-    @Transactional
+    @Transactional(transactionManager = "iDroolsTransactionManager")
     public Response<Object> del(Long id) {
         RuleTemplate template = new RuleTemplate();
         template.setId(id);

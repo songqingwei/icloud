@@ -35,11 +35,11 @@ public class RuleTemplateDto {
     @NotBlank
     private String cron;
 
-    // 目标分配比例 json List<Long>
+    // 目标分配比例 json Map<Long, String>
     @NotBlank
     private String targetRatio;
 
-    // 目标名称映射 json map<Long,String>
+    // 目标名称映射 json Map<Long, String>
     @NotBlank
     private String targetName;
 
