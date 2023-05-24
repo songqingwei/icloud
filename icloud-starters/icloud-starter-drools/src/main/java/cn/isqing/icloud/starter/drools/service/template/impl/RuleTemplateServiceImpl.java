@@ -114,11 +114,12 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         SpringBeanUtils.copyProperties(req, left);
         left.setOrderBy(SqlConstants.ID_ASC);
         left.setSelectFiled(SqlConstants.ALL_FIELD);
+        left.setGroupBy(RuleTemplateFiled.ID);
         Optional.ofNullable(pageInfo.getFromId()).ifPresent(left::setIdConditionMin);
 
         RuleTemplateBusiCondition right = new RuleTemplateBusiCondition();
         right.setBusiCode(req.getBusiCode());
-        right.setGroupBy(RuleTemplateBusiFiled.TID);
+
 
         PageResDto<RuleTemplateDto> resDto = new PageResDto<>();
         if (pageInfo.isNeedList()) {
@@ -294,7 +295,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         RuleTemplate template = new RuleTemplate();
         RuleTemplate condition = new RuleTemplate();
         SpringBeanUtils.copyProperties(dto, template);
-        condition.setId(template.getId());
+        condition.setId(dto.getId());
         template.setId(null);
         condition.setVersion(template.getVersion());
         template.setVersion(template.getVersion() + 1);
@@ -310,7 +311,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         busiMapper.del(busiCondition);
         // 关联业务查询
         RuleTemplateBusiCondition condition1 = new RuleTemplateBusiCondition();
-        condition1.setTid(template.getId());
+        condition1.setTid(dto.getId());
         condition1.setSelectFiled(RuleTemplateBusiFiled.BUSI_CODE);
         List<String> codes = busiMapper.selectStringByCondition(condition1);
         // 关联表入库
@@ -325,7 +326,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
             busi.setVersion(template.getVersion());
             list.add(busi);
         });
-        MybatisUtils.batchSave(sqlSessionFactory, list, busiMapper.getClass(), (busi, mapper) -> mapper.insert(busi));
+        MybatisUtils.batchSave(sqlSessionFactory, list, RuleTemplateBusiMapper.class, (busi, mapper) -> mapper.insert(busi));
 
         tplChangeEvent(dto, codes);
         return Response.SUCCESS;

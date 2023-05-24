@@ -29,6 +29,11 @@ public class ComponentController {
         return service.list(req);
     }
 
+    @PostMapping(value = "/text")
+    public Response<ComponentDto> getText(@RequestParam("id") Long id){
+        return service.getText(id);
+    }
+
     @PostMapping(value = "/add")
     public Response<Object> add(@RequestBody ComponentDto req){
         return service.add(req);

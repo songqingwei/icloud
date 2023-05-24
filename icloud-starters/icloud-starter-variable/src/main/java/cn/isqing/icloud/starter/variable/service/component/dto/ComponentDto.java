@@ -30,7 +30,7 @@ public class ComponentDto {
 
     private Map<String,String> dependCRes;
 
-    private Map<String,String>  dependConstantParams;
+    private Map<String,String> dependConstants;
     private Map<String,String>  selfConstants;
 
     private Map<String,String>  dependSystemVars;

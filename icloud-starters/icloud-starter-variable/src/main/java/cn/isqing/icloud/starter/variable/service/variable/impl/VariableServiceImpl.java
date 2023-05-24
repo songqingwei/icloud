@@ -178,7 +178,7 @@ public class VariableServiceImpl implements VariableService {
                 av.setActionId(actionId);
                 return av;
             }).collect(Collectors.toList());
-            MybatisUtils.batchSave(sqlSessionFactory, list, avMapper.getClass(), (busi, mapper) -> mapper.insert(busi));
+            MybatisUtils.batchSave(sqlSessionFactory, list, ActionVariableMapper.class, (busi, mapper) -> mapper.insert(busi));
         }
         return Response.SUCCESS;
     }

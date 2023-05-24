@@ -45,13 +45,14 @@ KEY `idx_fid` (`fid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='大字段存储';
 
 CREATE TABLE `component` (
-`id` bigint(20) DEFAULT NULL,
+`id` bigint(20) DEFAULT NULL AUTO_INCREMENT,
 `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
 `data_source_id` bigint(20) NOT NULL DEFAULT '0',
 `data_source_type` int(11) NOT NULL DEFAULT '0',
 `version` int(11) NOT NULL DEFAULT '0',
 `is_active` tinyint(1) NOT NULL DEFAULT '0',
-`is_del` tinyint(1) NOT NULL DEFAULT '0'
+`is_del` tinyint(1) NOT NULL DEFAULT '0',
+PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='组件';
 
 CREATE TABLE `component_text` (

@@ -18,34 +18,39 @@ import org.springframework.web.bind.annotation.*;
  **/
 @Slf4j
 @RestController
-@RequestMapping(value = "/${i.drools.web.pre}/datasource",produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/${i.drools.web.pre}/datasource", produces = MediaType.APPLICATION_JSON_VALUE)
 public class DataSourceController {
 
     @Autowired
     private DataSourceService service;
 
     @PostMapping(value = "/list")
-    public Response<PageResDto<DataSourceDto>> list(@RequestBody PageReqDto<DataSourceListReq> req){
+    public Response<PageResDto<DataSourceDto>> list(@RequestBody PageReqDto<DataSourceListReq> req) {
         return service.list(req);
     }
 
+    @PostMapping(value = "/text")
+    public Response<DataSourceDto> getText(@RequestParam("id") Long id) {
+        return service.getText(id);
+    }
+
     @PostMapping(value = "/add")
-    public Response<Object> add(@RequestBody DataSourceDto req){
+    public Response<Object> add(@RequestBody DataSourceDto req) {
         return service.add(req);
     }
 
     @PostMapping(value = "/edit")
-    public Response<Object> edit(@RequestBody DataSourceDto req){
+    public Response<Object> edit(@RequestBody DataSourceDto req) {
         return service.edit(req);
     }
 
     @PostMapping(value = "/sw")
-    public Response<Object> sw(@RequestBody UpdateStatusDto req){
+    public Response<Object> sw(@RequestBody UpdateStatusDto req) {
         return service.sw(req);
     }
 
     @PostMapping(value = "/del")
-    public Response<Object> sw(@RequestParam("id") Long id){
+    public Response<Object> sw(@RequestParam("id") Long id) {
         return service.del(id);
     }
 
