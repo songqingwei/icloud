@@ -9,6 +9,7 @@ import cn.isqing.icloud.common.api.dto.PageReqDto;
 import cn.isqing.icloud.common.api.dto.PageResDto;
 import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.enums.status.YesOrNo;
+import cn.isqing.icloud.common.utils.json.JsonUtil;
 import cn.isqing.icloud.common.utils.time.TimeUtil;
 import cn.isqing.icloud.common.utils.validation.group.AddGroup;
 import cn.isqing.icloud.common.utils.validation.group.EditGroup;
@@ -124,7 +125,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
             //组装结果dto
             left.setLimit(pageInfo.getPageSize());
             left.setOffset(pageInfo.getOffset());
-            List<RuleTemplateDto> dtoList = mapper.leftJoinSelect(left, right, TableJoinConstants.RTPL_BUSI);
+            List<RuleTemplateDto> dtoList = JsonUtil.toList(mapper.leftJoinSelect(left, right, TableJoinConstants.RTPL_BUSI),RuleTemplateDto.class);
             resDto.setList(dtoList);
         }
         if (pageInfo.isNeedTotal()) {
@@ -210,7 +211,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
             busi.setBusiName(v);
             list.add(busi);
         });
-        MybatisUtils.batchSave(sqlSessionFactory, list, busiMapper.getClass(), (busi, mapper) -> {
+        MybatisUtils.batchSave(sqlSessionFactory, list, RuleTemplateBusiMapper.class, (busi, mapper) -> {
             mapper.insert(busi);
         });
         tplChangeEvent(dto, null);
