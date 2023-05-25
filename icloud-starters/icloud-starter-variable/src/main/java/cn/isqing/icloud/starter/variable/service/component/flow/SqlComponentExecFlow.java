@@ -7,14 +7,21 @@ import cn.isqing.icloud.common.utils.enums.status.YesOrNo;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
 import cn.isqing.icloud.common.utils.kit.StrUtil;
 import cn.isqing.icloud.common.utils.sql.SqlUtil;
+import cn.isqing.icloud.starter.variable.common.constants.CommonTextTypeConstants;
 import cn.isqing.icloud.starter.variable.common.constants.DataSourceTypeConstatnts;
 import cn.isqing.icloud.starter.variable.common.constants.SqlResConstants;
 import cn.isqing.icloud.starter.variable.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.variable.common.enums.DataSourceType;
 import cn.isqing.icloud.starter.variable.common.enums.SqlComponentDialectType;
+import cn.isqing.icloud.starter.variable.dao.entity.CommonText;
+import cn.isqing.icloud.starter.variable.dao.entity.CommonTextCondition;
 import cn.isqing.icloud.starter.variable.dao.entity.DataSourceCondition;
+import cn.isqing.icloud.starter.variable.dao.mapper.CommonTextMapper;
 import cn.isqing.icloud.starter.variable.dao.mapper.DataSourceMapper;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.TypeReference;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -29,31 +36,47 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * @author songqingwei@aliyun.com
  * @version 1.0
  **/
 @Service
+@Slf4j
 @RouteType(r1 = DataSourceTypeConstatnts.SQL)
 public class SqlComponentExecFlow extends BaseComponentExecFlow {
 
     @Autowired
     private DataSourceMapper dataSourceMapper;
+    @Autowired
+    private CommonTextMapper commonTextMapper;
 
     // 数据源缓存
     private static final Map<Long, DataSource> DS_MAP = new ConcurrentHashMap<>();
     private static final Map<Long, JdbcTemplate> JDBC_MAP = new ConcurrentHashMap<>();
 
     @PostConstruct
-    public void init(){
+    public void init() {
         DataSourceCondition condition = new DataSourceCondition();
         condition.setType(DataSourceType.SQL.ordinal());
         condition.setIsActive(YesOrNo.YES.ordinal());
         condition.setSelectFiled(SqlConstants.ID);
         List<Long> list = dataSourceMapper.selectLongByCondition(condition);
-        list.parallelStream().forEach(sid->{
-            cacheDataSource(sid);
+        list.parallelStream().forEach(sid -> {
+            try {
+                CommonTextCondition text = new CommonTextCondition();
+                text.setFid(sid);
+                text.setType(CommonTextTypeConstants.DATA_SOURCE_CINFIG);
+                text.setOrderBy(SqlConstants.ID_ASC);
+                List<CommonText> texts = commonTextMapper.selectByCondition(text);
+                String s = texts.stream().collect(Collectors.mapping(CommonText::getText, Collectors.joining()));
+                Map<String, Object> configMap = JSONObject.parseObject(s, new TypeReference<Map<String, Object>>() {
+                });
+                cacheDataSource(sid,configMap);
+            } catch (Exception e) {
+                log.error("初始化数据源{}异常：{}",sid,e.getMessage(),e);
+            }
         });
     }
 
@@ -87,7 +110,7 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
     @Override
     protected void pre(ComponentExecContext context) {
         // 数据源
-        cacheDataSource(context.getComponent().getDataSourceId());
+        cacheDataSource(context.getComponent().getDataSourceId(),context.getDsConfig());
         String sql = (String) JsonUtil.extract(context.getDialectConfig(), SqlComponentDialectType.SQL.getJsonPath());
         final String[] sqlArr = {sql};
         context.setRequestParamsTpl(sqlArr);
@@ -111,9 +134,9 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
         }
         if (sql.startsWith("select ") || sql.startsWith("SELECT ")) {
             List<Map<String, Object>> list = template.queryForList(sql);
-            if(list.size()==1 && list.get(0)!=null && list.get(0).size()==1){
+            if (list.size() == 1 && list.get(0) != null && list.get(0).size() == 1) {
                 Map<String, Object> map = list.get(0);
-                map.entrySet().stream().findFirst().ifPresent(e->{
+                map.entrySet().stream().findFirst().ifPresent(e -> {
                     Object value = e.getValue();
                     context.setExecRes(String.valueOf(value));
                 });
@@ -126,13 +149,13 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
         context.setExecRes(String.format(updateRes, i));
     }
 
-    private void cacheDataSource(Long sourceId) {
+    private void cacheDataSource(Long sourceId, Map<String, Object> dsConfig) {
         DS_MAP.computeIfAbsent(sourceId, id -> {
             DruidDataSource dataSource = new DruidDataSource();
             DataBinder dataBinder = new DataBinder(dataSource);
             dataBinder.setIgnoreInvalidFields(true);
             dataBinder.setIgnoreUnknownFields(true);
-            MutablePropertyValues propertyValues = new MutablePropertyValues(context.getDsConfig());
+            MutablePropertyValues propertyValues = new MutablePropertyValues(dsConfig);
             dataBinder.bind(propertyValues);
             JdbcTemplate template = new JdbcTemplate();
             template.setDataSource(dataSource);
