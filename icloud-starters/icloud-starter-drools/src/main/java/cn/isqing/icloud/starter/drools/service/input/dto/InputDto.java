@@ -1,5 +1,6 @@
 package cn.isqing.icloud.starter.drools.service.input.dto;
 
+import com.google.protobuf.Api;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -15,6 +16,8 @@ public class InputDto implements Serializable {
     // 域
     @NotNull
     private Integer domain;
+    @NotNull
+    private String domainAuthCode;
     @NotBlank
     private String busiCode;
     // 动作

@@ -39,7 +39,7 @@ public class RuleTemplate {
 
     private Integer isDel;
 
-    // 蛇形算法参照物
-    private String ref;
+    // 蛇形算法参照物:变量id
+    private Long refId;
 
 }

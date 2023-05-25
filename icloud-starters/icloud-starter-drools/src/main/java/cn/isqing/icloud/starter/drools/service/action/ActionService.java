@@ -14,8 +14,6 @@ import cn.isqing.icloud.starter.drools.service.action.dto.ActionListReq;
 public interface ActionService {
     Response<PageResDto<ActionDto>> list(PageReqDto<ActionListReq> dto);
 
-    Response<ActionDto> getText(Long id);
-
     Response<Object> add(ActionDto dto);
 
     Response<Object> edit(ActionDto dto);

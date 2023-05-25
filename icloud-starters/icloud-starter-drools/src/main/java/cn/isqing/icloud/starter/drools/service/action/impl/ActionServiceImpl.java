@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -53,11 +54,6 @@ public class ActionServiceImpl implements ActionService {
     }
 
     @Override
-    public Response<ActionDto> getText(Long id) {
-        return null;
-    }
-
-    @Override
     public Response<Object> add(ActionDto dto) {
         Action data = new Action();
         SpringBeanUtils.copyProperties(dto, data);
@@ -70,6 +66,9 @@ public class ActionServiceImpl implements ActionService {
     public Response<Object> edit(ActionDto dto) {
         Action data = new Action();
         SpringBeanUtils.copyProperties(dto, data);
+        Optional.ofNullable(dto.getVersion()).ifPresent(v->{
+            data.setVersion(v+1);
+        });
         // 主表入库
         mapper.update(data);
         return Response.SUCCESS;

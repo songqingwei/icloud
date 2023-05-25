@@ -178,6 +178,8 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
         ApiVariablesValueReqDto reqDto = new ApiVariablesValueReqDto();
         reqDto.setCoreId(context.getCoreId().toString());
         reqDto.setInputParams(context.getInputDto().getParams());
+        reqDto.setDomain(context.getInputDto().getDomain());
+        reqDto.setDomainAuthCode(context.getInputDto().getDomainAuthCode());
         Response<Map<Long, String>> res = variableInterface.getComponentRes(reqDto);
         if(!res.isSuccess()){
             interrupt(context,Response.error(res.getMsg()));

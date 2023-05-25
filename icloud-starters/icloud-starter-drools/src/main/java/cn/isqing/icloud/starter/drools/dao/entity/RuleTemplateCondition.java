@@ -24,4 +24,6 @@ public class RuleTemplateCondition extends BaseCondition {
 
     private String createTimeConditionMax;
 
+    private Integer isDel;
+
 }

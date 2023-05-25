@@ -10,6 +10,7 @@ import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -18,9 +19,10 @@ import java.util.List;
  * @version 1.0
  **/
 @Slf4j
+@Component
 @RocketMQMessageListener(
-        consumerGroup = "${i.variable.bc-event.cgroup:i-drools-bc-event}",
-        topic = "${i.variable.bc-event.topic:i-drools-bc-event}",
+        consumerGroup = "${i.drools.bc-event.cgroup:i-drools-bc-event}",
+        topic = "${i.drools.bc-event.topic:i-drools-bc-event}",
         messageModel = MessageModel.BROADCASTING
 )
 public class BroadcastEventListener implements RocketMQListener<String> {

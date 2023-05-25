@@ -11,7 +11,7 @@ orgId
 refFunction
 package cn.isqing.icloud.starter.drools.rules;
 
-global org.slf4j.Logger logger
+global org.slf4j.Logger log
 import cn.isqing.icloud.starter.drools.service.semaphore.util.Allotter
 import cn.isqing.icloud.starter.drools.common.util.CronUtil
 dialect "java"
@@ -24,12 +24,12 @@ rule "@{id}"
     activation-group "@{actionId}"
 
     when
-      $data : Data( CronUtil.isSatisfiedBy("@{cron}",busiDate) && (@{condition}))
+      $data : Data( CronUtil.isSatisfied("@{cron}",busiDate) && (@{condition}))
     then
        log.info("命中规则：@{domain}:@{id}");
-       $data.setRuleId(@{id});
+       $data.setRuleId(@{id}L);
        $data.setTargetRes(
-            Allotter.getTargetId($data.getCoreId(),@{id},@{refFunction});
+            Allotter.getTargetId($data.getCoreId(),@{id}L,@{refFunction})
        );
 
 end

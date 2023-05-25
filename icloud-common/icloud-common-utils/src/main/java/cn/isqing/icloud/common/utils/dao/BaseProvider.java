@@ -33,7 +33,7 @@ public class BaseProvider<T> {
         sql.SET("lock_time = '" + nowTime + "'");
         sql.SET("lock_status = 1");
         sql.WHERE("id = #{id}");
-        sql.WHERE("status = 0");
+        sql.WHERE("lock_status = 0");
         sql.WHERE("lock_version = #{lockVersion}");
         return sql.toString();
     }
@@ -44,7 +44,7 @@ public class BaseProvider<T> {
         sql.SET("lock_version = lock_version+1");
         sql.SET("lock_status = 0");
         sql.WHERE("id = #{id}");
-        sql.WHERE("status = 1");
+        sql.WHERE("lock_status = 1");
         sql.WHERE("lock_version = #{lockVersion}");
         return sql.toString();
     }

@@ -2,20 +2,27 @@ package cn.isqing.icloud.starter.variable.service.component.flow;
 
 import cn.isqing.icloud.common.utils.annotation.RouteType;
 import cn.isqing.icloud.common.api.dto.Response;
+import cn.isqing.icloud.common.utils.constants.SqlConstants;
+import cn.isqing.icloud.common.utils.enums.status.YesOrNo;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
 import cn.isqing.icloud.common.utils.kit.StrUtil;
 import cn.isqing.icloud.common.utils.sql.SqlUtil;
 import cn.isqing.icloud.starter.variable.common.constants.DataSourceTypeConstatnts;
 import cn.isqing.icloud.starter.variable.common.constants.SqlResConstants;
 import cn.isqing.icloud.starter.variable.common.dto.ComponentExecDto;
+import cn.isqing.icloud.starter.variable.common.enums.DataSourceType;
 import cn.isqing.icloud.starter.variable.common.enums.SqlComponentDialectType;
+import cn.isqing.icloud.starter.variable.dao.entity.DataSourceCondition;
+import cn.isqing.icloud.starter.variable.dao.mapper.DataSourceMapper;
 import com.alibaba.druid.pool.DruidDataSource;
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.DataBinder;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -31,9 +38,24 @@ import java.util.concurrent.ConcurrentHashMap;
 @RouteType(r1 = DataSourceTypeConstatnts.SQL)
 public class SqlComponentExecFlow extends BaseComponentExecFlow {
 
+    @Autowired
+    private DataSourceMapper dataSourceMapper;
+
     // 数据源缓存
     private static final Map<Long, DataSource> DS_MAP = new ConcurrentHashMap<>();
     private static final Map<Long, JdbcTemplate> JDBC_MAP = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    public void init(){
+        DataSourceCondition condition = new DataSourceCondition();
+        condition.setType(DataSourceType.SQL.ordinal());
+        condition.setIsActive(YesOrNo.YES.ordinal());
+        condition.setSelectFiled(SqlConstants.ID);
+        List<Long> list = dataSourceMapper.selectLongByCondition(condition);
+        list.parallelStream().forEach(sid->{
+            cacheDataSource(sid);
+        });
+    }
 
     private String insertRes = "{\"" + SqlResConstants.INSERT_RES_ID + "\":%d}";
     private String updateRes = "{\"" + SqlResConstants.UPDATE_RES_A_ROWS + "\":%d}";
@@ -65,7 +87,7 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
     @Override
     protected void pre(ComponentExecContext context) {
         // 数据源
-        cacheDataSource(context);
+        cacheDataSource(context.getComponent().getDataSourceId());
         String sql = (String) JsonUtil.extract(context.getDialectConfig(), SqlComponentDialectType.SQL.getJsonPath());
         final String[] sqlArr = {sql};
         context.setRequestParamsTpl(sqlArr);
@@ -104,8 +126,7 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
         context.setExecRes(String.format(updateRes, i));
     }
 
-    private void cacheDataSource(ComponentExecContext context) {
-        Long sourceId = context.getComponent().getDataSourceId();
+    private void cacheDataSource(Long sourceId) {
         DS_MAP.computeIfAbsent(sourceId, id -> {
             DruidDataSource dataSource = new DruidDataSource();
             DataBinder dataBinder = new DataBinder(dataSource);

@@ -123,7 +123,7 @@ CREATE TABLE `rule_template` (
 `create_time` datetime DEFAULT NULL,
 `update_time` datetime DEFAULT NULL,
 `is_del` tinyint(1) NOT NULL DEFAULT '0',
-`ref` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '蛇形算法参照物',
+`refId` bigint default 0 not null comment '蛇形算法参照物:变量id',
 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='规则模版';
 

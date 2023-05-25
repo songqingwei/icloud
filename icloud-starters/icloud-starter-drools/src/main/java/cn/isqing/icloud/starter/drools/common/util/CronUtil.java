@@ -5,8 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.drools.core.time.impl.CronExpression;
+import sun.util.resources.LocaleData;
 
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -38,13 +43,16 @@ public class CronUtil {
         }
     };
 
-    public static boolean isSatisfied(String cron, Date date) {
+    public static boolean isSatisfied(String cron, LocalDate localDate) {
         try {
             CronExpression cronExpression = MAP.get(cron);
             if(cronExpression==null){
                 cronExpression = new CronExpression(cron);
                 MAP.put(cron,cronExpression);
             }
+            // date缺少时分秒 自动使用当前时分秒
+            LocalDateTime localDateTime = localDate.atTime(LocalTime.now());
+            Date date = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
             return cronExpression.isSatisfiedBy(date);
         } catch (ParseException e) {
             log.error("解析cron表达式[{}]异常", cron);

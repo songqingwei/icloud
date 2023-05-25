@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class VariableUtil {
 
-    public static final String uniNameTpl = "v_%d";
+    public static final String uniNameTpl = "v%d";
 
     public static String getUniName(ApiVariableSimpleDto v) {
         return String.format(uniNameTpl, v.getId());
@@ -21,12 +21,15 @@ public class VariableUtil {
         return String.format(uniNameTpl, v.getId());
     }
 
-    /**
-     * 获取变量值
-     *
-     * @param v
-     */
     public static Object getValue(ApiVariableSimpleDto v, Map<Long, String> resMap) {
+        String s = resMap.get(v.getCid());
+        if (s == null) {
+            return null;
+        }
+        return JSONPath.extract(s, v.getCresPath());
+    }
+
+    public static Object getValue(ApiVariableDto v, Map<Long, String> resMap) {
         String s = resMap.get(v.getCid());
         if (s == null) {
             return null;

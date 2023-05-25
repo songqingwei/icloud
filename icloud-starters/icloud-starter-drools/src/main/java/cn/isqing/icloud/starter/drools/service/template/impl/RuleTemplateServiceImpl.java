@@ -18,6 +18,7 @@ import cn.isqing.icloud.starter.drools.common.constants.EventTypeConstants;
 import cn.isqing.icloud.starter.drools.common.constants.TableJoinConstants;
 import cn.isqing.icloud.starter.drools.common.dto.RuleH5Dto;
 import cn.isqing.icloud.starter.drools.common.dto.UpdateStatusDto;
+import cn.isqing.icloud.starter.drools.common.enums.OperatorType;
 import cn.isqing.icloud.starter.variable.api.enums.VariableType;
 import cn.isqing.icloud.starter.drools.common.util.TextSqlUtil;
 import cn.isqing.icloud.starter.drools.dao.entity.*;
@@ -112,6 +113,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
 
         RuleTemplateCondition left = new RuleTemplateCondition();
         SpringBeanUtils.copyProperties(req, left);
+        left.setIsDel(YesOrNo.NO.ordinal());
         left.setOrderBy(SqlConstants.ID_ASC);
         left.setSelectFiled(SqlConstants.ALL_FIELD);
         left.setGroupBy(RuleTemplateFiled.ID);
@@ -279,7 +281,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
                         d.setValue(d.getValue() + "B");
                     }
                 }
-                return VariableUtil.getUniName(variable) + blank + d.getOperator() + blank + d.getValue();
+                return VariableUtil.getUniName(variable) + blank + OperatorType.getEnum(d.getOperator().intValue()).getValue() + blank + d.getValue();
             }).collect(Collectors.joining(blank + h5Dto.getRelation() + blank));
         }
         List<RuleH5Dto> h5DtoList = h5Dto.getGrouplist();
@@ -306,22 +308,24 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         }
         updateText(dto);
 
-        RuleTemplateBusi busiCondition = new RuleTemplateBusi();
-        busiCondition.setTid(dto.getId());
-        busiMapper.del(busiCondition);
         // 关联业务查询
         RuleTemplateBusiCondition condition1 = new RuleTemplateBusiCondition();
         condition1.setTid(dto.getId());
         condition1.setSelectFiled(RuleTemplateBusiFiled.BUSI_CODE);
         List<String> codes = busiMapper.selectStringByCondition(condition1);
+
         // 关联表入库
-        Long tid = template.getId();
+        RuleTemplateBusi busiCondition = new RuleTemplateBusi();
+        busiCondition.setTid(dto.getId());
+        busiMapper.del(busiCondition);
+        Long tid = dto.getId();
         List<RuleTemplateBusi> list = new ArrayList<>();
         Map<String, String> busiMap = dto.getBusiMap();
         busiMap.forEach((k, v) -> {
             RuleTemplateBusi busi = new RuleTemplateBusi();
             busi.setTid(tid);
             busi.setBusiCode(k);
+            codes.add(k);
             busi.setBusiName(v);
             busi.setVersion(template.getVersion());
             list.add(busi);
@@ -373,21 +377,14 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         });
     }
 
-    private void tplChangeEvent(RuleTemplateDto dto, List<String> oldCodes) {
+    private void tplChangeEvent(RuleTemplateDto dto, List<String> codes) {
+        codes = codes.stream().distinct().collect(Collectors.toList());
         TplChangeMsg msg = new TplChangeMsg();
         msg.setActionId(dto.getActionId());
         msg.setDomain(dto.getDomain());
         msg.setCreateTime(TimeUtil.now());
-        Map<String, String> busiMap = dto.getBusiMap();
-        busiMap.forEach((k, v) -> {
-            msg.setBusiCode(k);
-            eventPublisher.publishBcEvent(null, EventTypeConstants.TPL_CHANGE, msg);
-        });
-        Optional.ofNullable(oldCodes).ifPresent(codes -> {
-            codes.forEach(k -> {
-                if (busiMap.containsKey(k)) {
-                    return;
-                }
+        Optional.ofNullable(codes).ifPresent(c -> {
+            c.forEach(k -> {
                 msg.setBusiCode(k);
                 eventPublisher.publishBcEvent(null, EventTypeConstants.TPL_CHANGE, msg);
             });
