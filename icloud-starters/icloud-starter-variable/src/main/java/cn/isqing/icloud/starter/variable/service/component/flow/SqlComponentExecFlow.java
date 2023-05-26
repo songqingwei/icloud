@@ -32,6 +32,7 @@ import org.springframework.validation.DataBinder;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +60,7 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
     @PostConstruct
     public void init() {
         DataSourceCondition condition = new DataSourceCondition();
-        condition.setType(DataSourceType.SQL.ordinal());
+        condition.setType(DataSourceType.SQL.getCode());
         condition.setIsActive(YesOrNo.YES.ordinal());
         condition.setSelectFiled(SqlConstants.ID);
         List<Long> list = dataSourceMapper.selectLongByCondition(condition);
@@ -73,9 +74,9 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
                 String s = texts.stream().collect(Collectors.mapping(CommonText::getText, Collectors.joining()));
                 Map<String, Object> configMap = JSONObject.parseObject(s, new TypeReference<Map<String, Object>>() {
                 });
-                cacheDataSource(sid,configMap);
+                cacheDataSource(sid, configMap);
             } catch (Exception e) {
-                log.error("初始化数据源{}异常：{}",sid,e.getMessage(),e);
+                log.error("初始化数据源{}异常：{}", sid, e.getMessage(), e);
             }
         });
     }
@@ -110,7 +111,7 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
     @Override
     protected void pre(ComponentExecContext context) {
         // 数据源
-        cacheDataSource(context.getComponent().getDataSourceId(),context.getDsConfig());
+        cacheDataSource(context.getComponent().getDataSourceId(), context.getDsConfig());
         String sql = (String) JsonUtil.extract(context.getDialectConfig(), SqlComponentDialectType.SQL.getJsonPath());
         final String[] sqlArr = {sql};
         context.setRequestParamsTpl(sqlArr);
@@ -160,6 +161,11 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
             JdbcTemplate template = new JdbcTemplate();
             template.setDataSource(dataSource);
             JDBC_MAP.put(id, template);
+            try {
+                dataSource.init();
+            } catch (SQLException e) {
+                log.error("初始化数据库连接池异常:{}", e.getMessage(), e);
+            }
             return dataSource;
         });
     }

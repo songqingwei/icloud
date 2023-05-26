@@ -33,7 +33,9 @@ public class BaseProvider<T> {
         sql.SET("lock_time = '" + nowTime + "'");
         sql.SET("lock_status = 1");
         sql.WHERE("id = #{id}");
-        sql.WHERE("lock_status = 0");
+        // 这里为什么不用0 是为了解决死锁的情况 外层需要自己判断时间和状态是否异常
+        // 因为version每次都在增加，所以在操作前判断 cas乐观锁就不会出现并发问题
+        sql.WHERE("lock_status = #{loackStatus}");
         sql.WHERE("lock_version = #{lockVersion}");
         return sql.toString();
     }
@@ -44,7 +46,8 @@ public class BaseProvider<T> {
         sql.SET("lock_version = lock_version+1");
         sql.SET("lock_status = 0");
         sql.WHERE("id = #{id}");
-        sql.WHERE("lock_status = 1");
+        // 释放的时候不需要判断状态了，版本号匹配说明属于当前逻辑事务
+        // 前提：t的version更新必须是逻辑正确的，不能出现本次流程更新了数据库，但是没有更新对象的情况
         sql.WHERE("lock_version = #{lockVersion}");
         return sql.toString();
     }
