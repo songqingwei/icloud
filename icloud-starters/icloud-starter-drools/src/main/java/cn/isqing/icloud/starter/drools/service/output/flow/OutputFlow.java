@@ -12,6 +12,7 @@ import cn.isqing.icloud.common.utils.kit.RedisUtil;
 import cn.isqing.icloud.starter.drools.common.constants.EventTypeConstants;
 import cn.isqing.icloud.starter.drools.common.constants.LockScenarioConstants;
 import cn.isqing.icloud.starter.drools.common.constants.RunLogTextTypeConstants;
+import cn.isqing.icloud.starter.drools.common.constants.SystemConstants;
 import cn.isqing.icloud.starter.drools.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
 import cn.isqing.icloud.starter.drools.common.util.KieUtil;
@@ -237,7 +238,7 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
     }
 
     private void getLock(OutputFlowContext context) {
-        RLock lock = LockUtil.getRedisLock(RedisUtil.getKey(LockScenarioConstants.OUTPUT,
+        RLock lock = LockUtil.getRedisLock(RedisUtil.getKey(SystemConstants.REDIS_KEY_PRE,LockScenarioConstants.OUTPUT,
                 context.getMsg().getId().toString()));
         if (lock == null) {
             interrupt(context, Response.error("竞争redis锁失败"));

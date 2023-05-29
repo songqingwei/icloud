@@ -14,6 +14,7 @@ package cn.isqing.icloud.starter.drools.rules;
 global org.slf4j.Logger log
 import cn.isqing.icloud.starter.drools.service.semaphore.util.Allotter
 import cn.isqing.icloud.starter.drools.common.util.CronUtil
+import java.math.BigInteger
 dialect "java"
 /**@{udf}@*/
 

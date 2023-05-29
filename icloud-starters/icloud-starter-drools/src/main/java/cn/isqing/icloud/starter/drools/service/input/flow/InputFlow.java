@@ -10,10 +10,7 @@ import cn.isqing.icloud.common.utils.kit.LockUtil;
 import cn.isqing.icloud.common.utils.kit.RedisUtil;
 import cn.isqing.icloud.common.utils.time.TimeUtil;
 import cn.isqing.icloud.common.utils.validation.ValidationUtil;
-import cn.isqing.icloud.starter.drools.common.constants.EventTypeConstants;
-import cn.isqing.icloud.starter.drools.common.constants.FactDataConstants;
-import cn.isqing.icloud.starter.drools.common.constants.LockScenarioConstants;
-import cn.isqing.icloud.starter.drools.common.constants.RunLogTextTypeConstants;
+import cn.isqing.icloud.starter.drools.common.constants.*;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
 import cn.isqing.icloud.starter.drools.common.util.KieUtil;
 import cn.isqing.icloud.starter.drools.common.util.TextSqlUtil;
@@ -103,6 +100,7 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
         RLock lock = context.getLock();
         if (lock != null) {
             lock.unlock();
+            context.setLock(null);
         }
         if (context.isCasLock()) {
             LockUtil.unlockPo(context, context.getRunLog(), logMapper);
@@ -244,7 +242,7 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
     }
 
     private void getLock(InputFlowContext context) {
-        RLock lock = LockUtil.getRedisLock(RedisUtil.getKey(LockScenarioConstants.INPUT,
+        RLock lock = LockUtil.getRedisLock(RedisUtil.getKey(SystemConstants.REDIS_KEY_PRE,LockScenarioConstants.INPUT,
                 context.getCoreId().toString(), context.getInputDto().getSourceId().toString()));
         if (lock == null) {
             interrupt(context, Response.error("竞争redis锁失败"));

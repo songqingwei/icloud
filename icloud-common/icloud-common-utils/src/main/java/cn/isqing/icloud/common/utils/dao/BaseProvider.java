@@ -35,7 +35,7 @@ public class BaseProvider<T> {
         sql.WHERE("id = #{id}");
         // 这里为什么不用0 是为了解决死锁的情况 外层需要自己判断时间和状态是否异常
         // 因为version每次都在增加，所以在操作前判断 cas乐观锁就不会出现并发问题
-        sql.WHERE("lock_status = #{loackStatus}");
+        sql.WHERE("lock_status = #{lockStatus}");
         sql.WHERE("lock_version = #{lockVersion}");
         return sql.toString();
     }

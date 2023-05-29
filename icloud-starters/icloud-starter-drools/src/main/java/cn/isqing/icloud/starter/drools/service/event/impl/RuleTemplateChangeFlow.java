@@ -1,13 +1,12 @@
 package cn.isqing.icloud.starter.drools.service.event.impl;
 
 import cn.hutool.core.util.StrUtil;
-import cn.isqing.icloud.common.api.enums.ResCodeEnum;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.annotation.RouteType;
 import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
 import cn.isqing.icloud.common.utils.constants.EventConstants;
 import cn.isqing.icloud.common.utils.constants.SqlConstants;
 import cn.isqing.icloud.common.utils.dto.BaseException;
-import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;
 import cn.isqing.icloud.common.utils.kit.LockUtil;
 import cn.isqing.icloud.common.utils.kit.RedisUtil;
@@ -16,6 +15,7 @@ import cn.isqing.icloud.starter.drools.common.constants.*;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
 import cn.isqing.icloud.starter.drools.common.enums.AlgorithModel;
 import cn.isqing.icloud.starter.drools.common.enums.AllocationModel;
+import cn.isqing.icloud.starter.drools.common.util.ComponentUtil;
 import cn.isqing.icloud.starter.drools.common.util.KieUtil;
 import cn.isqing.icloud.starter.drools.dao.entity.*;
 import cn.isqing.icloud.starter.drools.dao.mapper.*;
@@ -27,15 +27,12 @@ import cn.isqing.icloud.starter.drools.service.msg.dto.EventMsg;
 import cn.isqing.icloud.starter.drools.service.msg.dto.TplChangeMsg;
 import cn.isqing.icloud.starter.drools.service.semaphore.dto.AllotterConfigDto;
 import cn.isqing.icloud.starter.drools.service.semaphore.util.Allotter;
-import cn.isqing.icloud.starter.drools.common.util.ComponentUtil;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
-import cn.isqing.icloud.starter.variable.api.dto.ApiVariableSimpleDto;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.kie.api.KieBase;
 import org.kie.api.KieBaseConfiguration;
 import org.kie.api.KieServices;
@@ -149,7 +146,9 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
         list.forEach(innerList -> innerList.forEach(c -> {
             condition1.setFid(c.getId());
             List<ComponentText> componentTexts = componentTextMapper.selectByCondition(condition1);
-
+            if(componentTexts.isEmpty()){
+                return;
+            }
             String s = componentTexts.stream().map(ComponentText::getText).collect(Collectors.joining());
             cids.addAll(JSON.parseObject(s, new TypeReference<List<Long>>() {
             }));
@@ -173,7 +172,6 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
         Action action = actionMapper.selectById(actionId, Action.class);
         ComponentDigraphContext digraphContext = new ComponentDigraphContext();
         digraphContext.setCidReq(Arrays.asList(action.getCid()));
-        digraphContext.setExcludeCidReq(context.getAllComponent().keySet());
         Response<List<List<Component>>> res = digraphFlow.exec(digraphContext);
         if (!res.isSuccess()) {
             log.error(res.getMsg());
@@ -220,6 +218,7 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
     }
 
     private void dealRecords(RuleTemplateChangeContext context) {
+        KieUtil.helperMap.remove(context.getRuleKeyDto());
         KieHelper kieHelper = KieUtil.getKieHelper(context.getRuleKeyDto());
         RuleKeyDto ruleKeyDto = context.getRuleKeyDto();
         Map<String, ApiVariableDto> map = new HashMap<>();

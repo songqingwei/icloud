@@ -64,7 +64,12 @@ public abstract class MDCUtil {
 
     public static void appendTraceId(String parentTID) {
         try {
-            String traceId = parentTID + SEPARATOR + UuidUtil.randomNum_6();
+            String traceId;
+            if(parentTID==null){
+                traceId = UuidUtil.randomNum_6();
+            }else {
+                traceId = parentTID + SEPARATOR + UuidUtil.randomNum_6();
+            }
             MDC.put(TRACE_ID_FIELD, traceId);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

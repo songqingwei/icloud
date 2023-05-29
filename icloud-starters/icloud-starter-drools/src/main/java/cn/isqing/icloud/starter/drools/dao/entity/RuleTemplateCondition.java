@@ -26,4 +26,6 @@ public class RuleTemplateCondition extends BaseCondition {
 
     private Integer isDel;
 
+    private Integer isActive;
+
 }

@@ -1,15 +1,18 @@
 package cn.isqing.icloud.starter.drools.service.template.impl;
 
+import cn.isqing.icloud.common.api.dto.PageReqDto;
+import cn.isqing.icloud.common.api.dto.PageResDto;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
 import cn.isqing.icloud.common.utils.constants.SqlConstants;
 import cn.isqing.icloud.common.utils.constants.StrConstants;
 import cn.isqing.icloud.common.utils.dao.MybatisUtils;
 import cn.isqing.icloud.common.utils.dto.BaseException;
-import cn.isqing.icloud.common.api.dto.PageReqDto;
-import cn.isqing.icloud.common.api.dto.PageResDto;
-import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.enums.status.YesOrNo;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
+import cn.isqing.icloud.common.utils.kit.ParallelStreamUtil;
+import cn.isqing.icloud.common.utils.kit.StrUtil;
+import cn.isqing.icloud.common.utils.log.MDCUtil;
 import cn.isqing.icloud.common.utils.time.TimeUtil;
 import cn.isqing.icloud.common.utils.validation.group.AddGroup;
 import cn.isqing.icloud.common.utils.validation.group.EditGroup;
@@ -19,13 +22,14 @@ import cn.isqing.icloud.starter.drools.common.constants.TableJoinConstants;
 import cn.isqing.icloud.starter.drools.common.dto.RuleH5Dto;
 import cn.isqing.icloud.starter.drools.common.dto.UpdateStatusDto;
 import cn.isqing.icloud.starter.drools.common.enums.OperatorType;
-import cn.isqing.icloud.starter.variable.api.enums.VariableType;
 import cn.isqing.icloud.starter.drools.common.util.TextSqlUtil;
 import cn.isqing.icloud.starter.drools.dao.entity.*;
 import cn.isqing.icloud.starter.drools.dao.mapper.CommonTextMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.RuleTemplateBusiMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.RuleTemplateMapper;
 import cn.isqing.icloud.starter.drools.service.event.EventPublisher;
+import cn.isqing.icloud.starter.drools.service.event.impl.RuleTemplateChangeContext;
+import cn.isqing.icloud.starter.drools.service.event.impl.RuleTemplateChangeFlow;
 import cn.isqing.icloud.starter.drools.service.msg.MsgParserService;
 import cn.isqing.icloud.starter.drools.service.msg.dto.TplChangeMsg;
 import cn.isqing.icloud.starter.drools.service.template.RuleTemplateService;
@@ -33,6 +37,7 @@ import cn.isqing.icloud.starter.drools.service.template.dto.RuleTemplateDto;
 import cn.isqing.icloud.starter.drools.service.template.dto.RuleTemplateListReq;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
+import cn.isqing.icloud.starter.variable.api.enums.VariableType;
 import cn.isqing.icloud.starter.variable.api.util.VariableUtil;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson2.JSON;
@@ -40,16 +45,19 @@ import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.validation.Valid;
 import javax.validation.groups.Default;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -65,8 +73,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     private RuleTemplateMapper mapper;
     @Autowired
     private CommonTextMapper textMapper;
-    @Autowired
-    private MsgParserService msgParserService;
+
     @Autowired
     private RuleTemplateBusiMapper busiMapper;
 
@@ -75,9 +82,21 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
 
     @Resource(name = "iDroolsSqlSessionFactory")
     private SqlSessionFactory sqlSessionFactory;
+
     @Reference(group = "${i.variable.dubbo.group:iVariable}", timeout = -1, retries = -1, version = "1.0.0")
     @Lazy
     private VariableInterface variableInterface;
+
+    @Autowired
+    private MsgParserService msgParserService;
+
+    @Autowired
+    private RuleTemplateChangeFlow changeFlow;
+
+    @Value("${i.drools.init.ruleTpl.pageSize:100}")
+    private Integer pageSize;
+    @Value("${i.drools.init.ruleTpl.timeOut:300000}")
+    private Integer timeOut;
 
     private String format = "(%s)";
     private String blank = " ";
@@ -91,8 +110,8 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     @Override
     public Response<PageResDto<RuleTemplateDto>> list(PageReqDto<RuleTemplateListReq> dto) {
         Response<PageResDto<RuleTemplateDto>> res = baseList(dto);
-        if(!res.isSuccess()){
-            return Response.withData(res,null);
+        if (!res.isSuccess()) {
+            return Response.withData(res, null);
         }
         if (dto.getPageInfo().isNeedList()) {
             setBusiMap(res.getData().getList());
@@ -128,7 +147,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
             //组装结果dto
             left.setLimit(pageInfo.getPageSize());
             left.setOffset(pageInfo.getOffset());
-            List<RuleTemplateDto> dtoList = JsonUtil.toList(mapper.leftJoinSelect(left, right, TableJoinConstants.RTPL_BUSI),RuleTemplateDto.class);
+            List<RuleTemplateDto> dtoList = JsonUtil.toList(mapper.leftJoinSelect(left, right, TableJoinConstants.RTPL_BUSI), RuleTemplateDto.class);
             resDto.setList(dtoList);
         }
         if (pageInfo.isNeedTotal()) {
@@ -150,8 +169,10 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         Map<Integer, String> map = texts.stream().collect(Collectors.groupingBy(CommonText::getType,
                 Collectors.mapping(CommonText::getText, Collectors.joining())));
         RuleTemplateDto dto = new RuleTemplateDto();
-        dto.setTargetRatio(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.TARGET_RATIO, StrConstants.EMPTY_JSON_OBJ),new TypeReference<Map<Long,String>>(){}));
-        dto.setTargetName(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.TARGET_NAME, StrConstants.EMPTY_JSON_OBJ),new TypeReference<Map<Long,String>>(){}));
+        dto.setTargetRatio(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.TARGET_RATIO, StrConstants.EMPTY_JSON_OBJ), new TypeReference<Map<Long, String>>() {
+        }));
+        dto.setTargetName(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.TARGET_NAME, StrConstants.EMPTY_JSON_OBJ), new TypeReference<Map<Long, String>>() {
+        }));
         dto.setContent(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.RULE_CONTENT_H5, StrConstants.EMPTY_JSON_OBJ), RuleH5Dto.class));
         return Response.success(dto);
     }
@@ -262,26 +283,33 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
                 ApiVariableDto variable = map.get(d.getId());
                 if (variable == null) {
                     Response<ApiVariableDto> res = variableInterface.getVariableById(d.getId());
-                    if(!res.isSuccess()){
-                        log.error("获取变量{}异常:{}",d.getId(),res);
+                    if (!res.isSuccess()) {
+                        log.error("获取变量{}异常:{}", d.getId(), res);
                         throw new BaseException("获取变量异常");
                     }
                     map.put(d.getId(), res.getData());
                     variable = res.getData();
                 }
-                if (variable.getType().equals(VariableType.BIG_DECIMAL.getCode())) {
-                    if (!"null".equals(d.getValue()) && (!d.getValue().startsWith("\"")) || !d.getValue().endsWith(
-                            "\"")) {
-                        log.error("异常字符串条件:{}", d);
-                        throw new BaseException("异常字符串条件");
-                    }
+
+                String left = VariableUtil.getUniName(variable);
+                VariableType variableType = VariableType.fromCode(variable.getType());
+                String operator = OperatorType.getEnum(d.getOperator().intValue()).getValue();
+                switch (variableType){
+                    case BIG_DECIMAL:
+                        if(!d.getValue().equals("\"null\"")){
+                            return left+".compareTo(BigDecimal.valueOf(\""+d.getValue()+"\")) "+operator+" 0";
+                        }
+                        break;
+                    case BIG_INTEGER:
+                        if(!d.getValue().equals("\"null\"")){
+                            return left+".compareTo(new BigInteger(\""+d.getValue()+"\")) "+operator+" 0";
+                        }
+                        break;
+                    default:
+                        break;
                 }
-                if (variable.getType().equals(VariableType.BIG_DECIMAL.getCode()) || variable.getType().equals(VariableType.BIG_INTEGER.getCode())) {
-                    if (!"null".equals(d.getValue())) {
-                        d.setValue(d.getValue() + "B");
-                    }
-                }
-                return VariableUtil.getUniName(variable) + blank + OperatorType.getEnum(d.getOperator().intValue()).getValue() + blank + d.getValue();
+                return left + blank + operator + blank + d.getValue();
+
             }).collect(Collectors.joining(blank + h5Dto.getRelation() + blank));
         }
         List<RuleH5Dto> h5DtoList = h5Dto.getGrouplist();
@@ -404,5 +432,62 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         }
         tplChangeEvent(id);
         return Response.SUCCESS;
+    }
+
+    /**
+     * 每次重启应用需要缓存规则相关内容
+     */
+    @PostConstruct
+    public void init() {
+        MDCUtil.appendTraceId();
+        log.info("缓存规则开始...");
+        //分页查询规则配置
+        List<RuleTemplate> list;
+        RuleTemplateCondition condition = new RuleTemplateCondition();
+        condition.setIsDel(YesOrNo.NO.ordinal());
+        condition.setIsActive(YesOrNo.YES.ordinal());
+        condition.setOrderBy(SqlConstants.ID_ASC);
+        condition.setSelectFiled(RuleTemplateFiled.ID, RuleTemplateFiled.DOMAIN, RuleTemplateFiled.ACTION_ID);
+        condition.setIdConditionMin(0L);
+        condition.setLimit(pageSize);
+        // 去重容器
+        ConcurrentHashMap<String, Long> uniMap = new ConcurrentHashMap<>();
+        LocalDateTime now = TimeUtil.now();
+        int page = 0;
+        do {
+            log.info("page:{}", ++page);
+            list = mapper.selectByCondition(condition);
+            if (list.isEmpty()) {
+                break;
+            }
+            condition.setIdConditionMin(list.get(list.size() - 1).getId() + 1);
+            try {
+                ParallelStreamUtil.exec(list, r -> {
+                    // 查询busiCode
+                    RuleTemplateBusiCondition busi = new RuleTemplateBusiCondition();
+                    busi.setTid(r.getId());
+                    busi.setSelectFiled(RuleTemplateBusiFiled.ID, RuleTemplateBusiFiled.BUSI_CODE);
+                    List<RuleTemplateBusi> busiList = busiMapper.selectByCondition(busi);
+                    busiList.forEach(b -> {
+                        String key = StrUtil.assembleKey(r.getDomain().toString(), r.getActionId().toString(), b.getBusiCode());
+                        Long cacheId = uniMap.computeIfAbsent(key, k -> b.getId());
+                        if (!cacheId.equals(b.getId())) {
+                            return;
+                        }
+                        TplChangeMsg msg = new TplChangeMsg();
+                        msg.setDomain(r.getDomain());
+                        msg.setActionId(r.getActionId());
+                        msg.setBusiCode(b.getBusiCode());
+                        msg.setCreateTime(now);
+                        RuleTemplateChangeContext context = new RuleTemplateChangeContext();
+                        context.setMsgReq(msgParserService.assembleMsg(msg));
+                        changeFlow.exec(context);
+                    });
+                }, timeOut);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        } while (true);
+
     }
 }
