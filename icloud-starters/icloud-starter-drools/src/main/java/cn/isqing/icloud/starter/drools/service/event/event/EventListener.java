@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ import java.util.List;
  * @version 1.0
  **/
 @Slf4j
+@Component
 @RocketMQMessageListener(
         consumerGroup = "${i.drools.event.cgroup:i-drools-event}",
         topic = "${i.drools.event.topic:i-drools-event}"
