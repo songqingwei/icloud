@@ -10,9 +10,6 @@ import cn.isqing.icloud.common.utils.dao.MybatisUtils;
 import cn.isqing.icloud.common.utils.dto.BaseException;
 import cn.isqing.icloud.common.utils.enums.status.YesOrNo;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
-import cn.isqing.icloud.common.utils.kit.ParallelStreamUtil;
-import cn.isqing.icloud.common.utils.kit.StrUtil;
-import cn.isqing.icloud.common.utils.log.MDCUtil;
 import cn.isqing.icloud.common.utils.time.TimeUtil;
 import cn.isqing.icloud.common.utils.validation.group.AddGroup;
 import cn.isqing.icloud.common.utils.validation.group.EditGroup;
@@ -28,7 +25,6 @@ import cn.isqing.icloud.starter.drools.dao.mapper.CommonTextMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.RuleTemplateBusiMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.RuleTemplateMapper;
 import cn.isqing.icloud.starter.drools.service.event.EventPublisher;
-import cn.isqing.icloud.starter.drools.service.event.impl.RuleTemplateChangeContext;
 import cn.isqing.icloud.starter.drools.service.event.impl.RuleTemplateChangeFlow;
 import cn.isqing.icloud.starter.drools.service.msg.MsgParserService;
 import cn.isqing.icloud.starter.drools.service.msg.dto.TplChangeMsg;
@@ -45,19 +41,15 @@ import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.validation.groups.Default;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -92,11 +84,6 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
 
     @Autowired
     private RuleTemplateChangeFlow changeFlow;
-
-    @Value("${i.drools.init.ruleTpl.pageSize:100}")
-    private Integer pageSize;
-    @Value("${i.drools.init.ruleTpl.timeOut:300000}")
-    private Integer timeOut;
 
     private String format = "(%s)";
     private String blank = " ";
@@ -434,60 +421,4 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         return Response.SUCCESS;
     }
 
-    /**
-     * 每次重启应用需要缓存规则相关内容
-     */
-    @PostConstruct
-    public void init() {
-        MDCUtil.appendTraceId();
-        log.info("缓存规则开始...");
-        //分页查询规则配置
-        List<RuleTemplate> list;
-        RuleTemplateCondition condition = new RuleTemplateCondition();
-        condition.setIsDel(YesOrNo.NO.ordinal());
-        condition.setIsActive(YesOrNo.YES.ordinal());
-        condition.setOrderBy(SqlConstants.ID_ASC);
-        condition.setSelectFiled(RuleTemplateFiled.ID, RuleTemplateFiled.DOMAIN, RuleTemplateFiled.ACTION_ID);
-        condition.setIdConditionMin(0L);
-        condition.setLimit(pageSize);
-        // 去重容器
-        ConcurrentHashMap<String, Long> uniMap = new ConcurrentHashMap<>();
-        LocalDateTime now = TimeUtil.now();
-        int page = 0;
-        do {
-            log.info("page:{}", ++page);
-            list = mapper.selectByCondition(condition);
-            if (list.isEmpty()) {
-                break;
-            }
-            condition.setIdConditionMin(list.get(list.size() - 1).getId() + 1);
-            try {
-                ParallelStreamUtil.exec(list, r -> {
-                    // 查询busiCode
-                    RuleTemplateBusiCondition busi = new RuleTemplateBusiCondition();
-                    busi.setTid(r.getId());
-                    busi.setSelectFiled(RuleTemplateBusiFiled.ID, RuleTemplateBusiFiled.BUSI_CODE);
-                    List<RuleTemplateBusi> busiList = busiMapper.selectByCondition(busi);
-                    busiList.forEach(b -> {
-                        String key = StrUtil.assembleKey(r.getDomain().toString(), r.getActionId().toString(), b.getBusiCode());
-                        Long cacheId = uniMap.computeIfAbsent(key, k -> b.getId());
-                        if (!cacheId.equals(b.getId())) {
-                            return;
-                        }
-                        TplChangeMsg msg = new TplChangeMsg();
-                        msg.setDomain(r.getDomain());
-                        msg.setActionId(r.getActionId());
-                        msg.setBusiCode(b.getBusiCode());
-                        msg.setCreateTime(now);
-                        RuleTemplateChangeContext context = new RuleTemplateChangeContext();
-                        context.setMsgReq(msgParserService.assembleMsg(msg));
-                        changeFlow.exec(context);
-                    });
-                }, timeOut);
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        } while (true);
-
-    }
 }

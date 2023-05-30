@@ -96,7 +96,7 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
 
     private void updateStatus(OutputFlowContext context) {
         RunLog runLog = context.getRunLog();
-        RunLog data = context.getCacheLog();
+        RunLog data = new RunLog();
         data.setId(runLog.getId());
         data.setSubStatus(SubFlowStatusEnum.SUCCESS.getCode());
         mapper.update(data);
@@ -158,7 +158,7 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
             if (!res.isSuccess()) {
                 log.error(res.getMsg());
                 // 更新数据库失败次数及原因
-                updataLog(context.getCacheLog(), runLog, res);
+                updataLog(new RunLog(), runLog, res);
                 interrupt(context, Response.error("执行异常"));
             }
             updataActionLog(first, runLog, res, c);
@@ -197,16 +197,12 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
         actionLogMapper.update(first);
     }
 
-    private void updataLog(RunLog cacheLog, RunLog runLog, Response<Object> res) {
-        cacheLog.setId(runLog.getId());
-        cacheLog.setSubFailNum(runLog.getSubFailNum() + 1);
-        cacheLog.setSubStatus(SubFlowStatusEnum.FAILED.getCode());
-        cacheLog.setSubFailReason(res.getMsg().substring(0, Math.min(subFailReasonLimit, res.getMsg().length())));
-        mapper.update(cacheLog);
-
-        cacheLog.setSubFailNum(null);
-        cacheLog.setSubStatus(null);
-        cacheLog.setSubFailReason(null);
+    private void updataLog(RunLog data, RunLog runLog, Response<Object> res) {
+        data.setId(runLog.getId());
+        data.setSubFailNum(runLog.getSubFailNum() + 1);
+        data.setSubStatus(SubFlowStatusEnum.FAILED.getCode());
+        data.setSubFailReason(res.getMsg().substring(0, Math.min(subFailReasonLimit, res.getMsg().length())));
+        mapper.update(data);
     }
 
     private void getCoreRecord(OutputFlowContext context) {
@@ -217,7 +213,7 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
 
     private void recordDoingStatus(OutputFlowContext context) {
         RunLog runLog = context.getRunLog();
-        RunLog data = context.getCacheLog();
+        RunLog data = new RunLog();
         data.setId(runLog.getId());
         data.setSubStatus(SubFlowStatusEnum.DOING.getCode());
         data.setVersion(runLog.getVersion() + 1);
@@ -229,9 +225,6 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
         } else {
             runLog.setVersion(data.getVersion());
         }
-        //清理cacheLog
-        data.setVersion(null);
-        data.setSubStatus(null);
     }
 
     private void getCasLock(OutputFlowContext context) {

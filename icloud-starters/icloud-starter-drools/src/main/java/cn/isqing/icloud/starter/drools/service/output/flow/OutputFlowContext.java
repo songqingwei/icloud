@@ -23,7 +23,6 @@ public class OutputFlowContext extends FlowContext {
 
     private RunLog runLog;
     private Map<Integer, String> paramsMap;
-    private RunLog cacheLog = new RunLog();
 
     private RuleCore ruleCore;
 
