@@ -15,9 +15,9 @@ public class ActionDto {
 
     private String name;
 
-    // 类型 1数据库 2 dubbo
     private Integer isActive;
 
     private Long cid;
 
+    private Integer version;
 }

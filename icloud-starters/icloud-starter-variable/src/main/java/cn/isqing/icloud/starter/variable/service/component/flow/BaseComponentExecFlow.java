@@ -243,8 +243,8 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
 
         // 判断依赖项是否正常完成
         Set<Long> aboveCids = context.getExecDto().getAboveResMap().keySet();
-        Set<Long> difference = new HashSet<>(aboveCids);
-        difference.removeAll(cids);
+        Set<Long> difference = new HashSet<>(cids);
+        difference.removeAll(aboveCids);
         if(!difference.isEmpty()){
             log.warn("缺少依赖组件结果集:{}",difference);
             interrupt(context,Response.error("缺少依赖组件结果集，取消执行"));

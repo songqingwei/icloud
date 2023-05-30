@@ -7,6 +7,7 @@ import cn.isqing.icloud.common.utils.kit.RedisUtil;
 import cn.isqing.icloud.common.utils.kit.StrUtil;
 import cn.isqing.icloud.common.utils.time.TimeUtil;
 import cn.isqing.icloud.starter.drools.common.constants.LockScenarioConstants;
+import cn.isqing.icloud.starter.drools.common.constants.SystemConstants;
 import cn.isqing.icloud.starter.drools.dao.entity.FixedNumAllotterLog;
 import cn.isqing.icloud.starter.drools.dao.mapper.FixedNumAllotterLogMapper;
 import cn.isqing.icloud.starter.drools.service.semaphore.dto.AllotterConfigDto;
@@ -109,13 +110,13 @@ public class FixedNumAllotter {
     private void incrDbRecord(Long coreId, Long rid, Long tid, String refValue) {
         LocalDate busiDate = TimeUtil.now().toLocalDate();
         String dateStr = busiDate.format(TimeUtil.simpleDateFormatter);
-        String uid = StrUtil.assembleKey(dateStr, coreId.toString(), rid.toString(),tid.toString());
+        String uid = StrUtil.assembleKey(dateStr, coreId.toString(), rid.toString(), tid.toString());
         mapper.incrByUid(uid, new BigDecimal(refValue));
     }
 
 
     public Response<Long> getTargetId(Long coreId, Long rid, String refValue, AllotterConfigDto configDto) {
-        String key = RedisUtil.getKey(LockScenarioConstants.FIX_NUM_ALLOTTER, coreId.toString(), rid.toString());
+        String key = RedisUtil.getKey(SystemConstants.REDIS_KEY_PRE, LockScenarioConstants.FIX_NUM_ALLOTTER, coreId.toString(), rid.toString());
         RLock rLock = LockUtil.getRedisLock(key, tryLockTimeLimit, TimeUnit.SECONDS);
         if (rLock == null) {
             return Response.error("获取redis锁失败");

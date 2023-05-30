@@ -7,6 +7,7 @@ import cn.isqing.icloud.common.api.dto.PageReqDto;
 import cn.isqing.icloud.common.api.dto.PageResDto;
 import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.enums.status.YesOrNo;
+import cn.isqing.icloud.common.utils.json.JsonUtil;
 import cn.isqing.icloud.common.utils.time.TimeUtil;
 import cn.isqing.icloud.common.utils.validation.group.AddGroup;
 import cn.isqing.icloud.common.utils.validation.group.EditGroup;
@@ -54,7 +55,7 @@ public class VariableServiceImpl implements VariableService {
         left.setSelectFiled(ActionVariableFiled.ACTION_ID);
 
         VariableCondition right = new VariableCondition();
-        SpringBeanUtils.copyProperties(req,right);
+        SpringBeanUtils.copyProperties(req, right);
         right.setSelectFiled(SqlConstants.ALL_FIELD);
 
         PageReqDto.PageInfo pageInfo = dto.getPageInfo();
@@ -64,11 +65,11 @@ public class VariableServiceImpl implements VariableService {
             //组装结果dto
             left.setLimit(pageInfo.getPageSize());
             left.setOffset(pageInfo.getOffset());
-            List<VariableDto> dtoList = avMapper.leftJoinSelect(left,right, TableJoinConstants.ACTION_VARIABLE);
+            List<VariableDto> dtoList = JsonUtil.toList(avMapper.leftJoinSelect(left, right, TableJoinConstants.ACTION_VARIABLE),VariableDto.class);
             resDto.setList(dtoList);
         }
         if (pageInfo.isNeedTotal()) {
-            Long count = avMapper.leftJoinCount(left,right, TableJoinConstants.ACTION_VARIABLE);
+            Long count = avMapper.leftJoinCount(left, right, TableJoinConstants.ACTION_VARIABLE);
             resDto.setTotal(count);
         }
         return Response.success(resDto);
@@ -78,7 +79,7 @@ public class VariableServiceImpl implements VariableService {
     public Response<PageResDto<VariableDto>> listNoAction(PageReqDto<VariableListReq> dto) {
         VariableListReq req = dto.getCondition();
         VariableCondition condition = new VariableCondition();
-        SpringBeanUtils.copyProperties(req,condition);
+        SpringBeanUtils.copyProperties(req, condition);
         condition.setIsDel(YesOrNo.NO.ordinal());
         condition.setOrderBy(SqlConstants.ID_ASC);
         PageReqDto.PageInfo pageInfo = dto.getPageInfo();
@@ -88,9 +89,9 @@ public class VariableServiceImpl implements VariableService {
             condition.setLimit(pageInfo.getPageSize());
             condition.setOffset(pageInfo.getOffset());
             List<Variable> dtoList = mapper.selectByCondition(condition);
-            resDto.setList(dtoList.stream().map(v->{
+            resDto.setList(dtoList.stream().map(v -> {
                 VariableDto dto1 = new VariableDto();
-                SpringBeanUtils.copyProperties(v,dto1);
+                SpringBeanUtils.copyProperties(v, dto1);
                 return dto1;
             }).collect(Collectors.toList()));
         }
@@ -170,14 +171,14 @@ public class VariableServiceImpl implements VariableService {
         actionVariable.setVid(vid);
         avMapper.del(actionVariable);
 
-        if(dto.getActions()!=null && !dto.getActions().isEmpty()){
+        if (dto.getActions() != null && !dto.getActions().isEmpty()) {
             List<ActionVariable> list = dto.getActions().stream().map(actionId -> {
                 ActionVariable av = new ActionVariable();
                 av.setVid(vid);
                 av.setActionId(actionId);
                 return av;
             }).collect(Collectors.toList());
-            MybatisUtils.batchSave(sqlSessionFactory, list, avMapper.getClass(), (busi, mapper) -> mapper.insert(busi));
+            MybatisUtils.batchSave(sqlSessionFactory, list, ActionVariableMapper.class, (busi, mapper) -> mapper.insert(busi));
         }
         return Response.SUCCESS;
     }

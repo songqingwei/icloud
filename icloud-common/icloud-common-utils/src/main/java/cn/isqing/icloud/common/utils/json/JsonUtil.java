@@ -3,9 +3,14 @@ package cn.isqing.icloud.common.utils.json;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.LRUCache;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.JSONReader;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author songqingwei
@@ -35,6 +40,13 @@ public class JsonUtil {
         }
         JSONReader jsonReader = JSONReader.of(json);
         return jsonPath.extract(jsonReader);
+    }
+
+    public static <R> List<R> toList(List<JSONObject> list,Class c){
+        if(list==null || list.isEmpty()){
+            return Collections.emptyList();
+        }
+        return (List<R>) list.stream().map(o->o.to(c)).collect(Collectors.toList());
     }
 
 }

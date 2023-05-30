@@ -12,4 +12,6 @@ public class RuleTemplateBusiCondition extends BaseCondition {
 
     private Long tid;
 
+    // 关联业务
+    private List<String> busiCode;
 }

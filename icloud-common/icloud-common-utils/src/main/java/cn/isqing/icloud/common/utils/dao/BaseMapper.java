@@ -1,5 +1,7 @@
 package cn.isqing.icloud.common.utils.dao;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -58,7 +60,7 @@ public interface BaseMapper<T> {
      * @return
      */
     @SelectProvider(method = "leftJoinSelect", type = BaseProvider.class)
-    <R> List<R> leftJoinSelect(@Param("left") Object left,@Param("right") Object right, @Param("join") String join);
+    List<JSONObject> leftJoinSelect(@Param("left") Object left, @Param("right") Object right, @Param("join") String join);
 
     /**
      *

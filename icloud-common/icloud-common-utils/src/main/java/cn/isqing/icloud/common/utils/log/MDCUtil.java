@@ -21,6 +21,15 @@ public abstract class MDCUtil {
         TRACE_ID_FIELD = fieldName;
     }
 
+    public static String getTraceId() {
+        try {
+            return MDC.get(TRACE_ID_FIELD);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return "";
+    }
+
     public static void appendTraceId() {
         try {
             String pid = MDC.get(TRACE_ID_FIELD);
@@ -53,5 +62,26 @@ public abstract class MDCUtil {
         }
     }
 
+    public static void appendTraceId(String parentTID) {
+        try {
+            String traceId;
+            if(parentTID==null){
+                traceId = UuidUtil.randomNum_6();
+            }else {
+                traceId = parentTID + SEPARATOR + UuidUtil.randomNum_6();
+            }
+            MDC.put(TRACE_ID_FIELD, traceId);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public static void removeTraceId() {
+        try {
+            MDC.remove(TRACE_ID_FIELD);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 
 }

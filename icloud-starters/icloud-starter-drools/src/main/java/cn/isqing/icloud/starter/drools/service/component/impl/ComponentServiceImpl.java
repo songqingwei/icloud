@@ -96,6 +96,10 @@ public class ComponentServiceImpl implements ComponentService {
                 new TypeReference<Map<String,String>>() {
                 })
         );
+        dto.setDependSystemVars(JSONObject.parseObject(map.get(ComponentTextTypeConstants.DEPEND_SYSTEM_VARS),
+                new TypeReference<Map<String,String>>() {
+                })
+        );
         dto.setSelfConstants(JSONObject.parseObject(map.get(ComponentTextTypeConstants.SELF_CONSTANTS),
                 new TypeReference<Map<String,String>>() {
                 })
@@ -124,6 +128,7 @@ public class ComponentServiceImpl implements ComponentService {
                 {dto.getDependInputParams(), ComponentTextTypeConstants.DEPEND_INPUT_PARAMS},
                 {dto.getDependCRes(), ComponentTextTypeConstants.DEPEND_C_RES},
                 {dto.getDependConstants(), ComponentTextTypeConstants.DEPEND_CONSTANTS},
+                {dto.getDependSystemVars(), ComponentTextTypeConstants.DEPEND_SYSTEM_VARS},
                 {dto.getSelfConstants(), ComponentTextTypeConstants.SELF_CONSTANTS},
                 {dto.getResJudge(), ComponentTextTypeConstants.RES_JUDGE}
         };

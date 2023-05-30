@@ -1,12 +1,12 @@
 package cn.isqing.icloud.starter.drools.service.event.impl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.annotation.RouteType;
 import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
 import cn.isqing.icloud.common.utils.constants.EventConstants;
 import cn.isqing.icloud.common.utils.constants.SqlConstants;
 import cn.isqing.icloud.common.utils.dto.BaseException;
-import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;
 import cn.isqing.icloud.common.utils.kit.LockUtil;
 import cn.isqing.icloud.common.utils.kit.RedisUtil;
@@ -15,6 +15,7 @@ import cn.isqing.icloud.starter.drools.common.constants.*;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
 import cn.isqing.icloud.starter.drools.common.enums.AlgorithModel;
 import cn.isqing.icloud.starter.drools.common.enums.AllocationModel;
+import cn.isqing.icloud.starter.drools.common.util.ComponentUtil;
 import cn.isqing.icloud.starter.drools.common.util.KieUtil;
 import cn.isqing.icloud.starter.drools.dao.entity.*;
 import cn.isqing.icloud.starter.drools.dao.mapper.*;
@@ -26,14 +27,13 @@ import cn.isqing.icloud.starter.drools.service.msg.dto.EventMsg;
 import cn.isqing.icloud.starter.drools.service.msg.dto.TplChangeMsg;
 import cn.isqing.icloud.starter.drools.service.semaphore.dto.AllotterConfigDto;
 import cn.isqing.icloud.starter.drools.service.semaphore.util.Allotter;
-import cn.isqing.icloud.starter.drools.common.util.ComponentUtil;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
-import cn.isqing.icloud.starter.variable.api.dto.ApiVariableSimpleDto;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.kie.api.KieBase;
 import org.kie.api.KieBaseConfiguration;
 import org.kie.api.KieServices;
@@ -79,7 +79,7 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
     private ComponentDigraphFlow digraphFlow;
     @Autowired
     private ComponentTextMapper componentTextMapper;
-    @Autowired
+    @Reference(group = "${i.variable.dubbo.group:iVariable}", timeout = 60000, retries = -1, version = "1.0.0")
     private VariableInterface variableInterface;
     @Autowired
     private RunCoreTextMapper runCoreTextMapper;
@@ -107,6 +107,15 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
         accept(this::recordVset);
         stepName("发布事件通知变量服务");
         accept(this::publishEvent);
+        finallyAcceptName("释放资源");
+        finallyAccept(this::release);
+    }
+
+    private void release(RuleTemplateChangeContext context) {
+        if(context.isLock()){
+            TplChangeMsg msg = context.getMsg();
+            msgMap.remove(msg, context.getDealTime());
+        }
     }
 
     private void recordVset(RuleTemplateChangeContext context) {
@@ -135,10 +144,12 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
         condition1.setOrderBy(SqlConstants.ID_ASC);
         List<Long> cids = new ArrayList<>();
 
-        list.forEach(innerList -> innerList.forEach(c ->{
+        list.forEach(innerList -> innerList.forEach(c -> {
             condition1.setFid(c.getId());
             List<ComponentText> componentTexts = componentTextMapper.selectByCondition(condition1);
-
+            if(componentTexts.isEmpty()){
+                return;
+            }
             String s = componentTexts.stream().map(ComponentText::getText).collect(Collectors.joining());
             cids.addAll(JSON.parseObject(s, new TypeReference<List<Long>>() {
             }));
@@ -146,6 +157,11 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
         context.setActionDepandCids(cids);
     }
 
+    /**
+     * 当变量集合整个删除的时候，没有通知变量组件刷新内存
+     *
+     * @param context
+     */
     private void publishEvent(RuleTemplateChangeContext context) {
         List<Long> list = context.getVariableMap().entrySet().stream().map(e -> e.getValue().getId()).collect(Collectors.toList());
         variableInterface.publishVsetChangeEvent(context.getCore().getId().toString(), list);
@@ -157,7 +173,6 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
         Action action = actionMapper.selectById(actionId, Action.class);
         ComponentDigraphContext digraphContext = new ComponentDigraphContext();
         digraphContext.setCidReq(Arrays.asList(action.getCid()));
-        digraphContext.setExcludeCidReq(context.getAllComponent().keySet());
         Response<List<List<Component>>> res = digraphFlow.exec(digraphContext);
         if (!res.isSuccess()) {
             log.error(res.getMsg());
@@ -175,6 +190,7 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
         String key = RedisUtil.getKey(SystemConstants.REDIS_KEY_PRE, LockScenarioConstants.INSERT_CORE, ruleKeyDto.getDomain().toString(), ruleKeyDto.getBusiCode(), ruleKeyDto.getActionId().toString());
         Predicate predicate = data -> {
             RuleCore ruleCore = coreMapper.first(core, null);
+            context.setCore(ruleCore);
             return ruleCore == null;
         };
         Consumer consumer = data -> {
@@ -203,9 +219,10 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
     }
 
     private void dealRecords(RuleTemplateChangeContext context) {
+        KieUtil.helperMap.remove(context.getRuleKeyDto());
         KieHelper kieHelper = KieUtil.getKieHelper(context.getRuleKeyDto());
         RuleKeyDto ruleKeyDto = context.getRuleKeyDto();
-        Map<String, ApiVariableSimpleDto> map = new HashMap<>();
+        Map<String, ApiVariableDto> map = new HashMap<>();
         long from = 0;
         Allotter.romoveConfig(context.getCore().getId());
         do {
@@ -222,19 +239,30 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
             Map<Integer, Map<Long, String>> collect = getRuleAndVar(texts);
             // 填充变量集合
             collect.get(CommonTextTypeConstants.RULE_VARIABLE_MAP).values().forEach(s -> {
-                map.putAll(JSON.parseObject(s, new TypeReference<Map<String, ApiVariableSimpleDto>>() {
+                map.putAll(JSON.parseObject(s, new TypeReference<Map<String, ApiVariableDto>>() {
                 }));
             });
 
             String drl = KieUtil.getDrl(ruleKeyDto, list, collect.get(CommonTextTypeConstants.RULE_CONTENT));
+            log.info(".drl:{}",drl);
             byte[] b1 = drl.getBytes();
             Resource resource = kieServices.getResources().newByteArrayResource(b1);
             kieHelper.addResource(resource, ResourceType.DRL);
         } while (true);
 
-        Set<String> set = map.entrySet().stream().map(e -> e.getKey()).collect(Collectors.toSet());
+        // 如果查不到配置则清理内存
+        if (map.isEmpty()) {
+            KieUtil.baseMap.put(ruleKeyDto, null);
+            KieUtil.variableMap.put(ruleKeyDto, null);
+            KieUtil.actionMap.put(ruleKeyDto, null);
+            interrupt(context, Response.success("清理内存"));
+            return;
+        }
+
+        Set<String> set = map.entrySet().stream().map(e -> e.getKey()+": "+e.getValue().getTypePath()).collect(Collectors.toSet());
 
         String dataStr = StrUtil.format(FactDataConstants.DRL_TEMPLATE, set.stream().collect(Collectors.joining("\n")));
+        log.info(".drl:{}",dataStr);
         Resource resource = kieServices.getResources().newByteArrayResource(dataStr.getBytes());
         kieHelper.addResource(resource, ResourceType.DRL);
         KieBaseConfiguration kieBaseConfiguration = kieServices.newKieBaseConfiguration();
@@ -250,7 +278,7 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
     private void cacheSemaphoreConfig(RuleTemplateChangeContext context, List<RuleTemplate> list,
                                       List<CommonText> texts) {
         Map<Long, Map<Integer, String>> collect1 =
-                texts.stream().filter(c -> c.getText().equals(CommonTextTypeConstants.TARGET_NAME) || c.getText().equals(CommonTextTypeConstants.TARGET_RATIO)).collect(Collectors.groupingBy(CommonText::getFid, Collectors.groupingBy(CommonText::getType, Collectors.mapping(CommonText::getText,
+                texts.stream().filter(c -> c.getType().equals(CommonTextTypeConstants.TARGET_NAME) || c.getType().equals(CommonTextTypeConstants.TARGET_RATIO)).collect(Collectors.groupingBy(CommonText::getFid, Collectors.groupingBy(CommonText::getType, Collectors.mapping(CommonText::getText,
                         Collectors.joining()))));
         Long coreId = context.getCore().getId();
         list.forEach(t -> {
@@ -258,7 +286,7 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
             configDto.setCoreId(coreId);
             configDto.setRid(t.getId());
             configDto.setAllocationModel(AllocationModel.getEnum(t.getAllocationModel()));
-            if (StringUtils.isBlank(t.getRef())) {
+            if (t.getRefId().longValue()==0L) {
                 configDto.setAlgorithModel(AlgorithModel.RANDOM);
             } else {
                 configDto.setAlgorithModel(AlgorithModel.S_SHAPED);
@@ -277,8 +305,8 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
 
     private Map<Integer, Map<Long, String>> getRuleAndVar(List<CommonText> texts) {
         Map<Integer, Map<Long, String>> collect =
-                texts.stream().filter(c -> c.getText().equals(CommonTextTypeConstants.RULE_CONTENT)
-                        || c.getText().equals(CommonTextTypeConstants.RULE_VARIABLE_MAP)
+                texts.stream().filter(c -> c.getType().equals(CommonTextTypeConstants.RULE_CONTENT)
+                        || c.getType().equals(CommonTextTypeConstants.RULE_VARIABLE_MAP)
                 ).collect(Collectors.groupingBy(CommonText::getType,
                         Collectors.groupingBy(CommonText::getFid, Collectors.mapping(CommonText::getText,
                                 Collectors.joining()))));
@@ -295,12 +323,13 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
         LocalDateTime dealTime = TimeUtil.now().plusSeconds(5L);
         LocalDateTime old = msgMap.putIfAbsent(msg, dealTime);
         if (old == null) {
+            context.setLock(true);
+            context.setDealTime(dealTime);
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 Thread.interrupted();
-                msgMap.remove(msg, dealTime);
                 throw new BaseException("时间延迟处理异常");
             }
             return;

@@ -16,8 +16,8 @@ public abstract class FactDataConstants {
 
     public static final String  DRL_TEMPLATE = "package " + KieUtil.PACKAGE_NAME + ";\n" +
             "declare Data\n" +
-            "{}"+
-            "    targetRes:cn.isqing.icloud.utils.dto.Response\n" +
+            "   {}\n"+
+            "    targetRes:cn.isqing.icloud.common.api.dto.Response\n" +
             "    busiDate:java.time.LocalDate\n" +
             "    ruleId:Long\n" +
             "    coreId:Long\n" +

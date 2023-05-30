@@ -1,27 +1,35 @@
 package cn.isqing.icloud.starter.drools.service.template.impl;
 
-import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
-import cn.isqing.icloud.common.utils.constants.SqlConstants;
-import cn.isqing.icloud.common.utils.dao.MybatisUtils;
-import cn.isqing.icloud.common.utils.dto.BaseException;
 import cn.isqing.icloud.common.api.dto.PageReqDto;
 import cn.isqing.icloud.common.api.dto.PageResDto;
 import cn.isqing.icloud.common.api.dto.Response;
+import cn.isqing.icloud.common.utils.bean.SpringBeanUtils;
+import cn.isqing.icloud.common.utils.constants.SqlConstants;
+import cn.isqing.icloud.common.utils.constants.StrConstants;
+import cn.isqing.icloud.common.utils.dao.MybatisUtils;
+import cn.isqing.icloud.common.utils.dto.BaseException;
 import cn.isqing.icloud.common.utils.enums.status.YesOrNo;
+import cn.isqing.icloud.common.utils.json.JsonUtil;
+import cn.isqing.icloud.common.utils.kit.ParallelStreamUtil;
+import cn.isqing.icloud.common.utils.kit.StrUtil;
+import cn.isqing.icloud.common.utils.log.MDCUtil;
 import cn.isqing.icloud.common.utils.time.TimeUtil;
 import cn.isqing.icloud.common.utils.validation.group.AddGroup;
 import cn.isqing.icloud.common.utils.validation.group.EditGroup;
 import cn.isqing.icloud.starter.drools.common.constants.CommonTextTypeConstants;
 import cn.isqing.icloud.starter.drools.common.constants.EventTypeConstants;
+import cn.isqing.icloud.starter.drools.common.constants.TableJoinConstants;
 import cn.isqing.icloud.starter.drools.common.dto.RuleH5Dto;
 import cn.isqing.icloud.starter.drools.common.dto.UpdateStatusDto;
-import cn.isqing.icloud.starter.variable.api.enums.VariableType;
+import cn.isqing.icloud.starter.drools.common.enums.OperatorType;
 import cn.isqing.icloud.starter.drools.common.util.TextSqlUtil;
 import cn.isqing.icloud.starter.drools.dao.entity.*;
 import cn.isqing.icloud.starter.drools.dao.mapper.CommonTextMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.RuleTemplateBusiMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.RuleTemplateMapper;
 import cn.isqing.icloud.starter.drools.service.event.EventPublisher;
+import cn.isqing.icloud.starter.drools.service.event.impl.RuleTemplateChangeContext;
+import cn.isqing.icloud.starter.drools.service.event.impl.RuleTemplateChangeFlow;
 import cn.isqing.icloud.starter.drools.service.msg.MsgParserService;
 import cn.isqing.icloud.starter.drools.service.msg.dto.TplChangeMsg;
 import cn.isqing.icloud.starter.drools.service.template.RuleTemplateService;
@@ -29,20 +37,27 @@ import cn.isqing.icloud.starter.drools.service.template.dto.RuleTemplateDto;
 import cn.isqing.icloud.starter.drools.service.template.dto.RuleTemplateListReq;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
+import cn.isqing.icloud.starter.variable.api.enums.VariableType;
 import cn.isqing.icloud.starter.variable.api.util.VariableUtil;
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.validation.Valid;
 import javax.validation.groups.Default;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -58,8 +73,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     private RuleTemplateMapper mapper;
     @Autowired
     private CommonTextMapper textMapper;
-    @Autowired
-    private MsgParserService msgParserService;
+
     @Autowired
     private RuleTemplateBusiMapper busiMapper;
 
@@ -68,8 +82,21 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
 
     @Resource(name = "iDroolsSqlSessionFactory")
     private SqlSessionFactory sqlSessionFactory;
-    @Autowired
+
+    @Reference(group = "${i.variable.dubbo.group:iVariable}", timeout = -1, retries = -1, version = "1.0.0")
+    @Lazy
     private VariableInterface variableInterface;
+
+    @Autowired
+    private MsgParserService msgParserService;
+
+    @Autowired
+    private RuleTemplateChangeFlow changeFlow;
+
+    @Value("${i.drools.init.ruleTpl.pageSize:100}")
+    private Integer pageSize;
+    @Value("${i.drools.init.ruleTpl.timeOut:300000}")
+    private Integer timeOut;
 
     private String format = "(%s)";
     private String blank = " ";
@@ -81,20 +108,15 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
      * @return
      */
     @Override
-    public Response<PageResDto<RuleTemplateDto>> list(@Valid PageReqDto<RuleTemplateListReq> dto) {
-        RuleTemplateListReq req = dto.getCondition();
-        PageReqDto.PageInfo pageInfo = dto.getPageInfo();
-        PageResDto<RuleTemplateDto> resDto = new PageResDto<>();
-        if (pageInfo.isNeedList()) {
-            //组装结果dto
-            List<RuleTemplateDto> dtoList = getDtoList(req, pageInfo);
-            resDto.setList(dtoList);
+    public Response<PageResDto<RuleTemplateDto>> list(PageReqDto<RuleTemplateListReq> dto) {
+        Response<PageResDto<RuleTemplateDto>> res = baseList(dto);
+        if (!res.isSuccess()) {
+            return Response.withData(res, null);
         }
-        if (pageInfo.isNeedTotal()) {
-            Long count = mapper.countWithBusi(req);
-            resDto.setTotal(count);
+        if (dto.getPageInfo().isNeedList()) {
+            setBusiMap(res.getData().getList());
         }
-        return Response.success(resDto);
+        return res;
     }
 
     /**
@@ -107,19 +129,29 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     public Response<PageResDto<RuleTemplateDto>> baseList(PageReqDto<RuleTemplateListReq> dto) {
         RuleTemplateListReq req = dto.getCondition();
         PageReqDto.PageInfo pageInfo = dto.getPageInfo();
+
+        RuleTemplateCondition left = new RuleTemplateCondition();
+        SpringBeanUtils.copyProperties(req, left);
+        left.setIsDel(YesOrNo.NO.ordinal());
+        left.setOrderBy(SqlConstants.ID_ASC);
+        left.setSelectFiled(SqlConstants.ALL_FIELD);
+        left.setGroupBy(RuleTemplateFiled.ID);
+        Optional.ofNullable(pageInfo.getFromId()).ifPresent(left::setIdConditionMin);
+
+        RuleTemplateBusiCondition right = new RuleTemplateBusiCondition();
+        right.setBusiCode(req.getBusiCode());
+
+
         PageResDto<RuleTemplateDto> resDto = new PageResDto<>();
         if (pageInfo.isNeedList()) {
             //组装结果dto
-            List<RuleTemplate> res = mapper.selectWithBusi(req, pageInfo, pageInfo.getOffset());
-            List<RuleTemplateDto> dtoList = res.stream().map(t -> {
-                RuleTemplateDto dto1 = new RuleTemplateDto();
-                SpringBeanUtils.copyProperties(t, dto1);
-                return dto1;
-            }).collect(Collectors.toList());
+            left.setLimit(pageInfo.getPageSize());
+            left.setOffset(pageInfo.getOffset());
+            List<RuleTemplateDto> dtoList = JsonUtil.toList(mapper.leftJoinSelect(left, right, TableJoinConstants.RTPL_BUSI), RuleTemplateDto.class);
             resDto.setList(dtoList);
         }
         if (pageInfo.isNeedTotal()) {
-            Long count = mapper.countWithBusi(req);
+            Long count = mapper.leftJoinCount(left, right, TableJoinConstants.RTPL_BUSI);
             resDto.setTotal(count);
         }
         return Response.success(resDto);
@@ -137,9 +169,11 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         Map<Integer, String> map = texts.stream().collect(Collectors.groupingBy(CommonText::getType,
                 Collectors.mapping(CommonText::getText, Collectors.joining())));
         RuleTemplateDto dto = new RuleTemplateDto();
-        dto.setTargetRatio(map.get(CommonTextTypeConstants.TARGET_RATIO));
-        dto.setTargetName(map.get(CommonTextTypeConstants.TARGET_NAME));
-        dto.setContent(map.get(CommonTextTypeConstants.RULE_CONTENT_H5));
+        dto.setTargetRatio(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.TARGET_RATIO, StrConstants.EMPTY_JSON_OBJ), new TypeReference<Map<Long, String>>() {
+        }));
+        dto.setTargetName(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.TARGET_NAME, StrConstants.EMPTY_JSON_OBJ), new TypeReference<Map<Long, String>>() {
+        }));
+        dto.setContent(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.RULE_CONTENT_H5, StrConstants.EMPTY_JSON_OBJ), RuleH5Dto.class));
         return Response.success(dto);
     }
 
@@ -168,27 +202,21 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         return Response.success(busiMap);
     }
 
-    private List<RuleTemplateDto> getDtoList(RuleTemplateListReq req, PageReqDto.PageInfo pageInfo) {
-        List<RuleTemplate> res = mapper.selectWithBusi(req, pageInfo, pageInfo.getOffset());
+    private void setBusiMap(List<RuleTemplateDto> res) {
         RuleTemplateBusiCondition busiCondition = new RuleTemplateBusiCondition();
-        busiCondition.setTidCondition(res.stream().map(RuleTemplate::getId).collect(Collectors.toList()));
+        busiCondition.setTidCondition(res.stream().map(RuleTemplateDto::getId).collect(Collectors.toList()));
         List<RuleTemplateBusi> resBusi = busiMapper.selectByCondition(busiCondition);
 
         Map<Long, Map<String, String>> busiMap =
                 resBusi.stream().collect(Collectors.groupingBy(RuleTemplateBusi::getTid,
                         Collectors.toMap(RuleTemplateBusi::getBusiCode, b -> b.getBusiName())));
 
-        List<RuleTemplateDto> dtoList = res.stream().map(t -> {
-            RuleTemplateDto dto1 = new RuleTemplateDto();
-            SpringBeanUtils.copyProperties(t, dto1);
-            dto1.setBusiMap(busiMap.get(t.getId()));
-            return dto1;
-        }).collect(Collectors.toList());
-        return dtoList;
+        res.forEach(d -> d.setBusiMap(busiMap.get(d.getId())));
+
     }
 
     @Override
-    @Transactional
+    @Transactional(transactionManager = "iDroolsTransactionManager")
     public Response<Object> add(@Validated({AddGroup.class, Default.class}) RuleTemplateDto dto) {
         RuleTemplate template = new RuleTemplate();
         SpringBeanUtils.copyProperties(dto, template);
@@ -207,7 +235,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
             busi.setBusiName(v);
             list.add(busi);
         });
-        MybatisUtils.batchSave(sqlSessionFactory, list, busiMapper.getClass(), (busi, mapper) -> {
+        MybatisUtils.batchSave(sqlSessionFactory, list, RuleTemplateBusiMapper.class, (busi, mapper) -> {
             mapper.insert(busi);
         });
         tplChangeEvent(dto, null);
@@ -224,7 +252,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         insetText(text, dto.getContent(), CommonTextTypeConstants.RULE_CONTENT_H5);
 
         // 解析h5规则
-        RuleH5Dto h5Dto = JSON.parseObject(dto.getContent(), RuleH5Dto.class);
+        RuleH5Dto h5Dto = dto.getContent();
         Map<Long, ApiVariableDto> map = new HashMap<>();
         String content = dealH5Dto(h5Dto, map);
         insetText(text, content, CommonTextTypeConstants.RULE_CONTENT);
@@ -246,32 +274,42 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         if (!CollectionUtils.isEmpty(list)) {
             // String.format(format)
             return list.stream().map(d -> {
+                if (d.getValue().contains("eval")) {
+                    log.error("检测到异常入侵条件:{}", d);
+                    throw new BaseException("检测到异常入侵条件");
+                }
                 // 字符串类型时要求前端加引号{"value1":"\"null\"","value2":"null",}
                 // value1是字符串null，value2是真null
                 ApiVariableDto variable = map.get(d.getId());
                 if (variable == null) {
                     Response<ApiVariableDto> res = variableInterface.getVariableById(d.getId());
+                    if (!res.isSuccess()) {
+                        log.error("获取变量{}异常:{}", d.getId(), res);
+                        throw new BaseException("获取变量异常");
+                    }
                     map.put(d.getId(), res.getData());
+                    variable = res.getData();
                 }
 
-                if (variable.getTypePath().equals(VariableType.BIG_DECIMAL.getName())) {
-                    if (!"null".equals(d.getValue()) && (!d.getValue().startsWith("\"")) || !d.getValue().endsWith(
-                            "\"")) {
-                        log.error("异常字符串条件:{}", d);
-                        throw new BaseException("异常字符串条件");
-                    }
-                } else {
-                    if (d.getValue().contains("eval")) {
-                        log.error("检测到异常入侵条件:{}", d);
-                        throw new BaseException("检测到异常入侵条件");
-                    }
+                String left = VariableUtil.getUniName(variable);
+                VariableType variableType = VariableType.fromCode(variable.getType());
+                String operator = OperatorType.getEnum(d.getOperator().intValue()).getValue();
+                switch (variableType){
+                    case BIG_DECIMAL:
+                        if(!d.getValue().equals("\"null\"")){
+                            return left+".compareTo(BigDecimal.valueOf(\""+d.getValue()+"\")) "+operator+" 0";
+                        }
+                        break;
+                    case BIG_INTEGER:
+                        if(!d.getValue().equals("\"null\"")){
+                            return left+".compareTo(new BigInteger(\""+d.getValue()+"\")) "+operator+" 0";
+                        }
+                        break;
+                    default:
+                        break;
                 }
-                if (variable.getTypePath().equals(VariableType.BIG_DECIMAL.getName()) || variable.getTypePath().equals(VariableType.BIG_INTEGER.getName())) {
-                    if (!"null".equals(d.getValue())) {
-                        d.setValue(d.getValue() + "B");
-                    }
-                }
-                return VariableUtil.getUniName(variable) + blank + d.getOperator() + blank + d.getValue();
+                return left + blank + operator + blank + d.getValue();
+
             }).collect(Collectors.joining(blank + h5Dto.getRelation() + blank));
         }
         List<RuleH5Dto> h5DtoList = h5Dto.getGrouplist();
@@ -282,12 +320,12 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     }
 
     @Override
-    @Transactional
+    @Transactional(transactionManager = "iDroolsTransactionManager")
     public Response<Object> edit(@Validated({EditGroup.class, Default.class}) RuleTemplateDto dto) {
         RuleTemplate template = new RuleTemplate();
         RuleTemplate condition = new RuleTemplate();
         SpringBeanUtils.copyProperties(dto, template);
-        condition.setId(template.getId());
+        condition.setId(dto.getId());
         template.setId(null);
         condition.setVersion(template.getVersion());
         template.setVersion(template.getVersion() + 1);
@@ -298,27 +336,29 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         }
         updateText(dto);
 
+        // 关联业务查询
+        RuleTemplateBusiCondition condition1 = new RuleTemplateBusiCondition();
+        condition1.setTid(dto.getId());
+        condition1.setSelectFiled(RuleTemplateBusiFiled.BUSI_CODE);
+        List<String> codes = busiMapper.selectStringByCondition(condition1);
+
+        // 关联表入库
         RuleTemplateBusi busiCondition = new RuleTemplateBusi();
         busiCondition.setTid(dto.getId());
         busiMapper.del(busiCondition);
-        // 关联业务查询
-        RuleTemplateBusiCondition condition1 = new RuleTemplateBusiCondition();
-        condition1.setTid(template.getId());
-        condition1.setSelectFiled(RuleTemplateBusiFiled.BUSI_CODE);
-        List<String> codes = busiMapper.selectStringByCondition(condition1);
-        // 关联表入库
-        Long tid = template.getId();
+        Long tid = dto.getId();
         List<RuleTemplateBusi> list = new ArrayList<>();
         Map<String, String> busiMap = dto.getBusiMap();
         busiMap.forEach((k, v) -> {
             RuleTemplateBusi busi = new RuleTemplateBusi();
             busi.setTid(tid);
             busi.setBusiCode(k);
+            codes.add(k);
             busi.setBusiName(v);
             busi.setVersion(template.getVersion());
             list.add(busi);
         });
-        MybatisUtils.batchSave(sqlSessionFactory, list, busiMapper.getClass(), (busi, mapper) -> mapper.insert(busi));
+        MybatisUtils.batchSave(sqlSessionFactory, list, RuleTemplateBusiMapper.class, (busi, mapper) -> mapper.insert(busi));
 
         tplChangeEvent(dto, codes);
         return Response.SUCCESS;
@@ -332,8 +372,8 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     }
 
     @Override
-    @Transactional
-    public Response<Object> sw(@Valid UpdateStatusDto dto) {
+    @Transactional(transactionManager = "iDroolsTransactionManager")
+    public Response<Object> sw(UpdateStatusDto dto) {
         RuleTemplate template = new RuleTemplate();
         RuleTemplate condition = new RuleTemplate();
         template.setVersion(dto.getVersion() + 1);
@@ -361,33 +401,26 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         msg.setCreateTime(TimeUtil.now());
         codes.forEach(k -> {
             msg.setBusiCode(k);
-            eventPublisher.publishBcEvent(null, EventTypeConstants.TPL_CHANGE,msg);
+            eventPublisher.publishBcEvent(null, EventTypeConstants.TPL_CHANGE, msg);
         });
     }
 
-    private void tplChangeEvent(RuleTemplateDto dto, List<String> oldCodes) {
+    private void tplChangeEvent(RuleTemplateDto dto, List<String> codes) {
+        codes = codes.stream().distinct().collect(Collectors.toList());
         TplChangeMsg msg = new TplChangeMsg();
         msg.setActionId(dto.getActionId());
         msg.setDomain(dto.getDomain());
         msg.setCreateTime(TimeUtil.now());
-        Map<String, String> busiMap = dto.getBusiMap();
-        busiMap.forEach((k, v) -> {
-            msg.setBusiCode(k);
-            eventPublisher.publishBcEvent(null, EventTypeConstants.TPL_CHANGE,msg);
-        });
-        Optional.ofNullable(oldCodes).ifPresent(codes->{
-            codes.forEach(k->{
-                if(busiMap.containsKey(k)){
-                    return;
-                }
+        Optional.ofNullable(codes).ifPresent(c -> {
+            c.forEach(k -> {
                 msg.setBusiCode(k);
-                eventPublisher.publishBcEvent(null, EventTypeConstants.TPL_CHANGE,msg);
+                eventPublisher.publishBcEvent(null, EventTypeConstants.TPL_CHANGE, msg);
             });
         });
     }
 
     @Override
-    @Transactional
+    @Transactional(transactionManager = "iDroolsTransactionManager")
     public Response<Object> del(Long id) {
         RuleTemplate template = new RuleTemplate();
         template.setId(id);
@@ -399,5 +432,62 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         }
         tplChangeEvent(id);
         return Response.SUCCESS;
+    }
+
+    /**
+     * 每次重启应用需要缓存规则相关内容
+     */
+    @PostConstruct
+    public void init() {
+        MDCUtil.appendTraceId();
+        log.info("缓存规则开始...");
+        //分页查询规则配置
+        List<RuleTemplate> list;
+        RuleTemplateCondition condition = new RuleTemplateCondition();
+        condition.setIsDel(YesOrNo.NO.ordinal());
+        condition.setIsActive(YesOrNo.YES.ordinal());
+        condition.setOrderBy(SqlConstants.ID_ASC);
+        condition.setSelectFiled(RuleTemplateFiled.ID, RuleTemplateFiled.DOMAIN, RuleTemplateFiled.ACTION_ID);
+        condition.setIdConditionMin(0L);
+        condition.setLimit(pageSize);
+        // 去重容器
+        ConcurrentHashMap<String, Long> uniMap = new ConcurrentHashMap<>();
+        LocalDateTime now = TimeUtil.now();
+        int page = 0;
+        do {
+            log.info("page:{}", ++page);
+            list = mapper.selectByCondition(condition);
+            if (list.isEmpty()) {
+                break;
+            }
+            condition.setIdConditionMin(list.get(list.size() - 1).getId() + 1);
+            try {
+                ParallelStreamUtil.exec(list, r -> {
+                    // 查询busiCode
+                    RuleTemplateBusiCondition busi = new RuleTemplateBusiCondition();
+                    busi.setTid(r.getId());
+                    busi.setSelectFiled(RuleTemplateBusiFiled.ID, RuleTemplateBusiFiled.BUSI_CODE);
+                    List<RuleTemplateBusi> busiList = busiMapper.selectByCondition(busi);
+                    busiList.forEach(b -> {
+                        String key = StrUtil.assembleKey(r.getDomain().toString(), r.getActionId().toString(), b.getBusiCode());
+                        Long cacheId = uniMap.computeIfAbsent(key, k -> b.getId());
+                        if (!cacheId.equals(b.getId())) {
+                            return;
+                        }
+                        TplChangeMsg msg = new TplChangeMsg();
+                        msg.setDomain(r.getDomain());
+                        msg.setActionId(r.getActionId());
+                        msg.setBusiCode(b.getBusiCode());
+                        msg.setCreateTime(now);
+                        RuleTemplateChangeContext context = new RuleTemplateChangeContext();
+                        context.setMsgReq(msgParserService.assembleMsg(msg));
+                        changeFlow.exec(context);
+                    });
+                }, timeOut);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        } while (true);
+
     }
 }

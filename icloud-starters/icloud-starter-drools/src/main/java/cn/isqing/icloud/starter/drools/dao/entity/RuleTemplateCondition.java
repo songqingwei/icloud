@@ -8,6 +8,8 @@ import java.util.List;
 @Data
 public class RuleTemplateCondition extends BaseCondition {
 
+    private Long idConditionMin;
+
     private List<Long> idList;
     /**
      * 规则名称
@@ -21,5 +23,9 @@ public class RuleTemplateCondition extends BaseCondition {
     private String createTimeConditionMin;
 
     private String createTimeConditionMax;
+
+    private Integer isDel;
+
+    private Integer isActive;
 
 }

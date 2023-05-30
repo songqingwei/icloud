@@ -53,7 +53,6 @@ import java.util.stream.Collectors;
  * @version 1.0
  **/
 @Service(group = "${i.variable.dubbo.group:iVariable}", timeout = 60000, retries = -1, version = "1.0.0")
-//@Service
 @Slf4j
 public class VariableInterfaceImpl implements VariableInterface {
 

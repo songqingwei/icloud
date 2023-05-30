@@ -9,6 +9,7 @@ public enum VariableType {
     BIG_INTEGER(3, "java.math.BigInteger", "BigInteger"),
     LIST(4, "java.util.List", "List"),
     MAP(5, "java.util.Map", "Map"),
+    LONG(6, "java.lang.Long", "Long"),
     ;
 
     private Integer code;
@@ -45,4 +46,7 @@ public enum VariableType {
         return type == null ? null : type.getName();
     }
 
+    public static VariableType fromCode(Integer code) {
+        return Arrays.stream(values()).filter(t -> t.getCode().equals(code)).findAny().orElse(null);
+    }
 }

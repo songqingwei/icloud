@@ -167,10 +167,12 @@ public class LockUtil {
         }
         Map<Object, BaseMapper> map = DO_LOCK_MAP.get(context);
         synchronized (dataPo) {
-            map.remove(dataPo);
-        }
-        if (map.isEmpty()) {
-            DO_LOCK_MAP.remove(context);
+            if(map!=null){
+                map.remove(dataPo);
+                if (map.isEmpty()) {
+                    DO_LOCK_MAP.remove(context);
+                }
+            }
         }
         return res;
     }

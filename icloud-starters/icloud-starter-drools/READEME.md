@@ -45,13 +45,14 @@ KEY `idx_fid` (`fid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='大字段存储';
 
 CREATE TABLE `component` (
-`id` bigint(20) DEFAULT NULL,
+`id` bigint(20) DEFAULT NULL AUTO_INCREMENT,
 `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
 `data_source_id` bigint(20) NOT NULL DEFAULT '0',
 `data_source_type` int(11) NOT NULL DEFAULT '0',
 `version` int(11) NOT NULL DEFAULT '0',
 `is_active` tinyint(1) NOT NULL DEFAULT '0',
-`is_del` tinyint(1) NOT NULL DEFAULT '0'
+`is_del` tinyint(1) NOT NULL DEFAULT '0',
+PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='组件';
 
 CREATE TABLE `component_text` (
@@ -122,7 +123,7 @@ CREATE TABLE `rule_template` (
 `create_time` datetime DEFAULT NULL,
 `update_time` datetime DEFAULT NULL,
 `is_del` tinyint(1) NOT NULL DEFAULT '0',
-`ref` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '蛇形算法参照物',
+`refId` bigint default 0 not null comment '蛇形算法参照物:变量id',
 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='规则模版';
 
@@ -164,7 +165,7 @@ CREATE TABLE `run_log` (
 `action_id` bigint(20) NOT NULL DEFAULT '0',
 PRIMARY KEY (`id`),
 UNIQUE KEY `uniq_one` (`busi_date`,`core_id`,`source_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `run_log_text` (
 `id` bigint(20) NOT NULL AUTO_INCREMENT,

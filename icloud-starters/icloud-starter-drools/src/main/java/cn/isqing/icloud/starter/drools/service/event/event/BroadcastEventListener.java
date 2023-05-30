@@ -21,8 +21,8 @@ import java.util.List;
 @Slf4j
 @Component
 @RocketMQMessageListener(
-        consumerGroup = "${i.variable.bc-event.cgroup:i-drools-bc-event}",
-        topic = "${i.variable.bc-event.topic:i-drools-bc-event}",
+        consumerGroup = "${i.drools.bc-event.cgroup:i-drools-bc-event}",
+        topic = "${i.drools.bc-event.topic:i-drools-bc-event}",
         messageModel = MessageModel.BROADCASTING
 )
 public class BroadcastEventListener implements RocketMQListener<String> {

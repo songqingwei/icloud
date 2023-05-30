@@ -23,7 +23,7 @@ public class RuleTemplate {
     // cron时间表达式
     private String cron;
 
-    // 分配算法:1固定数量2比例
+    // 分配算法:1固定数量 2比例 3高精度比例
     private Integer allocationModel;
 
     // 0未启用 1启用
@@ -39,7 +39,7 @@ public class RuleTemplate {
 
     private Integer isDel;
 
-    // 蛇形算法参照物
-    private String ref;
+    // 蛇形算法参照物:变量id
+    private Long refId;
 
 }

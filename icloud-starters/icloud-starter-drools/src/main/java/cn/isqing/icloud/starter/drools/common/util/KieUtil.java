@@ -5,6 +5,7 @@ import cn.isqing.icloud.common.api.enums.ResCodeEnum;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
 import cn.isqing.icloud.starter.drools.dao.entity.Component;
 import cn.isqing.icloud.starter.drools.dao.entity.RuleTemplate;
+import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariableSimpleDto;
 import lombok.extern.slf4j.Slf4j;
 import org.drools.template.ObjectDataCompiler;
@@ -31,7 +32,7 @@ public class KieUtil {
 
     public static final Map<RuleKeyDto, KieHelper> helperMap = new ConcurrentHashMap<>();
     public static final Map<RuleKeyDto, KieBase> baseMap = new ConcurrentHashMap<>();
-    public static final Map<RuleKeyDto, Map<String, ApiVariableSimpleDto>> variableMap = new ConcurrentHashMap<>();
+    public static final Map<RuleKeyDto, Map<String, ApiVariableDto>> variableMap = new ConcurrentHashMap<>();
     public static final Map<RuleKeyDto, List<List<Component>>> actionMap = new ConcurrentHashMap<>();
 
 
@@ -55,10 +56,10 @@ public class KieUtil {
             rule.put("orgId", r.getOrgId().toString());
             rule.put("cron", r.getCron());
 
-            if (StringUtils.isEmpty(r.getRef())) {
+            if (r.getRefId().longValue()==0L) {
                 rule.put("refFunction", "null");
             } else {
-                rule.put("refFunction", "$data.getC"+r.getRef().substring(1)+"().toString()");
+                rule.put("refFunction", "$data.getV"+r.getRefId().longValue()+"().toString()");
             }
 
             ruleAttributes.add(rule);
