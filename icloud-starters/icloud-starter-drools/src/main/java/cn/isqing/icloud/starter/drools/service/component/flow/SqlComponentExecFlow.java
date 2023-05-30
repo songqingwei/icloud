@@ -50,7 +50,7 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
         String v = SqlUtil.escapeSqlValue(String.valueOf(value));
         if (path.startsWith("${")) {
             boolean b = StrUtil.isNumber(v);
-            if (!b) {
+            if (!b && v != null) {
                 return Response.error("检测到sql注入");
             }
         } else if (path.startsWith("##{")) {

@@ -3,25 +3,21 @@ package cn.isqing.icloud.starter.drools.service.output.flow;
 import cn.isqing.icloud.common.utils.annotation.RouteType;
 import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.api.enums.ResCodeEnum;
+import cn.isqing.icloud.common.utils.constants.EventConstants;
 import cn.isqing.icloud.common.utils.enums.status.CommonStatusEnum;
 import cn.isqing.icloud.common.utils.enums.status.SubFlowStatusEnum;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;
 import cn.isqing.icloud.common.utils.kit.LockUtil;
 import cn.isqing.icloud.common.utils.kit.ParallelStreamUtil;
 import cn.isqing.icloud.common.utils.kit.RedisUtil;
-import cn.isqing.icloud.starter.drools.common.constants.EventTypeConstants;
-import cn.isqing.icloud.starter.drools.common.constants.LockScenarioConstants;
-import cn.isqing.icloud.starter.drools.common.constants.RunLogTextTypeConstants;
-import cn.isqing.icloud.starter.drools.common.constants.SystemConstants;
+import cn.isqing.icloud.starter.drools.common.constants.*;
 import cn.isqing.icloud.starter.drools.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
+import cn.isqing.icloud.starter.drools.common.util.ComponentUtil;
 import cn.isqing.icloud.starter.drools.common.util.KieUtil;
 import cn.isqing.icloud.starter.drools.common.util.ObjectTransformUtil;
 import cn.isqing.icloud.starter.drools.dao.entity.*;
-import cn.isqing.icloud.starter.drools.dao.mapper.ActionLogMapper;
-import cn.isqing.icloud.starter.drools.dao.mapper.RuleCoreMapper;
-import cn.isqing.icloud.starter.drools.dao.mapper.RunLogMapper;
-import cn.isqing.icloud.starter.drools.dao.mapper.RunLogTextMapper;
+import cn.isqing.icloud.starter.drools.dao.mapper.*;
 import cn.isqing.icloud.starter.drools.service.component.ComponentExecService;
 import cn.isqing.icloud.starter.drools.service.component.factory.ComponentExecFactory;
 import cn.isqing.icloud.starter.drools.service.event.EventSubscriber;
@@ -45,7 +41,7 @@ import java.util.stream.Collectors;
  **/
 @Service
 @Slf4j
-@RouteType(r1 = EventTypeConstants.OUTPUT)
+@RouteType(r1 = EventTypeConstants.OUTPUT, r2 = EventConstants.CLUSTERING_MODEL)
 public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implements EventSubscriber {
 
     @Value("${i.drools.execActionTimeOut:60000}")
@@ -61,6 +57,9 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
     private ComponentExecFactory execFactory;
     @Autowired
     private ActionLogMapper actionLogMapper;
+    @Autowired
+    private CommonConfigMapper configMapper;
+
     private int subFailReasonLimit = 255;
 
     public OutputFlow() {
@@ -71,7 +70,7 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
         accept(this::getCoreRecord);
         stepName("获取redis锁");
         accept(this::getLock);
-        stepName("获取乐观锁锁");
+        stepName("获取乐观锁");
         accept(this::getCasLock);
         stepName("记录处理中状态");
         accept(this::recordDoingStatus);
@@ -107,22 +106,37 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
 
     private void releaseResource(OutputFlowContext context) {
         RLock lock = context.getLock();
-        if(lock!=null){
+        if (lock != null) {
             lock.unlock();
+            context.setLock(null);
         }
-        if(context.isCasLock()){
-            LockUtil.unlockPo(context,context.getRunLog(),mapper);
+        if (context.isCasLock()) {
+            LockUtil.unlockPo(context, context.getRunLog(), mapper);
         }
     }
+
+    private CommonConfig getAuthConfig(Integer domain) {
+        CommonConfig config = new CommonConfig();
+        config.setGroup(CommonConfigGroupConstants.DOMAIN_AUTH_CODE);
+        config.setKey(domain.toString());
+        return configMapper.first(config, null);
+    }
+
 
     private void doAction(OutputFlowContext context) {
         Map<Integer, String> map = context.getParamsMap();
         ComponentExecDto paramDto = new ComponentExecDto();
         paramDto.setDomain(context.getRuleCore().getDomain());
-        //todo-sqw
-        paramDto.setDomainAuthCode("");
-        paramDto.getVariableAboveResMap().putAll(JSONObject.parseObject(map.get(RunLogTextTypeConstants.VC_RES_MAP),new TypeReference<Map<String,Object>>(){}));
-        paramDto.setInputParams(JSONObject.parseObject(map.get(RunLogTextTypeConstants.INPUT_PARAMS),new TypeReference<Map<String,Object>>(){}));
+        paramDto.setActionCoreId(ComponentUtil.getActionCoreId(context.getRuleCore().getId()));
+        CommonConfig config = getAuthConfig(context.getRuleCore().getDomain());
+        if (config == null) {
+            interrupt(context,Response.error("缺少domain authCode配置"));
+            return;
+        }
+        paramDto.setDomainAuthCode(config.getValue());
+        paramDto.getVariableAboveResMap().putAll(JSONObject.parseObject(map.get(RunLogTextTypeConstants.VC_RES_MAP), new TypeReference<Map<Integer, Object>>() {
+        }));
+        paramDto.setInputParams(map.get(RunLogTextTypeConstants.INPUT_PARAMS));
         paramDto.setRunRes(map.get(RunLogTextTypeConstants.INPUT_PARAMS));
 
         RuleCore ruleCore = context.getRuleCore();
@@ -136,7 +150,7 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
         Consumer<Component> consumer = (c) -> {
             actionLog.setCid(c.getId());
             ActionLog first = actionLogMapper.first(actionLog, null);
-            if(first!=null && first.getStatus()>CommonStatusEnum.FAILED.getCode()){
+            if (first != null && first.getStatus() > CommonStatusEnum.FAILED.getCode()) {
                 return;
             }
             ComponentExecService service = execFactory.getSingle(c.getDataSourceType().toString());
@@ -147,10 +161,10 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
                 updataLog(context.getCacheLog(), runLog, res);
                 interrupt(context, Response.error("执行异常"));
             }
-            updataActionLog(first,runLog, res,c);
+            updataActionLog(first, runLog, res, c);
         };
         componentList.forEach(list -> {
-            if(context.isFlowEnd()){
+            if (context.isFlowEnd()) {
                 return;
             }
             try {
@@ -159,27 +173,24 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
                 throw new RuntimeException(e);
             }
         });
-
-
-
     }
 
-    private void updataActionLog(ActionLog first, RunLog runLog, Response<Object> res,Component c) {
-        if(first==null){
+    private void updataActionLog(ActionLog first, RunLog runLog, Response<Object> res, Component c) {
+        if (first == null) {
             first = new ActionLog();
             first.setCoreId(runLog.getCoreId());
             first.setRunLogId(runLog.getId());
             first.setCid(c.getId());
             first.setFailNum(0);
         }
-        if(res.isSuccess()){
+        if (res.isSuccess()) {
             first.setStatus(CommonStatusEnum.SUCCESS.getCode());
         } else {
             first.setStatus(CommonStatusEnum.FAILED.getCode());
-            first.setFailNum(first.getFailNum()+1);
+            first.setFailNum(first.getFailNum() + 1);
             first.setFailReason(res.getMsg());
         }
-        if(first.getId()==null){
+        if (first.getId() == null) {
             actionLogMapper.insert(first);
             return;
         }
@@ -188,9 +199,9 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
 
     private void updataLog(RunLog cacheLog, RunLog runLog, Response<Object> res) {
         cacheLog.setId(runLog.getId());
-        cacheLog.setSubFailNum(runLog.getSubFailNum()+1);
+        cacheLog.setSubFailNum(runLog.getSubFailNum() + 1);
         cacheLog.setSubStatus(SubFlowStatusEnum.FAILED.getCode());
-        cacheLog.setSubFailReason(res.getMsg().substring(0,subFailReasonLimit));
+        cacheLog.setSubFailReason(res.getMsg().substring(0, Math.min(subFailReasonLimit, res.getMsg().length())));
         mapper.update(cacheLog);
 
         cacheLog.setSubFailNum(null);
@@ -200,7 +211,7 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
 
     private void getCoreRecord(OutputFlowContext context) {
         RunLog runLog = context.getRunLog();
-        RuleCore ruleCore = coreMapper.selectById(runLog.getId(),RuleCore.class);
+        RuleCore ruleCore = coreMapper.selectById(runLog.getCoreId(), RuleCore.class);
         context.setRuleCore(ruleCore);
     }
 
@@ -215,7 +226,7 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
         int i = mapper.updateByCondition(data, condition);
         if (i == 0) {
             interrupt(context, Response.error("更新处理中状态失败"));
-        }else {
+        } else {
             runLog.setVersion(data.getVersion());
         }
         //清理cacheLog
@@ -238,7 +249,7 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
     }
 
     private void getLock(OutputFlowContext context) {
-        RLock lock = LockUtil.getRedisLock(RedisUtil.getKey(SystemConstants.REDIS_KEY_PRE,LockScenarioConstants.OUTPUT,
+        RLock lock = LockUtil.getRedisLock(RedisUtil.getKey(SystemConstants.REDIS_KEY_PRE, LockScenarioConstants.OUTPUT,
                 context.getMsg().getId().toString()));
         if (lock == null) {
             interrupt(context, Response.error("竞争redis锁失败"));

@@ -12,7 +12,7 @@ public class RunLogTextTypeConstants {
     private RunLogTextTypeConstants() {
     }
 
-    // Map<String,Object>
+    // Map<Integer,Object>
     public static final int VC_RES_MAP = 1;
     // Map<String,Object>
     public static final int INPUT_PARAMS = 2;

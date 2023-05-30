@@ -83,6 +83,7 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
         stepName("更新log记录");
         accept(this::updateLog);
         stepName("触发action事件");
+        test(c->!c.isCancleSubFlow());
         accept(this::publishEvent);
         finallyAcceptName("释放资源");
         finallyAccept(this::releaseResource);
@@ -121,6 +122,7 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
         log.setStatus(CommonStatusEnum.SUCCESS.getCode());
         if (context.getTargetId() == null || context.getTargetId().equals(0L)) {
             log.setSubStatus(SubFlowStatusEnum.CANCLE.getCode());
+            context.setCancleSubFlow(true);
         } else {
             log.setSubStatus(SubFlowStatusEnum.PENDING.getCode());
         }
@@ -140,7 +142,7 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
                 {RunLogTextTypeConstants.RUN_RES_MAP, map}
         };
         for (Object[] arr1 : arr) {
-            insetText(text, arr[1], (int) arr1[0]);
+            insetText(text, arr1[1], (int) arr1[0]);
         }
     }
 

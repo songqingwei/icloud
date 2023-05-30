@@ -82,12 +82,17 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     }
 
     private void getVariablesValue(ComponentExecContext context) {
+        Map<String, Long> dependVariables = context.getDependVariables();
+        if(dependVariables==null || dependVariables.isEmpty()){
+            return;
+        }
         ComponentExecDto execDto = context.getExecDto();
         ApiVariablesValueReqDto reqDto = new ApiVariablesValueReqDto();
         reqDto.setDomain(execDto.getDomain());
         reqDto.setDomainAuthCode(execDto.getDomainAuthCode());
         reqDto.setAboveResMap(execDto.getAboveResMap());
         reqDto.setInputParams(execDto.getInputParams());
+        reqDto.setCoreId(execDto.getActionCoreId());
         Response<Map<Long, Object>> res = api.getValues(reqDto);
         if (!res.isSuccess()) {
             log.warn("获取变量失败:" + res.getMsg());
@@ -231,9 +236,13 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     protected abstract void execComponent(ComponentExecContext context);
 
     private void getSystemVarsValue(ComponentExecContext context) {
+        Map<String, String> configMap = context.getDependSystemVars();
+        if(configMap==null || configMap.isEmpty()){
+            return;
+        }
         Map<String, String> map = new HashMap<>();
         context.setSystemVarsValue(map);
-        context.getDependSystemVars().values().forEach(v -> {
+        configMap.values().forEach(v -> {
             switch (v) {
                 case "uuid":
                     map.put(v, UuidUtil.uuid());
@@ -253,7 +262,11 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     }
 
     private void getConstantValue(ComponentExecContext context) {
-        List<String> keyList = new ArrayList<>(context.getConstantsValue().values());
+        Map<String, String> configMap = context.getDependConstants();
+        if(configMap==null || configMap.isEmpty()){
+            return;
+        }
+        List<String> keyList = new ArrayList<>(configMap.values());
         CommonConfigCondition config = new CommonConfigCondition();
         config.setGroup(StrUtil.assembleKey(CommonConfigGroupConstants.VSET_DEFINITION_QUERY, context.getExecDto().getDomain().toString()));
         config.setKeyCondition(keyList);

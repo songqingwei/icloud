@@ -16,6 +16,8 @@ public class ComponentExecDto {
 
     private String domainAuthCode;
 
+    private String actionCoreId;
+
     // 变量服务组件id，json
     private Map<Long, String> variableAboveResMap = new ConcurrentHashMap<>();
 

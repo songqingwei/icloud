@@ -1,5 +1,6 @@
 package cn.isqing.icloud.starter.drools.service.input.flow;
 
+import cn.isqing.icloud.common.utils.enums.status.SubFlowStatusEnum;
 import cn.isqing.icloud.common.utils.flow.FlowContext;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
 import cn.isqing.icloud.starter.drools.dao.entity.RunLog;
@@ -35,7 +36,7 @@ public class InputFlowContext extends FlowContext<Object> {
     private Long ruleId;
     private Long targetId;
 
-
+    private boolean cancleSubFlow = false;
 
 
 }

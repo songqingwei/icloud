@@ -165,7 +165,9 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
     private void publishEvent(RuleTemplateChangeContext context) {
         List<Long> list = context.getVariableMap().entrySet().stream().map(e -> e.getValue().getId()).collect(Collectors.toList());
         variableInterface.publishVsetChangeEvent(context.getCore().getId().toString(), list);
-        variableInterface.publishVsetChangeEvent(ComponentUtil.getActionCoreId(context.getCore().getId()), context.getActionDepandCids());
+        if(!context.getActionDepandCids().isEmpty()) {
+            variableInterface.publishVsetChangeEvent(ComponentUtil.getActionCoreId(context.getCore().getId()), context.getActionDepandCids());
+        }
     }
 
     private void parseAction(RuleTemplateChangeContext context) {

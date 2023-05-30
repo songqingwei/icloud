@@ -8,6 +8,17 @@ rocketmq:
   name-server: 192.168.68.102:9876 # 访问地址
   producer:
     group: test_group
+xxl:
+  job:
+    accessToken: 123456
+    admin:
+      addresses: http://192.168.68.102:2222/xxl-job-admin
+    executor:
+      logpath: /logs/xxl-job
+      logretentiondays: 7
+      appname: policy-engine
+      ip: 172.16.2.144
+      port: 9999
 dubbo:
   scan:
     basePackages: cn.isqing.icloud.starter.variable,cn.isqing.icloud.policy.engine.dubbo.impl
