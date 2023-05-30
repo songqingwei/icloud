@@ -29,6 +29,7 @@ import cn.isqing.icloud.starter.drools.service.semaphore.dto.AllotterConfigDto;
 import cn.isqing.icloud.starter.drools.service.semaphore.util.Allotter;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
@@ -78,7 +79,7 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
     private ComponentDigraphFlow digraphFlow;
     @Autowired
     private ComponentTextMapper componentTextMapper;
-    @Autowired
+    @Reference(group = "${i.variable.dubbo.group:iVariable}", timeout = 60000, retries = -1, version = "1.0.0")
     private VariableInterface variableInterface;
     @Autowired
     private RunCoreTextMapper runCoreTextMapper;
