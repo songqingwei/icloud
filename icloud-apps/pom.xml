@@ -12,6 +12,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>icloud-app-policy-engine</module>
+        <module>icloud-app-freeswitch</module>
     </modules>
 
     <properties>

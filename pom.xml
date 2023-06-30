@@ -118,6 +118,11 @@
             </dependency>
             <dependency>
                 <groupId>cn.isqing.icloud</groupId>
+                <artifactId>icloud-common-freeswitch-esl-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.isqing.icloud</groupId>
                 <artifactId>icloud-starter-drools</artifactId>
                 <version>${project.version}</version>
             </dependency>

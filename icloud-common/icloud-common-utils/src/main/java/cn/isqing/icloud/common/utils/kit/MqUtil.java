@@ -18,7 +18,7 @@ public class MqUtil {
 
     private static RocketMQTemplate mqTemplate;
 
-    @Autowired
+    @Autowired(required = false)
     public void setMqTemplate(RocketMQTemplate mqTemplate) {
         MqUtil.mqTemplate = mqTemplate;
     }

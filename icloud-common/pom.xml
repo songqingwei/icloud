@@ -15,6 +15,7 @@
     <modules>
         <module>icloud-common-utils</module>
         <module>icloud-common-api</module>
+        <module>icloud-common-freeswitch-esl-client</module>
     </modules>
 
     <properties>

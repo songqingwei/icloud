@@ -182,8 +182,10 @@ PRIMARY KEY (`id`)
 
 # demo dml 样例配置
 <details>
-<summary>点击查看代码</summary>
+<summary></summary>
 <pre><code>
 
 </code></pre>
 </details>
+
+
