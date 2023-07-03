@@ -15,13 +15,17 @@
  */
 package org.freeswitch.esl.client.outbound;
 
+import com.google.common.util.concurrent.Futures;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.freeswitch.esl.client.internal.AbstractEslClientHandler;
 import org.freeswitch.esl.client.internal.Context;
 import org.freeswitch.esl.client.transport.event.EslEvent;
 import org.freeswitch.esl.client.transport.message.EslMessage;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 /**
  * Specialised {@link AbstractEslClientHandler} that implements the base connecction logic for an
@@ -68,6 +72,17 @@ class OutboundClientHandler extends AbstractEslClientHandler {
                     handleDisconnectionNotice();
                     return null;
                 });
+        /**
+         * 在outbound的onConnect事件里，如果尝试跟freeswitch发命令，会阻塞，后面的代码无法执行
+         * 为什么thenAccept方法内部改为线程池执行就可以了?
+         * 这个问题可能和 CompletableFuture 的特性有关。当你使用 thenAccept 方法时，它会在同一个线程里执行回调函数，也就是说，它会等待 sendApiSingleLineCommand 的结果返回后，再在同一个线程里调用 clientHandler.onConnect 方法。如果这个方法里有阻塞的操作，比如发送另一个命令给 freeswitch，那么就会导致整个线程被占用，无法处理其他的事件。如果你把 thenAccept 方法内部改为线程池执行，那么就相当于把回调函数放到了另一个线程里执行，这样就不会阻塞原来的线程，也就可以继续处理其他的事件了。
+         * {@link AbstractEslClientHandler#sendApiMultiLineCommand(Channel, List)}
+         * apiCalls 的 future 是一个 CompletableFuture 对象，它表示一个异步的操作，可以在完成时返回一个 EslMessage 结果。这个 future 是由 sendApiMultiLineCommand 方法创建并返回的，它会被添加到 apiCalls 这个队列里，等待被处理。
+         * 上面的方法返回里future不会阻塞，但是{@link Futures#getUnchecked(Future)} 会调用future.get()等待执行完成
+         * 当 channel 写入命令并刷新后，freeswitch 会返回一个响应，这个响应会被 channelRead0 方法接收并解析成一个 EslMessage 对象。然后，channelRead0 方法会从 apiCalls 队列里取出第一个 future，并调用它的 complete 方法，把 EslMessage 作为结果传递给 future。这样，future 就完成了。
+         * 问题应该就是这里收到响应，却没有线程执行！改成线程池，在异步线程阻塞，本线程完成future。
+         * 为什么是本线程，这就需要继续梳理整个执行逻辑了......
+          */
     }
 
     @Override
