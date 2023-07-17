@@ -30,7 +30,7 @@ public class DemoController {
     private VariableInterface api;
 
     /**
-     * 发布遍历集变更事件
+     * 发布变量集变更事件
      *
      * @param coreId
      * @param list

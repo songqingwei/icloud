@@ -87,7 +87,7 @@ public class ClientUtil {
         String calleeNumber = event.getEventHeaders().get("Caller-Callee-ID-Number");
         String callerNumber = event.getEventHeaders().get("Caller-Caller-ID-Number");
         log.info("用户转接, 主叫：" + callerNumber + " , 被叫：" + calleeNumber);
-        if (busiUuid == null) {
+        if (busiUuid != null) {
             String command = "uuid_break " + uuid;
             CompletableFuture<EslEvent> future = client.sendBackgroundApiCommand(command, null);
             future.thenAccept(asyncEslEventConsumer());
