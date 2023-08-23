@@ -16,9 +16,11 @@
 package org.freeswitch.esl.client.transport.message;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
 import io.netty.handler.codec.TooLongFrameException;
+import io.netty.util.CharsetUtil;
 import org.freeswitch.esl.client.transport.HeaderParser;
 import org.freeswitch.esl.client.transport.message.EslHeaders.Name;
 import org.slf4j.Logger;
@@ -78,6 +80,19 @@ public class EslFrameDecoder extends ReplayingDecoder<EslFrameDecoder.State> {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> out) throws Exception {
+
+        // 判断ByteBuf的可读字节数是否等于heartbeat detection字符串的长度
+        if (buffer.readableBytes() == "heartbeat detection".length()) {
+            // 将数据转换为字符串
+            String data = buffer.toString(CharsetUtil.UTF_8);
+            // 判断数据是否是heartbeat detection字符串
+            if (data.equals("heartbeat detection")) {
+                // 直接向通道写入OK字符串
+                ctx.writeAndFlush(Unpooled.copiedBuffer("+OK", CharsetUtil.UTF_8));
+                return;
+            }
+        }
+
         State state = state();
 
         log.trace("decode() : state [{}]", state);

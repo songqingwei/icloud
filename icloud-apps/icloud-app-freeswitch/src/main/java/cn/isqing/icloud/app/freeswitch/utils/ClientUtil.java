@@ -11,6 +11,7 @@ import org.freeswitch.esl.client.internal.IModEslApi;
 import org.freeswitch.esl.client.outbound.SocketClient;
 import org.freeswitch.esl.client.transport.event.EslEvent;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,8 @@ public class ClientUtil {
 
     @Value("${i.outbound.port:9091}")
     public int port;
+    @Autowired
+    private OutboundHandler outboundHandler;
 
     public static SocketClient outboundServer;
     public static Client client;
@@ -54,7 +57,7 @@ public class ClientUtil {
             String busiUuid = event.getEventHeaders().get("variable_busi_uuid");
             String uuid = event.getEventHeaders().get("Unique-ID");
             if (busiUuid == null) {
-                log.info("监听到事件:{}", eventName);
+                // log.info("监听到事件:{}", eventName);
             } else {
                 log.info("监听到事件:{}[busiUuid:{}]", eventName, busiUuid);
             }
@@ -146,7 +149,7 @@ public class ClientUtil {
                     dto.setCalleeOk(true);
                     dto.setCalleeUuid(uuid);
                     // String command = String.format("uuid_transfer %s  {busi_uuid=%s,execute_on_transfer=stop_music,hangup_after_bridge=true}user/%s", uuid, busiUuid, dto.getCaller());
-                    command = "originate {busi_uuid=" + busiUuid + ",execute_on_bridge=stop_music,hangup_after_bridge=true}user/" + dto.getCaller() + " &playback(my/turandeziwo.wav)";
+                    command = "originate {rtp_secure_media=optional,media_mix_inbound_outbound_codecs=true,busi_uuid=" + busiUuid + ",execute_on_bridge=stop_music,hangup_after_bridge=true}user/" + dto.getCaller() + " &playback(my/turandeziwo.wav)";
                 } else {
                     dto.setCallerUuid(uuid);
                     command = String.format("uuid_bridge %s %s a_stop_displace=true,b_stop_displace=true,hangup_after_bridge=true", dto.getCallerUuid(), dto.getCalleeUuid());
@@ -164,8 +167,8 @@ public class ClientUtil {
         SocketClient outboundServer = null;
         try {
             outboundServer = new SocketClient(
-                    new InetSocketAddress("localhost", port),
-                    () -> new OutboundHandler());
+                    new InetSocketAddress("0.0.0.0", port),
+                    () -> outboundHandler);
             outboundServer.startAsync();
         } catch (Exception e) {
             log.error(e.getMessage(),e);

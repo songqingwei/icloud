@@ -1,64 +1,50 @@
 package cn.isqing.icloud.app.freeswitch.service.outbound;
 
+import cn.isqing.icloud.app.freeswitch.dao.mapper.SipRegistrationsMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.freeswitch.esl.client.dptools.Execute;
 import org.freeswitch.esl.client.dptools.ExecuteException;
 import org.freeswitch.esl.client.internal.Context;
 import org.freeswitch.esl.client.outbound.IClientHandler;
 import org.freeswitch.esl.client.transport.event.EslEvent;
-import org.freeswitch.esl.client.transport.message.EslHeaders;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
+@Service
 @Slf4j
 public class OutboundHandler implements IClientHandler {
 
-    private Map<String, Boolean> checkMusic = new ConcurrentHashMap<>();
-
-    public static String nameMapToString(Map<EslHeaders.Name, String> map,
-                                         List<String> lines) {
-        StringBuilder sb = new StringBuilder("\nHeaders:\n");
-        for (EslHeaders.Name key : map.keySet()) {
-            if (key == null)
-                continue;
-            sb.append(key);
-            sb.append("\n\t\t\t\t = \t ");
-            sb.append(map.get(key));
-            sb.append("\n");
-        }
-        if (lines != null) {
-            sb.append("Body Lines:\n");
-            for (String line : lines) {
-                sb.append(line);
-                sb.append("\n");
-            }
-        }
-        return sb.toString();
-    }
+    @Autowired
+    private SipRegistrationsMapper mapper;
 
     @Override
     public void onConnect(Context context, EslEvent eslEvent) {
-
-        long threadId = Thread.currentThread().getId();
-
-        String uuid = eslEvent.getEventHeaders().get("Unique-ID");
-        log.debug(nameMapToString(eslEvent.getMessageHeaders(), eslEvent.getEventBodyLines()));
-        log.info("Creating execute app for uuid {},threadId:" + threadId, uuid);
-
         try {
+            // todo 防止重连
+            long threadId = Thread.currentThread().getId();
+            Map<String, String> headers = eslEvent.getEventHeaders();
+            String uuid = headers.get("Unique-ID");
+            log.info("Outbound onConnect:uuid {},threadId {}", uuid, threadId);
+            String dest = headers.get("Channel-Destination-Number");
             Execute exe = new Execute(context, uuid);
-            // subscribe event
+            // 订阅事件
             // EslMessage eslMessage = context.sendCommand("event plain ALL");
             // if (eslMessage.getHeaderValue(EslHeaders.Name.REPLY_TEXT).startsWith("+OK")) {
             //     log.info("subscribe event success!");
             // }
             exe.answer();
             exe.playback("my/turandeziwo.wav");
-            exe.set("hangup_after_bridge","true");
-            String dest = eslEvent.getEventHeaders().get("Channel-Destination-Number");
-            exe.bridge("user/" + dest);
+            exe.set("hangup_after_bridge", "true");
+            // dest如果以0开头则走网关,如0 01 1001就是使用gw-01网关拨打1001
+            if(dest.startsWith("0")){
+                String destStr = String.format("{rtp_secure_media=forbidden}sofia/gateway/gw-%s/%s", dest.substring(1,3), dest.substring(3));
+                exe.bridge(destStr);
+            }else {
+                exe.export("rtp_secure_media", "optional", false);
+                exe.bridge("{media_mix_inbound_outbound_codecs=true}user/" + dest);
+            }
             // exe.hangup("exec over,auto hangup");
         } catch (ExecuteException e) {
             log.error("Could not prompt for digits", e);

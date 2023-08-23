@@ -5,12 +5,11 @@ i:
     port: 9091
 # 配置redis
 # spring.redis.host
-spring:
-  datasource:
-    type: com.alibaba.druid.pool.DruidDataSource
-    driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/opensips?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&useAffectedRows=true&useSSL=false
-    username: root
-    # 1.配置生成的password
-    password: root
+i.freeswitch:
+    datasource:
+      type: com.alibaba.druid.pool.DruidDataSource
+      driverClassName: com.mysql.jdbc.Driver
+      url: jdbc:mysql://192.168.68.101:3306/freeswitch?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&useAffectedRows=true&useSSL=false
+      username: root
+      password: root
 

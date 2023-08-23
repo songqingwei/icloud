@@ -29,7 +29,7 @@ public class InboundServiceImpl implements InboundService {
             dto.setCallee(callee);
             dto.setBusiUuid(uuid);
             ClientUtil.CALL_MAP.put(uuid, dto);
-            CompletableFuture<EslEvent> future = client.sendBackgroundApiCommand("originate", "{busi_uuid=" + uuid + "}user/" + callee + " &playback(my/turandeziwo.wav)");
+            CompletableFuture<EslEvent> future = client.sendBackgroundApiCommand("originate", "{rtp_secure_media=optional,media_mix_inbound_outbound_codecs=true,busi_uuid=" + uuid + "}user/" + callee + " &playback(my/turandeziwo.wav)");
             future.thenAccept(ClientUtil.asyncEslEventConsumer());
         } else {
             log.error("连接不可用");
