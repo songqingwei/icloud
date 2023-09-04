@@ -1,13 +1,11 @@
 package cn.isqing.icloud.app.freeswitch.service.outbound;
 
-import cn.isqing.icloud.app.freeswitch.dao.mapper.SipRegistrationsMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.freeswitch.esl.client.dptools.Execute;
 import org.freeswitch.esl.client.dptools.ExecuteException;
 import org.freeswitch.esl.client.internal.Context;
 import org.freeswitch.esl.client.outbound.IClientHandler;
 import org.freeswitch.esl.client.transport.event.EslEvent;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -15,9 +13,6 @@ import java.util.Map;
 @Service
 @Slf4j
 public class OutboundHandler implements IClientHandler {
-
-    @Autowired
-    private SipRegistrationsMapper mapper;
 
     @Override
     public void onConnect(Context context, EslEvent eslEvent) {
