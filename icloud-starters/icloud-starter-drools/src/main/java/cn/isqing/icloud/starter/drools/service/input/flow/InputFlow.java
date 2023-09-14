@@ -84,7 +84,7 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
         accept(this::runRule);
         stepName("更新log记录");
         accept(this::updateLog);
-        stepName("组装反参");
+        stepName("组装返参");
         test(c->!c.isAsync());
         accept(this::assemblingRes);
         stepName("触发action事件");

@@ -1,11 +1,10 @@
 package cn.isqing.icloud.starter.variable.service.component.flow;
 
-import cn.isqing.icloud.common.utils.annotation.RouteType;
 import cn.isqing.icloud.common.api.dto.Response;
+import cn.isqing.icloud.common.utils.annotation.RouteType;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
 import cn.isqing.icloud.starter.variable.common.constants.DataSourceTypeConstatnts;
 import cn.isqing.icloud.starter.variable.common.constants.DubboDSConfigConstatnts;
-import cn.isqing.icloud.starter.variable.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.variable.common.dto.DubboMethodDto;
 import cn.isqing.icloud.starter.variable.common.enums.DubboComponentDialectType;
 import com.alibaba.dubbo.config.ReferenceConfig;
@@ -28,12 +27,6 @@ import java.util.Map;
 @Slf4j
 @RouteType(r1 = DataSourceTypeConstatnts.DUBBO)
 public class DubboComponentExecFlow extends BaseComponentExecFlow {
-
-    @Override
-    protected void registerRes(ComponentExecContext context) {
-        ComponentExecDto resDto = context.getExecDto();
-        resDto.getAboveResMap().put(context.getComponent().getId(), context.getExecRes());
-    }
 
     @Override
     protected void pre(ComponentExecContext context) {

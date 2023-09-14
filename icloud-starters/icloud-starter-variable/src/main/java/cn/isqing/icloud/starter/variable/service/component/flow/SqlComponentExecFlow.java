@@ -1,7 +1,7 @@
 package cn.isqing.icloud.starter.variable.service.component.flow;
 
-import cn.isqing.icloud.common.utils.annotation.RouteType;
 import cn.isqing.icloud.common.api.dto.Response;
+import cn.isqing.icloud.common.utils.annotation.RouteType;
 import cn.isqing.icloud.common.utils.constants.SqlConstants;
 import cn.isqing.icloud.common.utils.enums.status.YesOrNo;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
@@ -10,7 +10,6 @@ import cn.isqing.icloud.common.utils.sql.SqlUtil;
 import cn.isqing.icloud.starter.variable.common.constants.CommonTextTypeConstants;
 import cn.isqing.icloud.starter.variable.common.constants.DataSourceTypeConstatnts;
 import cn.isqing.icloud.starter.variable.common.constants.SqlResConstants;
-import cn.isqing.icloud.starter.variable.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.variable.common.enums.DataSourceType;
 import cn.isqing.icloud.starter.variable.common.enums.SqlComponentDialectType;
 import cn.isqing.icloud.starter.variable.dao.entity.CommonText;
@@ -84,11 +83,6 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
     private String insertRes = "{\"" + SqlResConstants.INSERT_RES_ID + "\":%d}";
     private String updateRes = "{\"" + SqlResConstants.UPDATE_RES_A_ROWS + "\":%d}";
 
-    @Override
-    protected void registerRes(ComponentExecContext context) {
-        ComponentExecDto resDto = context.getExecDto();
-        resDto.getAboveResMap().put(context.getComponent().getId(), context.getExecRes());
-    }
 
     @Override
     protected Response<Object> replace(String[] requestParams, String path, Object value) {
@@ -119,9 +113,8 @@ public class SqlComponentExecFlow extends BaseComponentExecFlow {
 
     @Override
     protected void execComponent(ComponentExecContext context) {
-        Object request = context.getRequestParamsTpl();
-        String[] sqlArr = (String[]) request;
-        String sql = sqlArr[0];
+        String[] tpl = context.getRequestParamsTpl();
+        String sql = tpl[0];
         JdbcTemplate template = JDBC_MAP.get(context.getComponent().getDataSourceId());
         if (sql.startsWith("insert ") || sql.startsWith("INSERT ")) {
             GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();

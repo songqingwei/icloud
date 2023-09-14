@@ -48,7 +48,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     private Pattern cresPathPattern = Pattern.compile("^(\\$)\\.(\\d+)\\.([^\\s]+)$");
 
     protected BaseComponentExecFlow() {
-        start("执行组件",this);
+        start("执行组件", this);
         errorApply(this::errorAccept);
         stepName("查询组件配置");
         accept(this::getConfig);
@@ -85,15 +85,18 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         }
     }
 
-    protected abstract void registerRes(ComponentExecContext context);
+    protected void registerRes(ComponentExecContext context) {
+        ComponentExecDto resDto = context.getExecDto();
+        resDto.getAboveResMap().put(context.getComponent().getId(), context.getExecRes());
+    }
 
     private void replaceRequestParam(ComponentExecContext context) {
         // 替换模版参数
-        resolveTplParams(context,context.getDependInputParams(), context.getExecDto().getInputParams());
+        resolveTplParams(context, context.getDependInputParams(), context.getExecDto().getInputParams());
         resolveTplDependCRes(context);
-        resolveTplParams(context,context.getDependConstants(), context.getConstantsValue());
-        resolveTplParams(context,context.getSelfConstants());
-        resolveTplParams(context,context.getDependSystemVars(), context.getSystemVarsValue());
+        resolveTplParams(context, context.getDependConstants(), context.getConstantsValue());
+        resolveTplParams(context, context.getSelfConstants());
+        resolveTplParams(context, context.getDependSystemVars(), context.getSystemVarsValue());
     }
 
     /**
@@ -182,14 +185,14 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         return Response.SUCCESS;
     }
 
-    protected void pre(ComponentExecContext componentExecContext){
+    protected void pre(ComponentExecContext componentExecContext) {
 
     }
 
     private void getDSConfig(ComponentExecContext context) {
         Long dataSourceId = context.getComponent().getDataSourceId();
         // 常量数据源
-        if(dataSourceId.equals(0L)){
+        if (dataSourceId.equals(0L)) {
             return;
         }
         CommonTextCondition text = new CommonTextCondition();
@@ -207,7 +210,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
 
     private void getSystemVarsValue(ComponentExecContext context) {
         Map<String, String> configMap = context.getDependSystemVars();
-        if(configMap==null || configMap.isEmpty()){
+        if (configMap == null || configMap.isEmpty()) {
             return;
         }
         Map<String, String> map = new HashMap<>();
@@ -233,7 +236,7 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
 
     private void getConstantValue(ComponentExecContext context) {
         Map<String, String> configMap = context.getDependConstants();
-        if(configMap==null || configMap.isEmpty()){
+        if (configMap == null || configMap.isEmpty()) {
             return;
         }
         List<String> keyList = new ArrayList<>(context.getDependConstants().values());
@@ -255,40 +258,41 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
         List<ComponentText> list = textMapper.selectByCondition(condition);
         Map<Integer, String> map = list.stream().collect(Collectors.groupingBy(ComponentText::getType,
                 Collectors.mapping(ComponentText::getText, Collectors.joining())));
-        Set<Long> cids = JSON.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_CIDS,StrConstants.EMPTY_JSON_ARR), new TypeReference<Set<Long>>() {});
+        Set<Long> cids = JSON.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_CIDS, StrConstants.EMPTY_JSON_ARR), new TypeReference<Set<Long>>() {
+        });
 
         // 判断依赖项是否正常完成
         Set<Long> aboveCids = context.getExecDto().getAboveResMap().keySet();
         Set<Long> difference = new HashSet<>(cids);
         difference.removeAll(aboveCids);
-        if(!difference.isEmpty()){
-            log.warn("缺少依赖组件结果集:{}",difference);
-            interrupt(context,Response.error("缺少依赖组件结果集，取消执行"));
+        if (!difference.isEmpty()) {
+            log.warn("缺少依赖组件结果集:{}", difference);
+            interrupt(context, Response.error("缺少依赖组件结果集，取消执行"));
             return;
         }
 
         context.setDialectConfig(map.getOrDefault(ComponentTextTypeConstants.DIALECT_CONFIG, StrConstants.EMPTY_STR));
-        context.setDependInputParams(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_INPUT_PARAMS,StrConstants.EMPTY_JSON_OBJ),
+        context.setDependInputParams(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_INPUT_PARAMS, StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setDependCRes(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_C_RES,StrConstants.EMPTY_JSON_OBJ),
+        context.setDependCRes(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_C_RES, StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setDependConstants(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_CONSTANTS,StrConstants.EMPTY_JSON_OBJ),
+        context.setDependConstants(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_CONSTANTS, StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setDependSystemVars(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_SYSTEM_VARS,StrConstants.EMPTY_JSON_OBJ),
+        context.setDependSystemVars(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.DEPEND_SYSTEM_VARS, StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setSelfConstants(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.SELF_CONSTANTS,StrConstants.EMPTY_JSON_OBJ),
+        context.setSelfConstants(JSONObject.parseObject(map.getOrDefault(ComponentTextTypeConstants.SELF_CONSTANTS, StrConstants.EMPTY_JSON_OBJ),
                 new TypeReference<Map<String, String>>() {
                 })
         );
-        context.setResJudge(JSON.parseArray(map.getOrDefault(ComponentTextTypeConstants.RES_JUDGE,StrConstants.EMPTY_JSON_ARR)).toArray(new String[0]));
+        context.setResJudge(JSON.parseArray(map.getOrDefault(ComponentTextTypeConstants.RES_JUDGE, StrConstants.EMPTY_JSON_ARR)).toArray(new String[0]));
     }
 
 

@@ -10,5 +10,7 @@ public class DataSourceTypeConstatnts {
     public static final String DEFAULT = "0";
     public static final String SQL = "1";
     public static final String DUBBO = "2";
+    // 调用本地方法
+    public static final String FUNCTION = "3";
 
 }

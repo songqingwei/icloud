@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class SyncResVariableDto {
 
-    // 反参变量名
+    // 返参变量名
     private String name;
     // 对应的变量id
     private Long variableId;
