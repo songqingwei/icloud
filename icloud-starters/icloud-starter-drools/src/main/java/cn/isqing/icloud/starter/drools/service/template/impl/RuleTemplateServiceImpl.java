@@ -132,7 +132,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
 
         PageResDto<RuleTemplateDto> resDto = new PageResDto<>();
         if (pageInfo.isNeedList()) {
-            //组装结果dto
+            // 组装结果dto
             left.setLimit(pageInfo.getPageSize());
             left.setOffset(pageInfo.getOffset());
             List<RuleTemplateDto> dtoList = JsonUtil.toList(mapper.leftJoinSelect(left, right, TableJoinConstants.RTPL_BUSI), RuleTemplateDto.class);
@@ -271,6 +271,8 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
                     log.error("检测到异常入侵条件:{}", d);
                     throw new BaseException("检测到异常入侵条件");
                 }
+                // null要求前端加引号{"value1":"\"null\"","value2":"null",}
+                // value1是字符串null，value2是真null
                 ApiVariableDto variable = map.get(d.getId());
                 if (variable == null) {
                     Response<ApiVariableDto> res = variableInterface.getVariableById(d.getId());
@@ -285,15 +287,15 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
                 String left = VariableUtil.getUniName(variable);
                 VariableType variableType = VariableType.fromCode(variable.getType());
                 String operator = OperatorType.getEnum(d.getOperator().intValue()).getValue();
-                switch (variableType){
+                switch (variableType) {
                     case BIG_DECIMAL:
-                        if(d.getValue()!=null){
-                            return left+".compareTo(BigDecimal.valueOf(\""+d.getValue()+"\")) "+operator+" 0";
+                        if (d.getValue() != null) {
+                            return left + ".compareTo(BigDecimal.valueOf(\"" + d.getValue() + "\")) " + operator + " 0";
                         }
                         break;
                     case BIG_INTEGER:
-                        if(d.getValue()!=null){
-                            return left+".compareTo(new BigInteger(\""+d.getValue()+"\")) "+operator+" 0";
+                        if (d.getValue() != null) {
+                            return left + ".compareTo(new BigInteger(\"" + d.getValue() + "\")) " + operator + " 0";
                         }
                         break;
                     default:
