@@ -30,11 +30,13 @@ public class OutboundHandler implements IClientHandler {
             //     log.info("subscribe event success!");
             // }
             exe.answer();
-            exe.playback("my/turandeziwo.wav");
+            //头节点播放 尾节点接通后结束头节点的播放
+            //exe.playback("my/turandeziwo.wav");
             exe.set("hangup_after_bridge", "true");
+            exe.set("inherit_codec", "true");
             // dest如果以0开头则走网关,如0 01 1001就是使用gw-01网关拨打1001
             if(dest.startsWith("0")){
-                String destStr = String.format("{rtp_secure_media=forbidden}sofia/gateway/gw-%s/%s", dest.substring(1,3), dest.substring(3));
+                String destStr = String.format("{rtp_secure_media=forbidden,media_mix_inbound_outbound_codecs=true}sofia/gateway/gw-%s/%s", dest.substring(1,3), dest.substring(3));
                 exe.bridge(destStr);
             }else {
                 exe.export("rtp_secure_media", "optional", false);

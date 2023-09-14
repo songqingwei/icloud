@@ -152,6 +152,7 @@ CREATE TABLE `run_log` (
 `core_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '限界id',
 `busi_date` date NOT NULL,
 `source_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '源id:外部业务标识',
+`group_key` varchar(255) NOT NULL DEFAULT '' COMMENT '分组标识',
 `target_id` bigint(20) NOT NULL DEFAULT '0',
 `tid` bigint(20) NOT NULL DEFAULT '0' COMMENT '规则模版id',
 `lock_status` tinyint(4) NOT NULL DEFAULT '0',

@@ -92,12 +92,6 @@
             </dependency>
             <dependency>
                 <groupId>cn.isqing.icloud</groupId>
-                <artifactId>icloud-interview-annotation-processor</artifactId>
-                <version>${project.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>cn.isqing.icloud</groupId>
                 <artifactId>icloud-starters</artifactId>
                 <version>${project.version}</version>
             </dependency>

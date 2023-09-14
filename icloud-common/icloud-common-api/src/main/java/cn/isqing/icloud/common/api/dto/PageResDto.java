@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author songqingwei@aliyun.com

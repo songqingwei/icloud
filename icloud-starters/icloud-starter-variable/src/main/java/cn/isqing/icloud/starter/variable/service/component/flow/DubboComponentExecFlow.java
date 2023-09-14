@@ -36,19 +36,6 @@ public class DubboComponentExecFlow extends BaseComponentExecFlow {
     }
 
     @Override
-    protected Response<Object> replace(String[] requestParams, String path, Object value) {
-        String v = String.valueOf(value);
-        if (path.startsWith("##{")) {
-            v = "\"" + v + "\"";
-        } else if (path.startsWith("#{")) {
-            v = "\'" + v + "\'";
-        }
-        requestParams[0] = requestParams[0].replace(path, v);
-
-        return Response.SUCCESS;
-    }
-
-    @Override
     protected void pre(ComponentExecContext context) {
         // 数据源
         Map<String, Object> dsConfig = context.getDsConfig();

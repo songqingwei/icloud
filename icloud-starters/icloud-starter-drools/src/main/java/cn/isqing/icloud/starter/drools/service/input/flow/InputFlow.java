@@ -1,7 +1,7 @@
 package cn.isqing.icloud.starter.drools.service.input.flow;
 
-import cn.isqing.icloud.common.utils.constants.SqlConstants;
 import cn.isqing.icloud.common.api.dto.Response;
+import cn.isqing.icloud.common.utils.constants.SqlConstants;
 import cn.isqing.icloud.common.utils.enums.status.CommonStatusEnum;
 import cn.isqing.icloud.common.utils.enums.status.SubFlowStatusEnum;
 import cn.isqing.icloud.common.utils.flow.FlowTemplate;
@@ -12,20 +12,21 @@ import cn.isqing.icloud.common.utils.time.TimeUtil;
 import cn.isqing.icloud.common.utils.validation.ValidationUtil;
 import cn.isqing.icloud.starter.drools.common.constants.*;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
+import cn.isqing.icloud.starter.drools.common.dto.SyncResVariableDto;
 import cn.isqing.icloud.starter.drools.common.util.KieUtil;
 import cn.isqing.icloud.starter.drools.common.util.TextSqlUtil;
-import cn.isqing.icloud.starter.drools.dao.entity.RuleCoreCondition;
-import cn.isqing.icloud.starter.drools.dao.entity.RunLog;
-import cn.isqing.icloud.starter.drools.dao.entity.RunLogText;
+import cn.isqing.icloud.starter.drools.dao.entity.*;
+import cn.isqing.icloud.starter.drools.dao.mapper.CommonTextMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.RuleCoreMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.RunLogMapper;
 import cn.isqing.icloud.starter.drools.dao.mapper.RunLogTextMapper;
-import cn.isqing.icloud.starter.drools.service.component.factory.ComponentExecFactory;
 import cn.isqing.icloud.starter.drools.service.event.EventPublisher;
 import cn.isqing.icloud.starter.drools.service.input.dto.InputDto;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariablesValueReqDto;
 import cn.isqing.icloud.starter.variable.api.util.VariableUtil;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.TypeReference;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.kie.api.KieBase;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author songqingwei@aliyun.com
@@ -52,7 +54,7 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
     @Autowired
     private RunLogMapper logMapper;
     @Autowired
-    private ComponentExecFactory execFactory;
+    private CommonTextMapper commonTextMapper;
 
     @Autowired
     private VariableInterface variableInterface;
@@ -82,11 +84,33 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
         accept(this::runRule);
         stepName("更新log记录");
         accept(this::updateLog);
+        stepName("组装反参");
+        test(c->!c.isAsync());
+        accept(this::assemblingRes);
         stepName("触发action事件");
-        test(c->!c.isCancleSubFlow());
+        test(c->!c.isCancleSubFlow() && c.isAsync());
         accept(this::publishEvent);
         finallyAcceptName("释放资源");
         finallyAccept(this::releaseResource);
+    }
+
+    private void assemblingRes(InputFlowContext context) {
+        // todo-sqw
+        // 获取同步结果变量配置
+        CommonTextCondition condition = new CommonTextCondition();
+        condition.setFid(context.getRuleId());
+        condition.setType(CommonTextTypeConstants.SYNC_RES_VARIABLE);
+        condition.setOrderBy(SqlConstants.ID_ASC);
+        List<CommonText> texts = commonTextMapper.selectByCondition(condition);
+        if(texts.isEmpty()){
+            return;
+        }
+        String str = texts.stream().map(CommonText::getText).collect(Collectors.joining());
+        List<SyncResVariableDto> syncResVariable = JSON.parseObject(str, new TypeReference<List<SyncResVariableDto>>() {
+        });
+        Map<String, Object> res = new HashMap<>();
+
+
     }
 
     private void checkParam(InputFlowContext context) {
@@ -220,6 +244,9 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
         if (logs.isEmpty()) {
             runLog.setBusiDate(TimeUtil.now().toLocalDate());
             runLog.setActionId(context.getInputDto().getActionId());
+            //
+
+
             logMapper.insert(runLog);
             context.setRunLog(logMapper.selectById(runLog.getId(), RunLog.class));
             return;

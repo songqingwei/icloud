@@ -17,6 +17,7 @@ import cn.isqing.icloud.starter.drools.common.constants.CommonTextTypeConstants;
 import cn.isqing.icloud.starter.drools.common.constants.EventTypeConstants;
 import cn.isqing.icloud.starter.drools.common.constants.TableJoinConstants;
 import cn.isqing.icloud.starter.drools.common.dto.RuleH5Dto;
+import cn.isqing.icloud.starter.drools.common.dto.SyncResVariableDto;
 import cn.isqing.icloud.starter.drools.common.dto.UpdateStatusDto;
 import cn.isqing.icloud.starter.drools.common.enums.OperatorType;
 import cn.isqing.icloud.starter.drools.common.util.TextSqlUtil;
@@ -150,7 +151,9 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         condition.setFid(id);
         condition.setTypeCondition(Arrays.asList(CommonTextTypeConstants.TARGET_RATIO,
                 CommonTextTypeConstants.TARGET_NAME,
-                CommonTextTypeConstants.RULE_CONTENT_H5));
+                CommonTextTypeConstants.RULE_CONTENT_H5,
+                CommonTextTypeConstants.SYNC_RES_VARIABLE
+        ));
         condition.setOrderBy(SqlConstants.ID_ASC);
         List<CommonText> texts = textMapper.selectByCondition(condition);
         Map<Integer, String> map = texts.stream().collect(Collectors.groupingBy(CommonText::getType,
@@ -160,7 +163,9 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         }));
         dto.setTargetName(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.TARGET_NAME, StrConstants.EMPTY_JSON_OBJ), new TypeReference<Map<Long, String>>() {
         }));
-        dto.setContent(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.RULE_CONTENT_H5, StrConstants.EMPTY_JSON_OBJ), RuleH5Dto.class));
+        dto.setSyncResVariable(JSON.parseObject(map.getOrDefault(CommonTextTypeConstants.SYNC_RES_VARIABLE, StrConstants.EMPTY_JSON_ARR), new TypeReference<List<SyncResVariableDto>>() {
+        }));
+
         return Response.success(dto);
     }
 
@@ -237,6 +242,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
         insetText(text, dto.getTargetRatio(), CommonTextTypeConstants.TARGET_RATIO);
         insetText(text, dto.getTargetName(), CommonTextTypeConstants.TARGET_NAME);
         insetText(text, dto.getContent(), CommonTextTypeConstants.RULE_CONTENT_H5);
+        insetText(text, dto.getSyncResVariable(), CommonTextTypeConstants.SYNC_RES_VARIABLE);
 
         // 解析h5规则
         RuleH5Dto h5Dto = dto.getContent();
@@ -265,8 +271,6 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
                     log.error("检测到异常入侵条件:{}", d);
                     throw new BaseException("检测到异常入侵条件");
                 }
-                // 字符串类型时要求前端加引号{"value1":"\"null\"","value2":"null",}
-                // value1是字符串null，value2是真null
                 ApiVariableDto variable = map.get(d.getId());
                 if (variable == null) {
                     Response<ApiVariableDto> res = variableInterface.getVariableById(d.getId());
@@ -283,12 +287,12 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
                 String operator = OperatorType.getEnum(d.getOperator().intValue()).getValue();
                 switch (variableType){
                     case BIG_DECIMAL:
-                        if(!d.getValue().equals("\"null\"")){
+                        if(d.getValue()!=null){
                             return left+".compareTo(BigDecimal.valueOf(\""+d.getValue()+"\")) "+operator+" 0";
                         }
                         break;
                     case BIG_INTEGER:
-                        if(!d.getValue().equals("\"null\"")){
+                        if(d.getValue()!=null){
                             return left+".compareTo(new BigInteger(\""+d.getValue()+"\")) "+operator+" 0";
                         }
                         break;

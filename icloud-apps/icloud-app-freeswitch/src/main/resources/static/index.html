@@ -1,0 +1,50 @@
+<html>
+<head>
+    <title>SIP.js Demo</title>
+    <meta charset="UTF-8">
+
+</head>
+<body>
+<h1>SIP.js Demo</h1>
+<p>这是一个使用 SIP.js 的简单示例</p>
+<div>
+    <label for="server">服务器地址：</label>
+    <input id="server" type="text" value="wss://192.168.68.101:7443/ws"/>
+</div>
+<div>
+    <button id="connect">连接</button>
+    <button id="unconnect">断开</button>
+    <span id="connect_status">未连接</span>
+</div>
+<div>
+    <label for="aor">分机号：</label>
+    <input id="aor" type="text" value="sip:1000@192.168.68.101"/>
+</div>
+<div>
+    <label for="password">密码：</label>
+    <input id="password" type="text" value="1234"/>
+</div>
+<div>
+    <button id="register">注册</button>
+    <button id="unregister">注销</button>
+    <span id="status">未注册</span>
+</div>
+<div>
+    <label for="target">目标号码：</label>
+    <input id="target" type="text" value="sip:1001@192.168.68.101"/>
+</div>
+<div>
+    <button id="call">拨打</button>
+    <button id="hangup">挂断</button>
+    <button id="answer">接听</button>
+    <input type="checkbox" id="auto-answer-checkbox" data-action="auto-answer">
+    <label for="auto-answer-checkbox">自动接通</label>
+</div>
+<!-- 远端音频元素 -->
+<audio id="remoteAudio"></audio>
+
+<script src="./sip-0.21.2.js"></script>
+<script src="./main.js"></script>
+</body>
+</html>
+

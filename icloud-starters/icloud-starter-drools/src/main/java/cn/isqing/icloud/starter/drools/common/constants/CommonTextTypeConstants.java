@@ -22,6 +22,8 @@ public class CommonTextTypeConstants {
     public static final int TARGET_RATIO = 4;
     // 目标名称-json
     public static final int TARGET_NAME = 5;
+    // 同步返回的变量定义
+    public static final int SYNC_RES_VARIABLE = 6;
     // rule_template 相关 end--------------------------
 
 

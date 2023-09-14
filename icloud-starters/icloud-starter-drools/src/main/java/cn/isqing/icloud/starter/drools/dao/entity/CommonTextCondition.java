@@ -15,6 +15,7 @@ public class CommonTextCondition extends BaseCondition {
 
     // 文本类型
     private List<Integer> typeCondition;
+
     private Integer type;
 
 }

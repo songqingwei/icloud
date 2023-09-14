@@ -17,6 +17,8 @@ public class RunLog {
     // 源id:外部业务标识
     private Long sourceId;
 
+    private String groupKey;
+
     private Long targetId;
 
     // 规则模版id

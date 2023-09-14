@@ -170,12 +170,28 @@ public abstract class BaseComponentExecFlow extends FlowTemplate<ComponentExecCo
     }
 
 
-    protected abstract Response<Object> replace(String[] requestParams, String path, Object value);
+    protected Response<Object> replace(String[] requestParams, String path, Object value) {
+        String v = String.valueOf(value);
+        if (path.startsWith("##{")) {
+            v = "\"" + v + "\"";
+        } else if (path.startsWith("#{")) {
+            v = "\'" + v + "\'";
+        }
+        requestParams[0] = requestParams[0].replace(path, v);
 
-    protected abstract void pre(ComponentExecContext componentExecContext);
+        return Response.SUCCESS;
+    }
+
+    protected void pre(ComponentExecContext componentExecContext){
+
+    }
 
     private void getDSConfig(ComponentExecContext context) {
         Long dataSourceId = context.getComponent().getDataSourceId();
+        // 常量数据源
+        if(dataSourceId.equals(0L)){
+            return;
+        }
         CommonTextCondition text = new CommonTextCondition();
         text.setFid(dataSourceId);
         text.setType(CommonTextTypeConstants.DATA_SOURCE_CINFIG);

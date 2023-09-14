@@ -68,6 +68,10 @@ public class Response<T> implements Serializable {
         return new Response<>(ResCodeEnum.SUCCESS.getCode(), msg, data);
     }
 
+    public static <T> Response<T> success() {
+        return (Response<T>) SUCCESS;
+    }
+
     public static <T> Response<T> success(T data) {
         return new Response<>(ResCodeEnum.SUCCESS.getCode(), ResCodeEnum.SUCCESS.getMsg(), data);
     }

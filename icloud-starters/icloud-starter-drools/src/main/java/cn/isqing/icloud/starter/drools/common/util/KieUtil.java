@@ -1,22 +1,24 @@
 package cn.isqing.icloud.starter.drools.common.util;
 
-import cn.isqing.icloud.common.utils.dto.BaseException;
 import cn.isqing.icloud.common.api.enums.ResCodeEnum;
+import cn.isqing.icloud.common.utils.dto.BaseException;
 import cn.isqing.icloud.starter.drools.common.dto.RuleKeyDto;
+import cn.isqing.icloud.starter.drools.common.dto.SyncResVariableDto;
 import cn.isqing.icloud.starter.drools.dao.entity.Component;
 import cn.isqing.icloud.starter.drools.dao.entity.RuleTemplate;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
-import cn.isqing.icloud.starter.variable.api.dto.ApiVariableSimpleDto;
 import lombok.extern.slf4j.Slf4j;
 import org.drools.template.ObjectDataCompiler;
 import org.kie.api.KieBase;
 import org.kie.internal.utils.KieHelper;
 import org.springframework.util.ResourceUtils;
-import org.springframework.util.StringUtils;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -33,6 +35,8 @@ public class KieUtil {
     public static final Map<RuleKeyDto, KieHelper> helperMap = new ConcurrentHashMap<>();
     public static final Map<RuleKeyDto, KieBase> baseMap = new ConcurrentHashMap<>();
     public static final Map<RuleKeyDto, Map<String, ApiVariableDto>> variableMap = new ConcurrentHashMap<>();
+    //  Map<Long, SyncResVariableDto> <规则id,>
+    public static final Map<RuleKeyDto, Map<Long, SyncResVariableDto>> syncResMap = new ConcurrentHashMap<>();
     public static final Map<RuleKeyDto, List<List<Component>>> actionMap = new ConcurrentHashMap<>();
 
 
