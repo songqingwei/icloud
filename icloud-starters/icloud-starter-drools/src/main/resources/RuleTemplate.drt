@@ -2,7 +2,6 @@ template header
 id
 coreId
 domain
-busiCode
 actionId
 busiCode
 cron
