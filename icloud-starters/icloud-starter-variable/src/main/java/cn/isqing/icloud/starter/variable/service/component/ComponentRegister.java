@@ -18,7 +18,6 @@ public interface ComponentRegister {
 
     /**
      * @param name     注册名称
-     * @param function 入参即解析后的配置字符串，返参要求是json字符串
      */
     UnaryOperator<String> get(String name);
 
