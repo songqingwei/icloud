@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>icloud-starter-drools</module>
-        <module>icloud-starters-flow</module>
+        <module>icloud-starter-flow</module>
         <module>icloud-starter-variable</module>
         <module>icloud-starter-variable-api</module>
     </modules>
