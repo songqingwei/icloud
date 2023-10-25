@@ -20,6 +20,7 @@ public class FlowContext<R> {
      * flow end ：flow本身执行完毕 返回之前更新为true
      */
     protected boolean flowEnd = false;
+    protected boolean casLock = false;
     /**
      * 是否需要打印入参出参
      */

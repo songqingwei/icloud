@@ -31,8 +31,6 @@ public class InputFlowContext extends FlowContext<Object> {
 
     private RLock lock;
 
-    private boolean casLock = false;
-
     private RunLog runLog;
 
     private Long ruleId;
