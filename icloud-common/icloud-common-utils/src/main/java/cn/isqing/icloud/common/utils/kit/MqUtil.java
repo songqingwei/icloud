@@ -46,5 +46,17 @@ public class MqUtil {
         }
     }
 
+    public static void syncSend(String destination, Object msg) {
+        try {
+            SendResult sendResult = mqTemplate.syncSend(destination, msg);
+            if (sendResult.getSendStatus().equals(SendStatus.SEND_OK)) {
+                log.info("发送消息成功: destination: {}, msg: {}", destination, msg);
+            } else {
+                log.info("发送消息失败: destination: {}, msg: {}, sendStatus: {}", destination, msg, sendResult.getSendStatus());
+            }
+        } catch (Exception e) {
+            log.error("发送消息异常：" + e.getMessage(), e);
+        }
+    }
 
 }

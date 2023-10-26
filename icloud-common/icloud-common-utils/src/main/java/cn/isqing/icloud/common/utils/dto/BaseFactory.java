@@ -23,20 +23,25 @@ public class BaseFactory<T> {
 
     private Map<String, List<T>> map = new HashMap<>();
 
-    public boolean isSupport(String... r){
+    public boolean isSupport(String... r) {
         return map.containsKey(getKey(r));
     }
 
-    public List<T> get(String... r){
+    public List<T> get(String... r) {
         return map.get(getKey(r));
     }
 
-    public String getKey(String... args){
+    public String getKey(String... args) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] == null) {
+                args[i] = "";
+            }
+        }
         // 占位符个数
         int num = 3;
-        if(args.length>=3){
+        if (args.length >= 3) {
             return String.format(temlate, args);
-        }else{
+        } else {
             String[] newArgs = new String[num];
             // 将参数数组复制到新数组中
             System.arraycopy(args, 0, newArgs, 0, args.length);
@@ -49,7 +54,7 @@ public class BaseFactory<T> {
     }
 
 
-    public T getSingle(String... r){
+    public T getSingle(String... r) {
         return map.get(getKey(r)).get(0);
     }
 
@@ -58,7 +63,7 @@ public class BaseFactory<T> {
         list.forEach(o -> {
             RouteType routeType = o.getClass().getAnnotation(RouteType.class);
             String key = getKey(routeType.r1(), routeType.r2(), routeType.r3());
-            map.computeIfAbsent(key,k->new ArrayList<>()).add(o);
+            map.computeIfAbsent(key, k -> new ArrayList<>()).add(o);
         });
     }
 }
