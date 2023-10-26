@@ -35,9 +35,9 @@ public class FlowTemplate<T extends FlowContext, R> {
     private Function<T, Response<R>> finallyApply;
     private String finallyApplyName;
 
-    protected void start(String flowName, Object flow) {
+    protected void start(String flowName) {
         this.flowName = flowName;
-        this.flowClassName = flow.getClass().getSimpleName();
+        this.flowClassName = this.getClass().getSimpleName();
     }
 
     @Data

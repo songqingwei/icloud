@@ -2189,7 +2189,7 @@ class Session {
             request.reject();
             return;
         }
-        const referral = new _referral_js__WEBPACK_IMPORTED_MODULE_12__.Referral(request, this);
+        const referral = new _referral_js__WEBPACK_IMPORTED_MODULE_12__.Referral(request);
         if (this.delegate && this.delegate.onRefer) {
             this.delegate.onRefer(referral);
         }
@@ -13422,7 +13422,7 @@ class UserAgentClient {
         this._transaction = transaction;
         // Add the new transaction to the core.
         const userAgentClientId = transaction.id + transaction.request.method;
-        this.core.userAgentClients.set(userAgentClientId, this);
+        this.core.userAgentClients.set(userAgentClientId);
     }
 }
 
@@ -14439,7 +14439,7 @@ class Dialog {
     constructor(core, dialogState) {
         this.core = core;
         this.dialogState = dialogState;
-        this.core.dialogs.set(this.id, this);
+        this.core.dialogs.set(this.id);
     }
     /**
      * When a UAC receives a response that establishes a dialog, it
@@ -16848,7 +16848,7 @@ class UserAgentServer {
         this._transaction = transaction;
         // Add the new transaction to the core.
         const userAgentServerId = transaction.id;
-        this.core.userAgentServers.set(transaction.id, this);
+        this.core.userAgentServers.set(transaction.id);
     }
 }
 
@@ -17729,7 +17729,7 @@ class SubscribeUserAgentClient extends _user_agent_client_js__WEBPACK_IMPORTED_M
         if (!this.N) {
             // Add ourselves to the core's subscriber map.
             // This allows the core to route out of dialog NOTIFY messages to us.
-            this.core.subscribers.set(this.subscriberId, this);
+            this.core.subscribers.set(this.subscriberId);
             this.N = setTimeout(() => this.timerN(), _timers_js__WEBPACK_IMPORTED_MODULE_4__.Timers.TIMER_N);
         }
     }

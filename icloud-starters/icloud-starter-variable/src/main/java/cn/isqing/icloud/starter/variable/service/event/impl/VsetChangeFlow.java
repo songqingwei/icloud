@@ -50,7 +50,7 @@ public class VsetChangeFlow extends FlowTemplate<VsetChangeContext, Object> impl
     private final Map<String, Long> lockMap = new ConcurrentHashMap<>();
 
     public VsetChangeFlow() {
-        start("变量：规则模版变更流程", this);
+        start("变量：规则模版变更流程");
         stepName("解析消息");
         test(c->c.getVidList()==null);
         accept(this::parseMsg);

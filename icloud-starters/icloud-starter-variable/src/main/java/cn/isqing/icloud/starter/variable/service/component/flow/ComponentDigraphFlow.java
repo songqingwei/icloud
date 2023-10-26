@@ -44,7 +44,7 @@ public class ComponentDigraphFlow extends FlowTemplate<ComponentDigraphContext, 
     private ComponentTextMapper componentTextMapper;
 
     public ComponentDigraphFlow() {
-        start("组件有向图流程", this);
+        start("组件有向图流程");
         stepName("加载初始依赖");
         accept(this::loanBaseDependency);
         stepName("加载间接依赖");

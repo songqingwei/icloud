@@ -63,7 +63,7 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
     private int subFailReasonLimit = 255;
 
     public OutputFlow() {
-        start("输出处理流程", this);
+        start("输出处理流程");
         stepName("获取log记录");
         accept(this::getRecord);
         stepName("获取core记录");

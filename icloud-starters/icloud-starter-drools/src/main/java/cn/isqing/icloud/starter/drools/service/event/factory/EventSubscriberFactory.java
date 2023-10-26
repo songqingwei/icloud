@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * 组件执行服务工厂
+ * 事件订阅工厂
  *
  * @author songqingwei@aliyun.com
  * @version 1.0

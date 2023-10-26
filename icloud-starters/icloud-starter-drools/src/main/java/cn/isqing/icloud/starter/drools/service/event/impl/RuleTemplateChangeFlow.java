@@ -91,7 +91,7 @@ public class RuleTemplateChangeFlow extends FlowTemplate<RuleTemplateChangeConte
     private final Map<TplChangeMsg, LocalDateTime> msgMap = new ConcurrentHashMap<>();
 
     public RuleTemplateChangeFlow() {
-        start("规则变更流程", this);
+        start("规则变更流程");
         stepName("解析消息");
         accept(this::parseMsg);
         stepName("获取并发锁");

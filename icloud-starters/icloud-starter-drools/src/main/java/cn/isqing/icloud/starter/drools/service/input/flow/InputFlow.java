@@ -65,7 +65,7 @@ public class InputFlow extends FlowTemplate<InputFlowContext, Object> {
     private EventPublisher eventPublisher;
 
     public InputFlow() {
-        start("输入处理流程", this);
+        start("输入处理流程");
         stepName("参数校验");
         accept(this::checkParam);
         stepName("获取coreId");
