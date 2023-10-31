@@ -36,7 +36,7 @@ public class LockUtil {
         jobRxecutor.setCorePoolSize(64);
         jobRxecutor.setQueueCapacity(600);
         jobRxecutor.setAllowCoreThreadTimeOut(true);
-        jobRxecutor.setKeepAliveSeconds(3000);
+        jobRxecutor.setKeepAliveSeconds(1000);
         jobRxecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
     }
 
