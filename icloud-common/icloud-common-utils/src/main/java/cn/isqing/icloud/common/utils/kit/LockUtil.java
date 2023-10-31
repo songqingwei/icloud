@@ -33,11 +33,10 @@ public class LockUtil {
 
     static {
         jobRxecutor.setThreadNamePrefix("do-watchdog");
-        jobRxecutor.setMaxPoolSize(120);
         jobRxecutor.setCorePoolSize(64);
         jobRxecutor.setQueueCapacity(600);
         jobRxecutor.setAllowCoreThreadTimeOut(true);
-        jobRxecutor.setKeepAliveSeconds(300);
+        jobRxecutor.setKeepAliveSeconds(3000);
         jobRxecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
     }
 
