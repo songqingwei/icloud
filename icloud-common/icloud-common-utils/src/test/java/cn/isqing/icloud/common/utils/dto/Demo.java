@@ -1,5 +1,7 @@
 package cn.isqing.icloud.common.utils.dto;
 
+import cn.isqing.icloud.common.utils.kit.LockUtil;
+
 import java.util.ArrayList;
 
 /**
@@ -8,8 +10,18 @@ import java.util.ArrayList;
  **/
 public class Demo {
     public static void main(String[] args) {
-        ArrayList<Object> list = new ArrayList<>();
-        Object list1 = list;
-        System.out.println(list1.getClass());
+        try {
+            boolean b = LockUtil.renewalPo(null, null, null);
+        } catch (Exception e) {
+
+        }
+        while (true) {
+            try {
+                Thread.sleep(30000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 }

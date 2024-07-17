@@ -19,7 +19,6 @@ public class OutputFlowContext extends FlowContext {
     private EventMsg msg;
 
     private RLock lock;
-    private boolean casLock = false;
 
     private RunLog runLog;
     private Map<Integer, String> paramsMap;

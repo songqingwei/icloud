@@ -110,8 +110,8 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
             lock.unlock();
             context.setLock(null);
         }
-        if (context.isCasLock()) {
-            LockUtil.unlockPo(context, context.getRunLog(), mapper);
+        if (context.isCasLocked()) {
+            LockUtil.unlockPo(context);
         }
     }
 
@@ -228,6 +228,8 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
     }
 
     private void getCasLock(OutputFlowContext context) {
+        context.setMapper(mapper);
+        context.setDataPo(context.getRunLog());
         boolean b;
         try {
             b = LockUtil.lockPo(context, context.getRunLog(), mapper);
@@ -235,7 +237,7 @@ public class OutputFlow extends FlowTemplate<OutputFlowContext, Object> implemen
             log.error(e.getMessage(), e);
             b = false;
         }
-        context.setCasLock(b);
+        context.setCasLocked(b);
         if (!b) {
             interrupt(context, Response.error("获取乐观锁失败"));
         }

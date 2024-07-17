@@ -12,6 +12,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.Map;
@@ -27,53 +28,23 @@ import java.util.function.Predicate;
 @Slf4j
 public class LockUtil {
 
-    private static final Map<FlowContext, Map<Object, BaseMapper>> DO_LOCK_MAP = new ConcurrentHashMap<>();
+    // 秒
+    private static long renewalLimit = 300;
 
-    private static final ThreadPoolTaskExecutor jobRxecutor = new ThreadPoolTaskExecutor();
-
-    static {
-        jobRxecutor.setThreadNamePrefix("do-watchdog");
-        jobRxecutor.setMaxPoolSize(120);
-        jobRxecutor.setCorePoolSize(64);
-        jobRxecutor.setQueueCapacity(600);
-        jobRxecutor.setAllowCoreThreadTimeOut(true);
-        jobRxecutor.setKeepAliveSeconds(300);
-        jobRxecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
-    }
+    private static final Map<Long, FlowContext> DO_LOCK_MAP = new ConcurrentHashMap<>();
 
 
     private static final ScheduledExecutorService excutor = Executors.newSingleThreadScheduledExecutor();
 
     static {
         excutor.scheduleAtFixedRate(() -> {
-            Iterator<Map.Entry<FlowContext, Map<Object, BaseMapper>>> iterator = DO_LOCK_MAP.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<FlowContext, Map<Object, BaseMapper>> next = iterator.next();
-                jobRxecutor.submit(() -> {
-                    if (next.getKey().isFlowEnd()) {
-                        DO_LOCK_MAP.remove(next.getKey());
-                        return;
-                    }
-                    Iterator<Map.Entry<Object, BaseMapper>> iterator1 = next.getValue().entrySet().iterator();
-                    while (iterator1.hasNext()) {
-                        Map.Entry<Object, BaseMapper> next1 = iterator1.next();
-                        synchronized (next1.getKey()) {
-                            if (next.getValue().containsKey(next1.getKey())) {
-                                try {
-                                    renewalDo(next1.getKey(), next1.getValue());
-                                } catch (Exception e) {
-                                    log.error(e.getMessage(), e);
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-        }, 5, 5, TimeUnit.MINUTES);
+            clearDoLockMap();
+        }, 5, 5, TimeUnit.SECONDS);//todo
     }
 
 
     public static RedissonClient redissonClient;
+
 
     @Autowired
     public void setRedissonClient(RedissonClient redissonClient) {
@@ -93,7 +64,7 @@ public class LockUtil {
         }
         try {
             boolean test = predicate.test(null);
-            if(test){
+            if (test) {
                 consumer.accept(null);
             }
         } finally {
@@ -124,6 +95,40 @@ public class LockUtil {
     }
 
 
+    public static void clearDoLockMap() {
+        Iterator<Map.Entry<Long, FlowContext>> iterator = DO_LOCK_MAP.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Long, FlowContext> entry = iterator.next();
+            if (entry == null) {
+                continue;
+            }
+            FlowContext flowContext = entry.getValue();
+            if (flowContext.isFlowEnd()) {
+                iterator.remove();
+                continue;
+            }
+
+        }
+    }
+
+    private static void renewalWrapper(Map.Entry<Long, FlowContext> entry) {
+        try {
+            FlowContext value = entry.getValue();
+            if (Instant.now().getEpochSecond() - value.getLockTime() < renewalLimit) {
+                return;
+            }
+            synchronized (value){
+                if(value.isUnCasLockedPre()){
+                    return;
+                }
+                renewalPo(value,value.getDataPo(),value.getMapper());
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+
     public static boolean lockPo(FlowContext context, Object dataPo, BaseMapper mapper) throws Exception {
         Class<?> aClass = dataPo.getClass();
         Method getLockStatus = aClass.getMethod("getLockStatus");
@@ -135,16 +140,22 @@ public class LockUtil {
         Method getLockVersion = aClass.getMethod("getLockVersion");
         int lock = mapper.lock(dataPo);
         if (lock > 0) {
-            setLockVersion.invoke(dataPo, ((long) getLockVersion.invoke(dataPo)) + 1L);
-            Map<Object, BaseMapper> mapperMap = DO_LOCK_MAP.computeIfAbsent(context,
-                    k -> new ConcurrentHashMap<>());
-            mapperMap.put(dataPo, mapper);
+            setLockVersion.invoke(dataPo, ((int) getLockVersion.invoke(dataPo)) + 1);
+            DO_LOCK_MAP.putIfAbsent(context.getUniqueValue(), context);
+            context.setCasLocked(true);
+            context.setMapper(mapper);
+            context.setDataPo(dataPo);
             return true;
         }
         return false;
     }
 
-    public static boolean unlockPo(FlowContext context, Object dataPo, BaseMapper mapper) {
+    public static boolean unlockPo(FlowContext context) {
+        DO_LOCK_MAP.remove(context.getUniqueValue());
+        context.setUnCasLockedPre(true);
+        Object dataPo = context.getDataPo();
+        BaseMapper mapper = context.getMapper();
+
         Class<?> aClass = dataPo.getClass();
         Method setLockVersion;
         Method getLockVersion;
@@ -155,7 +166,10 @@ public class LockUtil {
             log.error(e.getMessage(), e);
             return false;
         }
-        int lock = mapper.unlock(dataPo);
+        int lock;
+        synchronized (context){
+            lock = mapper.unlock(dataPo);
+        }
         boolean res = false;
         if (lock > 0) {
             try {
@@ -165,24 +179,16 @@ public class LockUtil {
             }
             res = true;
         }
-        Map<Object, BaseMapper> map = DO_LOCK_MAP.get(context);
-        synchronized (dataPo) {
-            if(map!=null){
-                map.remove(dataPo);
-                if (map.isEmpty()) {
-                    DO_LOCK_MAP.remove(context);
-                }
-            }
-        }
         return res;
     }
 
-    public static boolean renewalDo(Object dataDo, BaseMapper mapper) throws Exception {
+    public static boolean renewalPo(FlowContext context,Object dataDo, BaseMapper mapper) throws Exception {
         Class<?> aClass = dataDo.getClass();
         Method setLockVersion = aClass.getMethod("setLockVersion", Long.class);
         Method getLockVersion = aClass.getMethod("getLockVersion");
         int lock = mapper.lock(dataDo);
         if (lock > 0) {
+            context.setLockTime(Instant.now().getEpochSecond());
             setLockVersion.invoke(dataDo, ((long) getLockVersion.invoke(dataDo)) + 1L);
             return true;
         }

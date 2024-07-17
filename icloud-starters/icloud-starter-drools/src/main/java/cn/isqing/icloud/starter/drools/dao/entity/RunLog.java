@@ -24,7 +24,7 @@ public class RunLog {
 
     private Integer lockStatus;
 
-    private Long lockVersion;
+    private Integer lockVersion;
 
     private LocalDateTime lockTime;
 
