@@ -42,7 +42,7 @@ public class ConditionParser {
         specialTplMap.put("_min_open", "%s`%s`>#{%s%s}");
         specialTplMap.put("_max", "%s`%s`<=#{%s%s}");
         specialTplMap.put("_max_open", "%s`%s`<#{%s%s}");
-        specialTplMap.put("_like", "%s`%s` like #{%s%s%}");
+        specialTplMap.put("_like", "%s`%s` like #{%s%s%%}");
         specialTplMap.put("_not_eq", "%s`%s` != #{%s%s}");
         specialTplMap.put("_not_in", "%s`%s` not in %s");
     }
