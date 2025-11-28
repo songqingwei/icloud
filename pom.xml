@@ -349,14 +349,6 @@
         <!--release-->
         <profile>
             <id>release</id>
-            <properties>
-                <!-- 补充插件版本变量（避免未定义报错，可根据实际需求调整版本） -->
-                <maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
-                <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-                <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
-                <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
-                <!-- 移除nexus-staging-maven-plugin版本（旧插件已失效） -->
-            </properties>
             <build>
                 <plugins>
                     <!-- 保留原有：POM扁平化插件（不变） -->
