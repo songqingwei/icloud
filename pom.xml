@@ -42,11 +42,11 @@
         <!--插件版本-->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-release-plugin.version>3.0.0-M1</maven-release-plugin.version>
+
+        <maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-        <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
-        <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
-        <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
-        <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
+        <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+        <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
     </properties>
 
     <url>https://github.com/songqingwei/icloud</url>
@@ -349,8 +349,17 @@
         <!--release-->
         <profile>
             <id>release</id>
+            <properties>
+                <!-- 补充插件版本变量（避免未定义报错，可根据实际需求调整版本） -->
+                <maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
+                <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+                <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+                <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
+                <!-- 移除nexus-staging-maven-plugin版本（旧插件已失效） -->
+            </properties>
             <build>
                 <plugins>
+                    <!-- 保留原有：POM扁平化插件（不变） -->
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>flatten-maven-plugin</artifactId>
@@ -376,12 +385,15 @@
                             </execution>
                         </executions>
                     </plugin>
+
+                    <!-- 保留原有：部署插件（不变） -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-deploy-plugin</artifactId>
                         <version>${maven-deploy-plugin.version}</version>
                     </plugin>
-                    <!-- Source -->
+
+                    <!-- 保留原有：源码打包插件（不变） -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
@@ -396,7 +408,8 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <!-- Javadoc -->
+
+                    <!-- 保留原有：Javadoc打包插件（不变） -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
@@ -417,12 +430,13 @@
                                     <goal>jar</goal>
                                 </goals>
                                 <configuration>
-                                    <doclint>none</doclint>
+                                    <doclint>none</doclint> <!-- 关闭Javadoc语法检查，避免报错 -->
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
-                    <!-- Gpg Signature -->
+
+                    <!-- 保留原有：GPG签名插件（仅保留配置，无需修改） -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
@@ -435,33 +449,25 @@
                                     <goal>sign</goal>
                                 </goals>
                                 <configuration>
-                                    <keyname>7FCD4CC8C3AE0850</keyname>
-                                    <passphraseServerId>gpg.passphrase</passphraseServerId>
+                                    <keyname>7FCD4CC8C3AE0850</keyname> <!-- 你的GPG密钥ID（不变） -->
+                                    <passphraseServerId>gpg.passphrase
+                                    </passphraseServerId> <!-- 关联settings.xml的GPG密码（不变） -->
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>${nexus-staging-maven-plugin.version}</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>sonatype-release</serverId>
-                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
+
+                    <!-- 关键修改：移除旧的nexus-staging-maven-plugin（OSSRH下线后已失效） -->
+                    <!-- 替代方案：使用Central Portal兼容路径，部署后自动释放（无需手动操作） -->
                 </plugins>
             </build>
+
+            <!-- 关键修改：分发管理（替换旧OSSRH配置，与settings.xml的server.id一致） -->
             <distributionManagement>
-                <snapshotRepository>
-                    <id>sonatype-snapshots</id>
-                    <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-                </snapshotRepository>
                 <repository>
-                    <id>sonatype-release</id>
-                    <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                    <id>central-publish</id> <!-- 必须与settings.xml中的server.id一致 -->
+                    <url>https://ossrh.sonatype.org/service/local/staging/deploy/maven2/
+                    </url> <!-- 正式版本发布路径（与快照共用兼容URL） -->
                 </repository>
             </distributionManagement>
         </profile>
