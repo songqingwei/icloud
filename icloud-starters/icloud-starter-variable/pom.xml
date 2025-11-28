@@ -74,11 +74,12 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
+        <!-- Removed deprecated com.alibaba:dubbo dependency -->
+        <!-- dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
             <optional>true</optional>
-        </dependency>
+        </dependency -->
         <dependency>
             <groupId>cn.isqing.icloud</groupId>
             <artifactId>icloud-common-utils</artifactId>

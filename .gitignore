@@ -56,3 +56,4 @@ build/
 
 .flattened-pom.xml
 rebel.xml
+/.ai/
