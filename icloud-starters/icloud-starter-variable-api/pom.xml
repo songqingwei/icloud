@@ -11,6 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>icloud-starter-variable-api</artifactId>
+    <name>iCloud Starter Variable API</name>
     <dependencies>
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>

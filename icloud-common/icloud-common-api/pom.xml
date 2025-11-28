@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>icloud-common-api</artifactId>
+    <name>iCloud Common API</name>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

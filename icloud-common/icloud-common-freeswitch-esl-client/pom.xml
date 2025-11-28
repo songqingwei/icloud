@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>icloud-common-freeswitch-esl-client</artifactId>
+    <name>iCloud Common FreeSwitch ESL Client</name>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

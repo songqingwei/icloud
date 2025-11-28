@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>icloud-app-policy-engine</artifactId>
+    <name>iCloud App Policy Engine</name>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

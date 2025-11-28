@@ -11,6 +11,7 @@
     </parent>
 
     <artifactId>icloud-app-freeswitch</artifactId>
+    <name>iCloud App FreeSwitch</name>
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>

@@ -11,6 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>icloud-starters</artifactId>
+    <name>iCloud Starters</name>
     <packaging>pom</packaging>
     <modules>
         <module>icloud-starter-drools</module>

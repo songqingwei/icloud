@@ -43,12 +43,12 @@ public class ComponentTextTypeConstants {
 
 
     /**
-     * 策略结果 MAP<placeholder,jsonPath>
+     * 策略结果 MAP&lt;placeholder,jsonPath&gt;
      */
     public static final int DEPEND_RUN_RES = 8;
 
     /**
-     * 依赖的变量 MAP<placeholder,key>
+     * 依赖的变量 MAP&lt;placeholder,key&gt;
      */
     public static final int DEPEND_VARIABLES = 9;
 

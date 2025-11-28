@@ -91,8 +91,8 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     /**
      * 不查询规则大文本
      *
-     * @param dto
-     * @return
+     * @param dto 查询条件
+     * @return 规则模板分页结果
      */
     @Override
     public Response<PageResDto<RuleTemplateDto>> list(PageReqDto<RuleTemplateListReq> dto) {
@@ -109,8 +109,8 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     /**
      * 不查询规则大文本和关联业务
      *
-     * @param dto
-     * @return
+     * @param dto 查询条件
+     * @return 规则模板分页结果
      */
     @Override
     public Response<PageResDto<RuleTemplateDto>> baseList(PageReqDto<RuleTemplateListReq> dto) {
@@ -167,8 +167,8 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     /**
      * 不查询大文本和关联业务
      *
-     * @param id
-     * @return
+     * @param id 规则模板ID
+     * @return 规则模板信息
      */
     @Override
     public Response<RuleTemplateDto> baseInfo(Long id) {

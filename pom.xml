@@ -11,13 +11,13 @@
         <module>icloud-common</module>
         <module>icloud-starters</module>
     </modules>
-    <name>icloud</name>
+    <name>iCloud</name>
     <description>icloud</description>
 
     <properties>
         <java.version>1.8</java.version>
         <!--<revision>1.0.0-SNAPSHOT</revision>-->
-        <revision>0.1.0</revision>
+        <revision>0.1.1</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>2.0.2.RELEASE</spring-boot.version>
@@ -47,6 +47,7 @@
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
         <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
+        <maven-central-publisher-plugin.version>0.9.0</maven-central-publisher-plugin.version>
     </properties>
 
     <url>https://github.com/songqingwei/icloud</url>
@@ -319,6 +320,32 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${maven-source-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
                 <version>1.2.7</version>
@@ -346,12 +373,11 @@
         </plugins>
     </build>
     <profiles>
-        <!--release-->
         <profile>
             <id>release</id>
             <build>
                 <plugins>
-                    <!-- 保留原有：POM扁平化插件（不变） -->
+                    <!-- 保留：POM扁平化插件（父POM必需） -->
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>flatten-maven-plugin</artifactId>
@@ -364,28 +390,17 @@
                             <execution>
                                 <id>flatten</id>
                                 <phase>process-resources</phase>
-                                <goals>
-                                    <goal>flatten</goal>
-                                </goals>
+                                <goals><goal>flatten</goal></goals>
                             </execution>
                             <execution>
                                 <id>flatten.clean</id>
                                 <phase>clean</phase>
-                                <goals>
-                                    <goal>clean</goal>
-                                </goals>
+                                <goals><goal>clean</goal></goals>
                             </execution>
                         </executions>
                     </plugin>
 
-                    <!-- 保留原有：部署插件（不变） -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-deploy-plugin</artifactId>
-                        <version>${maven-deploy-plugin.version}</version>
-                    </plugin>
-
-                    <!-- 保留原有：源码打包插件（不变） -->
+                    <!-- 添加源码插件 -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
@@ -393,7 +408,6 @@
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
-                                <phase>package</phase>
                                 <goals>
                                     <goal>jar-no-fork</goal>
                                 </goals>
@@ -401,34 +415,32 @@
                         </executions>
                     </plugin>
 
-                    <!-- 保留原有：Javadoc打包插件（不变） -->
+                    <!-- 添加Javadoc插件 -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>${maven-javadoc-plugin.version}</version>
                         <configuration>
-                            <show>package</show>
-                            <tags>
-                                <tag>
-                                    <name>date</name>
-                                </tag>
-                            </tags>
+                            <!-- 关键配置：禁用自关闭标签检查（Java 8 兼容） -->
+                            <additionalJOptions>
+                                <additionalJOption>-Xdoclint:none</additionalJOption> <!-- 关闭所有语法检查（简单粗暴） -->
+                                <!-- 或更精细：只允许自关闭标签，不关闭其他检查 -->
+                                <!-- <additionalJOption>-html4</additionalJOption> --> <!-- 强制使用 HTML4 规范，忽略 XHTML 自关闭标签 -->
+                            </additionalJOptions>
+                            <!-- 可选：指定 Javadoc 源版本（匹配项目的 Java 版本） -->
+                            <source>8</source>
                         </configuration>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
-                                <phase>package</phase>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
-                                <configuration>
-                                    <doclint>none</doclint> <!-- 关闭Javadoc语法检查，避免报错 -->
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
 
-                    <!-- 保留原有：GPG签名插件（仅保留配置，无需修改） -->
+                    <!-- 保留：GPG签名插件（父POM的POM文件也需要签名） -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
@@ -437,31 +449,29 @@
                             <execution>
                                 <id>sign-artifacts</id>
                                 <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
+                                <goals><goal>sign</goal></goals>
                                 <configuration>
-                                    <keyname>7FCD4CC8C3AE0850</keyname> <!-- 你的GPG密钥ID（不变） -->
-                                    <passphraseServerId>gpg.passphrase
-                                    </passphraseServerId> <!-- 关联settings.xml的GPG密码（不变） -->
+                                    <keyname>7FCD4CC8C3AE0850</keyname>
+                                    <passphraseServerId>gpg.passphrase</passphraseServerId>
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
 
-                    <!-- 关键修改：移除旧的nexus-staging-maven-plugin（OSSRH下线后已失效） -->
-                    <!-- 替代方案：使用Central Portal兼容路径，部署后自动释放（无需手动操作） -->
+                    <!-- 关键1：删除无效的maven-deploy-plugin（旧插件，无需保留） -->
+                    <!-- 关键2：新增官方发布插件（适配新API的核心） -->
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${maven-central-publisher-plugin.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
-
-            <!-- 关键修改：分发管理（替换旧OSSRH配置，与settings.xml的server.id一致） -->
-            <distributionManagement>
-                <repository>
-                    <id>central-publish</id> <!-- 必须与settings.xml中的server.id一致 -->
-                    <url>https://ossrh.sonatype.org/service/local/staging/deploy/maven2/
-                    </url> <!-- 正式版本发布路径（与快照共用兼容URL） -->
-                </repository>
-            </distributionManagement>
         </profile>
     </profiles>
 </project>

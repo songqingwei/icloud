@@ -11,6 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>icloud-starters-flow</artifactId>
+    <name>iCloud Starters Flow</name>
 
     <properties>
         <!--todo-->

@@ -35,10 +35,13 @@ public class SingleRatioAllotter {
 
 
     /**
-     * @param coreId
-     * @param rid
-     * @param refValue
-     * @return
+     * 获取目标ID
+     *
+     * @param coreId 核心ID
+     * @param rid 规则ID
+     * @param refValue 引用值
+     * @param configDto 配置DTO
+     * @return 目标ID响应
      */
     public static Response<Long> getTargetId(Long coreId, Long rid, String refValue, AllotterConfigDto configDto) {
         if (configDto.getTargetIds().isEmpty()) {

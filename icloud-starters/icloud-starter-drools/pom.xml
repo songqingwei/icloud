@@ -11,6 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>icloud-starter-drools</artifactId>
+    <name>iCloud Starter Drools</name>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
