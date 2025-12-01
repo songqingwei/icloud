@@ -2,7 +2,7 @@ package cn.isqing.icloud.common.api.dto;
 
 import lombok.Data;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.io.Serializable;
 
 /**

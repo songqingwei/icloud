@@ -29,7 +29,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.DataBinder;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
+
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

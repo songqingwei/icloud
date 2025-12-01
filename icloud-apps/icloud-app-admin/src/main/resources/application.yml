@@ -1,0 +1,59 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: icloud-app-admin
+  datasource:
+    url: jdbc:mysql://localhost:3306/icloud_admin?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        login-username: admin
+        login-password: admin
+  freemarker:
+    template-loader-path: classpath:/templates/
+    suffix: .html
+    content-type: text/html;charset=UTF-8
+    cache: false
+    prefer-file-system-access: false
+
+
+# admin starter 配置
+i.admin:
+  enabled: true
+  # web访问前缀
+  web.pre: iadmin
+  datasource:
+    admin:
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      max-wait: 60000
+      url: jdbc:mysql://127.0.0.1:3306/icloud_admin?useUnicode=true&characterEncoding=UTF8&allowMultiQueries=true&rewriteBatchedStatements=true&useAffectedRows=true&serverTimezone=Asia/Shanghai
+      validation-query: SELECT 1 FROM DUAL
+      min-evictable-idle-time-millis: 300000
+      test-on-borrow: false
+      filters: stat,wall,udf
+      test-on-return: false
+      password: root
+      initial-size: 5
+      driver-class-name: com.mysql.jdbc.Driver
+      max-active: 200
+      username: root
+      min-idle: 5
+      type: com.alibaba.druid.pool.DruidDataSource
+      test-while-idle: true
+      time-between-eviction-runs-millis: 60000
+      max-pool-prepared-statement-per-connection-size: 20
+      pool-prepared-statements: false
+
+logging:
+  level:
+    cn.isqing.icloud: debug

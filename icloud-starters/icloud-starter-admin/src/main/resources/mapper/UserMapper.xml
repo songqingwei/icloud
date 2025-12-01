@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.isqing.icloud.starter.admin.dao.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="cn.isqing.icloud.starter.admin.dao.entity.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="nickname" property="nickname"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="status" property="status"/>
+        <result column="department_id" property="departmentId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="RoleResultMap" type="cn.isqing.icloud.starter.admin.dao.entity.Role">
+        <id column="r_id" property="id"/>
+        <result column="r_name" property="name"/>
+        <result column="r_code" property="code"/>
+        <result column="r_description" property="description"/>
+        <result column="r_status" property="status"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, username, password, nickname, email, phone, status, department_id, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="cn.isqing.icloud.starter.admin.dao.entity.User">
+        INSERT INTO admin_user (
+            id, username, password, nickname, email, phone, status, department_id, create_time, update_time
+        ) VALUES (
+            #{id}, #{username}, #{password}, #{nickname}, #{email}, #{phone}, #{status}, #{departmentId}, #{createTime}, #{updateTime}
+        )
+    </insert>
+
+    <update id="update" parameterType="cn.isqing.icloud.starter.admin.dao.entity.User">
+        UPDATE admin_user
+        <set>
+            <if test="username != null and username != ''">
+                username = #{username},
+            </if>
+            <if test="password != null and password != ''">
+                password = #{password},
+            </if>
+            <if test="nickname != null and nickname != ''">
+                nickname = #{nickname},
+            </if>
+            <if test="email != null and email != ''">
+                email = #{email},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="departmentId != null">
+                department_id = #{departmentId},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM admin_user WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM admin_user
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM admin_user
+        WHERE username = #{username}
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM admin_user
+        <where>
+            <if test="id != null and id != 0">
+                AND id = #{id}
+            </if>
+            <if test="username != null and username != ''">
+                AND username = #{username}
+            </if>
+            <if test="nickname != null and nickname != ''">
+                AND nickname LIKE CONCAT('%', #{nickname}, '%')
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="departmentId != null and departmentId != 0">
+                AND department_id = #{departmentId}
+            </if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM admin_user
+        <where>
+            <if test="user.id != null and user.id != 0">
+                AND id = #{user.id}
+            </if>
+            <if test="user.username != null and user.username != ''">
+                AND username = #{user.username}
+            </if>
+            <if test="user.nickname != null and user.nickname != ''">
+                AND nickname LIKE CONCAT('%', #{user.nickname}, '%')
+            </if>
+            <if test="user.status != null">
+                AND status = #{user.status}
+            </if>
+            <if test="user.departmentId != null and user.departmentId != 0">
+                AND department_id = #{user.departmentId}
+            </if>
+        </where>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM admin_user
+        <where>
+            <if test="id != null and id != 0">
+                AND id = #{id}
+            </if>
+            <if test="username != null and username != ''">
+                AND username = #{username}
+            </if>
+            <if test="nickname != null and nickname != ''">
+                AND nickname LIKE CONCAT('%', #{nickname}, '%')
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="departmentId != null and departmentId != 0">
+                AND department_id = #{departmentId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectRolesByUserId" resultMap="RoleResultMap">
+        SELECT r.id AS r_id, r.name AS r_name, r.code AS r_code, r.description AS r_description, r.status AS r_status
+        FROM admin_user u
+        LEFT JOIN admin_user_role ur ON u.id = ur.user_id
+        LEFT JOIN admin_role r ON ur.role_id = r.id
+        WHERE u.id = #{userId} AND r.status = 1
+    </select>
+
+</mapper>

@@ -5,8 +5,8 @@ import cn.isqing.icloud.common.utils.validation.group.EditGroup;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import java.time.LocalDateTime;
 
 @Data

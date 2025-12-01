@@ -2,7 +2,7 @@ package cn.isqing.icloud.starter.variable.service.msg.dto;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 /**

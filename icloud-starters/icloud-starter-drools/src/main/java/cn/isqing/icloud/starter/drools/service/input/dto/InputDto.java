@@ -3,8 +3,8 @@ package cn.isqing.icloud.starter.drools.service.input.dto;
 import com.google.protobuf.Api;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**

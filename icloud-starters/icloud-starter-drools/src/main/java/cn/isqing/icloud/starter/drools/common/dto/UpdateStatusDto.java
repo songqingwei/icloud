@@ -2,7 +2,7 @@ package cn.isqing.icloud.starter.drools.common.dto;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * @author songqingwei@aliyun.com

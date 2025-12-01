@@ -21,7 +21,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>3.5.8</spring-boot.version>
-        <slf4j.version>1.7.5</slf4j.version>
+        <!-- 移除slf4j.version定义，让Spring Boot管理版本 -->
+        <!-- <slf4j.version>1.7.5</slf4j.version> -->
         <dubbo.version>3.2.5</dubbo.version>
         <dubbo-spring-boot.version>3.2.0</dubbo-spring-boot.version>
         <fastjson2.version>2.0.9</fastjson2.version>
@@ -138,6 +139,16 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>cn.isqing.icloud</groupId>
+                <artifactId>icloud-starter-admin</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.isqing.icloud</groupId>
+                <artifactId>icloud-starter-admin-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
                 <version>${gson.version}</version>
@@ -147,6 +158,8 @@
                 <artifactId>fastjson2</artifactId>
                 <version>${fastjson2.version}</version>
             </dependency>
+            <!-- 移除slf4j依赖管理，让Spring Boot自动管理 -->
+            <!--
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -158,6 +171,7 @@
                 <version>${slf4j.version}</version>
                 <scope>test</scope>
             </dependency>
+            -->
             <dependency>
                 <groupId>org.apache.dubbo</groupId>
                 <artifactId>dubbo-spring-boot-starter</artifactId>
@@ -248,6 +262,11 @@
                 <groupId>org.apache.zookeeper</groupId>
                 <artifactId>zookeeper</artifactId>
                 <version>${zookeeper.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>8.0.33</version>
             </dependency>
         </dependencies>
 

@@ -12,6 +12,7 @@
     <name>iCloud Apps</name>
     <packaging>pom</packaging>
     <modules>
+        <module>icloud-app-admin</module>
     </modules>
 
     <properties>

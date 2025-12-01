@@ -17,6 +17,8 @@
         <module>icloud-starter-drools</module>
         <module>icloud-starter-variable</module>
         <module>icloud-starter-variable-api</module>
+        <module>icloud-starter-admin-api</module>
+        <module>icloud-starter-admin</module>
     </modules>
 
     <properties>

@@ -5,8 +5,8 @@ import cn.isqing.icloud.common.utils.validation.group.AddGroup;
 import cn.isqing.icloud.common.utils.validation.group.EditGroup;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 
 @Data
 public class CommonConfigDto {

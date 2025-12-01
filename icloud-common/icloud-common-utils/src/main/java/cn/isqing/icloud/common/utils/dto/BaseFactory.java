@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.isqing.icloud.common.utils.annotation.RouteType;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

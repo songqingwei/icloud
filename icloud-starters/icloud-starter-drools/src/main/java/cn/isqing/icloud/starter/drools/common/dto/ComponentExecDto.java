@@ -1,9 +1,10 @@
 package cn.isqing.icloud.starter.drools.common.dto;
 
 import lombok.Data;
-import org.jboss.netty.util.internal.ConcurrentHashMap;
+
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author songqingwei@aliyun.com

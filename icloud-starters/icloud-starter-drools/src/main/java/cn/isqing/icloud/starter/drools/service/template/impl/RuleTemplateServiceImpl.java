@@ -47,8 +47,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
-import javax.annotation.Resource;
-import javax.validation.groups.Default;
+import jakarta.annotation.Resource;
+import jakarta.validation.groups.Default;
 import java.util.*;
 import java.util.stream.Collectors;
 

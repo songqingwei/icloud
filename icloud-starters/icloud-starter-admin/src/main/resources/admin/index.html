@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="format-detection" content="email=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Admin管理平台</title>
+    <link rel="stylesheet" href="./base/global.css" />
+    <link rel="stylesheet" href="./web.css">
+    <style type="text/css">
+        body {
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
+</head>
+
+<body>
+<div id="App"></div>
+<script>
+    window.pageConfig = {
+        device: 'web'
+    }
+    window.g_config = {
+        "id": "App",
+        "isSinglePage": true,
+        "historyType": "HASH",
+        "locale": "zh_CN",
+        "navConfig": {
+            // 当前导航的覆盖配置，请勿修改，否则会导致渲染异常
+            "showNav": true,
+            "showTodoTasks": false,
+            "showPersonInfo": false,
+            "showMsg": false,
+            "navLogo": "https://tianshu.alicdn.com/052a190e-c961-4afe-aa4c-49ee9722952d.svg",
+        },
+    };
+</script>
+<script crossorigin="anonymous" src="./base/base0.js"></script>
+
+<script crossorigin="anonymous" src="./base/moment-with-locales.min.js"></script>
+<script crossorigin="anonymous" src="./base/base1.js"></script>
+<script crossorigin="anonymous" src="./base/base2.js"></script>
+
+<script crossorigin="anonymous" src="./base/render-engine.min.js"></script>
+<script crossorigin="anonymous" src="./web.js"></script>
+
+</body>
+
+</html>
