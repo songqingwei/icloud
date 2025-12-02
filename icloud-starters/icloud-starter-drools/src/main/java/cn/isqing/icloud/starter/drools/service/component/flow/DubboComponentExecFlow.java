@@ -8,10 +8,10 @@ import cn.isqing.icloud.starter.drools.common.constants.DubboDSConfigConstatnts;
 import cn.isqing.icloud.starter.drools.common.dto.ComponentExecDto;
 import cn.isqing.icloud.starter.drools.common.dto.DubboMethodDto;
 import cn.isqing.icloud.starter.drools.common.enums.DubboComponentDialectType;
-import com.alibaba.dubbo.config.ReferenceConfig;
-import com.alibaba.dubbo.config.RegistryConfig;
-import com.alibaba.dubbo.config.utils.ReferenceConfigCache;
-import com.alibaba.dubbo.rpc.service.GenericService;
+
+import org.apache.dubbo.config.ReferenceConfig;
+import org.apache.dubbo.config.RegistryConfig;
+import org.apache.dubbo.rpc.service.GenericService;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import lombok.extern.slf4j.Slf4j;
@@ -76,16 +76,19 @@ public class DubboComponentExecFlow extends BaseComponentExecFlow {
         JSONArray objects = JSONArray.parseArray(context.getRequestParamsTpl()[0]);
         dto.setParamObj(objects.toArray());
         ReferenceConfig<GenericService> referenceConfig = getReferenceConfig(dto);
-        ReferenceConfigCache cache = ReferenceConfigCache.getCache();
-        GenericService genericService = cache.get(referenceConfig);
         try {
+            // Apache Dubbo 2.7+ 内置缓存机制，直接调用get()即可
+            GenericService genericService = referenceConfig.get();
             Object res = genericService.$invoke(dto.getMethodName(), dto.getMethodType(), dto.getParamObj());
-            context.setExecRes(JSON.toJSONString(res));
+            if (res instanceof String) {
+                context.setExecRes((String) res);
+            } else {
+                context.setExecRes(JSON.toJSONString(res));
+            }
         } catch (Exception e) {
             referenceConfig.destroy();
-            cache.destroy(referenceConfig);
-            log.error(e.getMessage(),e);
-            interrupt(context,Response.error("调用dubbo接口异常"));
+            log.error(e.getMessage(), e);
+            interrupt(context, Response.error("调用dubbo接口异常"));
             return;
         }
     }

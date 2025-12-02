@@ -14,8 +14,8 @@ import cn.isqing.icloud.starter.drools.service.event.impl.RuleTemplateChangeFlow
 import cn.isqing.icloud.starter.drools.service.msg.MsgParserService;
 import cn.isqing.icloud.starter.drools.service.msg.dto.TplChangeMsg;
 import cn.isqing.icloud.starter.variable.api.VariableInterface;
-import com.alibaba.dubbo.config.annotation.Reference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -43,7 +43,7 @@ public class ApplicationListenerImpl implements ApplicationListener<ApplicationR
     @Autowired
     private RuleTemplateChangeFlow changeFlow;
 
-    @Reference(group = "${i.variable.dubbo.group:iVariable}", timeout = -1, retries = -1, version = "1.0.0")
+    @DubboReference(group = "${i.variable.dubbo.group:iVariable}", timeout = -1, retries = -1, version = "1.0.0")
     private VariableInterface variableInterface;
 
     @Override
@@ -107,5 +107,3 @@ public class ApplicationListenerImpl implements ApplicationListener<ApplicationR
 
     }
 }
-
-

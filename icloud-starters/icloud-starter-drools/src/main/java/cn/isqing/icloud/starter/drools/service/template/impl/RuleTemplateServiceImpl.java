@@ -35,13 +35,14 @@ import cn.isqing.icloud.starter.variable.api.VariableInterface;
 import cn.isqing.icloud.starter.variable.api.dto.ApiVariableDto;
 import cn.isqing.icloud.starter.variable.api.enums.VariableType;
 import cn.isqing.icloud.starter.variable.api.util.VariableUtil;
-import com.alibaba.dubbo.config.annotation.Reference;
+import org.apache.dubbo.config.annotation.DubboReference;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.annotation.Reference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -75,7 +76,7 @@ public class RuleTemplateServiceImpl implements RuleTemplateService {
     @Resource(name = "iDroolsSqlSessionFactory")
     private SqlSessionFactory sqlSessionFactory;
 
-    @Reference(group = "${i.variable.dubbo.group:iVariable}", timeout = -1, retries = -1, version = "1.0.0")
+    @DubboReference(group = "${i.variable.dubbo.group:iVariable}", timeout = -1, retries = -1, version = "1.0.0")
     @Lazy
     private VariableInterface variableInterface;
 
