@@ -8,8 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 import java.lang.reflect.Method;
 import java.time.Instant;
@@ -28,25 +29,34 @@ import java.util.function.Predicate;
 @Slf4j
 public class LockUtil {
 
-    // 秒
-    private static long renewalLimit = 300;
-
     private static final Map<Long, FlowContext> DO_LOCK_MAP = new ConcurrentHashMap<>();
 
+    private static ScheduledExecutorService scheduledExecutor;
 
-    private static final ScheduledExecutorService excutor = Executors.newSingleThreadScheduledExecutor();
-
-    static {
-        excutor.scheduleAtFixedRate(() -> {
-            clearDoLockMap();
-        }, 5, 5, TimeUnit.SECONDS);//todo
+    // Spring 容器启动后初始化定时任务
+    public LockUtil() {
+        // 创建定时任务线程池
+        scheduledExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread thread = new Thread(r, "LockUtil-ClearMap-Scheduler");
+            thread.setDaemon(true);
+            return thread;
+        });
+        // 启动定时清理任务
+        scheduledExecutor.scheduleAtFixedRate(() -> {
+            try {
+                clearDoLockMap();
+            } catch (Exception e) {
+                log.error("定时清理 DO_LOCK_MAP 异常", e);
+            }
+        }, 5, 5, TimeUnit.MINUTES);
+        log.info("LockUtil 定时清理任务已启动，每 5 分钟执行一次");
     }
 
 
     public static RedissonClient redissonClient;
 
 
-    @Autowired
+    @Resource
     public void setRedissonClient(RedissonClient redissonClient) {
         LockUtil.redissonClient = redissonClient;
     }
@@ -85,9 +95,9 @@ public class LockUtil {
             }
         } catch (InterruptedException e) {
             log.warn(e.getMessage(), e);
-            // 表示为当前线程打中断标记:这里是代码扫描要求不能忽视中断异常
+            // 表示为当前线程打中断标记：这里是代码扫描要求不能忽视中断异常
             Thread.currentThread().interrupt();
-            // Thread.interrupted()能告诉你线程是否发生中断,并将清除中断状态标记
+            // Thread.interrupted() 能告诉你线程是否发生中断，并将清除中断状态标记
             // 这里清除中断标记是为了让后续逻辑正常，中断表示我们没有获取到锁而已，至于谁通知我们中断的 暂时忽略
             Thread.interrupted();
         }
@@ -96,6 +106,9 @@ public class LockUtil {
 
 
     public static void clearDoLockMap() {
+        if (log.isDebugEnabled()) {
+            log.debug("开始清理 DO_LOCK_MAP，当前大小：{}", DO_LOCK_MAP.size());
+        }
         Iterator<Map.Entry<Long, FlowContext>> iterator = DO_LOCK_MAP.entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<Long, FlowContext> entry = iterator.next();
@@ -105,18 +118,16 @@ public class LockUtil {
             FlowContext flowContext = entry.getValue();
             if (flowContext.isFlowEnd()) {
                 iterator.remove();
+                log.debug("移除已结束的流程：{}", entry.getKey());
                 continue;
             }
-
+            renewalWrapper(entry);
         }
     }
 
     private static void renewalWrapper(Map.Entry<Long, FlowContext> entry) {
         try {
             FlowContext value = entry.getValue();
-            if (Instant.now().getEpochSecond() - value.getLockTime() < renewalLimit) {
-                return;
-            }
             synchronized (value){
                 if(value.isUnCasLockedPre()){
                     return;
@@ -138,9 +149,11 @@ public class LockUtil {
         }
         Method setLockVersion = aClass.getMethod("setLockVersion", Long.class);
         Method getLockVersion = aClass.getMethod("getLockVersion");
+        Method setLockStatus = aClass.getMethod("setLockStatus", Integer.class);
         int lock = mapper.lock(dataPo);
         if (lock > 0) {
             setLockVersion.invoke(dataPo, ((int) getLockVersion.invoke(dataPo)) + 1);
+            setLockStatus.invoke(dataPo, YesOrNo.YES.ordinal());
             DO_LOCK_MAP.putIfAbsent(context.getUniqueValue(), context);
             context.setCasLocked(true);
             context.setMapper(mapper);
