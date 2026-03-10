@@ -23,7 +23,7 @@ public enum ResCodeEnum {
     NOTFIND("000009", "未获取到相关记录"),
     CANCEL("000010", "取消"),
     TIMEOUT("000011", "超时"),
-
+    TOKEN_EXPIRED("000012", "token过期"),
     ;
 
     private String code;

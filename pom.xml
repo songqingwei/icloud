@@ -16,12 +16,10 @@
 
     <properties>
         <java.version>17</java.version>
-        <revision>3.0.0</revision>
+        <revision>3.0.2-SNAPSHOT</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>3.5.8</spring-boot.version>
-        <!-- 移除slf4j.version定义，让Spring Boot管理版本 -->
-        <!-- <slf4j.version>1.7.5</slf4j.version> -->
         <dubbo.version>3.2.5</dubbo.version>
         <dubbo-spring-boot.version>3.2.0</dubbo-spring-boot.version>
         <fastjson2.version>2.0.9</fastjson2.version>
