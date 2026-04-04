@@ -61,13 +61,17 @@ public class AutoApiRouteInterceptor implements HandlerInterceptor {
         String uri = request.getRequestURI();
         String method = request.getMethod();
         
+        log.debug("AutoApiRouteInterceptor.preHandle called: uri={}, method={}", uri, method);
+        
         // 只处理POST请求
         if (!"POST".equalsIgnoreCase(method)) {
+            log.debug("非POST请求，放行");
             return true;
         }
         
         // 检查是否是自动API路径
         if (!uri.startsWith(AUTO_API_PREFIX + "/")) {
+            log.debug("不是auto-api路径，放行");
             return true;
         }
         
