@@ -60,7 +60,7 @@ public class Response<T> implements Serializable {
         return res;
     }
 
-    public static <T> Response<T> success(String msg) {
+    public static <T> Response<T> successMsg(String msg) {
         return new Response<>(ResCodeEnum.SUCCESS.getCode(), msg);
     }
 

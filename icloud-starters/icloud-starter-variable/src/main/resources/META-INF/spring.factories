@@ -1,2 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-cn.isqing.icloud.starter.variable.AutoConfiguration

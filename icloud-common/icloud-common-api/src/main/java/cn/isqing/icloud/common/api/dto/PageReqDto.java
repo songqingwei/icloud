@@ -25,6 +25,7 @@ public class PageReqDto<T> implements Serializable {
         private Integer pageSize = 20;
         private boolean needTotal = true;
         private boolean needList = true;
+        private boolean selectAll = false;
 
         private Long fromId;
 

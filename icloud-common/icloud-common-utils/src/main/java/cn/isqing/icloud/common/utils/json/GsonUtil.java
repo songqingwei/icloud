@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
  * GSON工具
  * 注意：gson解决不了循环引用的问题，请不要用在循环引用的对象中，否则内存溢出
  *
- * @author songqingwei
+ * @author
  * @version 1.0
  **/
 @Slf4j
@@ -37,5 +37,13 @@ public class GsonUtil {
         }
         return "";
     }
-
+    
+    public static <T> T fromJson(String json, Class<T> classOfT) {
+        try {
+            return GSON.fromJson(json, classOfT);
+        } catch (Exception e) {
+            log.warn("json转对象异常:{},{}", e.getMessage(), json);
+        }
+        return null;
+    }
 }
