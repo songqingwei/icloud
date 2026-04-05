@@ -19,7 +19,7 @@ import java.util.concurrent.ForkJoinPool;
  * 如果未自动加载,请检查:
  * 1. 该文件是否正确配置了此类的完整类名
  * 2. 项目是否正确引入了 icloud-common-utils 依赖
- * 3. Spring Boot 版本是否为 2.7+ 或 3.x (支持新的自动配置机制)
+ * 3. Spring Boot 版本是否为 2.7+ / 3.x / 4.x (支持新的自动配置机制)
  *
  * @author songqingwei@aliyun.com
  * @version 1.0
@@ -45,7 +45,7 @@ public class AutoConfiguration {
 
     public void setTraceIdField(String traceIdField) {
         this.traceIdField = traceIdField;
-        if(!StringUtils.isEmpty(traceIdField)){
+        if(StringUtils.hasText(traceIdField)){
             MDCUtil.setTraceIdField(traceIdField);
             log.info("MDC TraceId Field 已设置为: {}", traceIdField);
         }
