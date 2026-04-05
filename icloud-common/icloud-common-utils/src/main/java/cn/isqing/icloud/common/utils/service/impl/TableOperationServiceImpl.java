@@ -90,9 +90,13 @@ public class TableOperationServiceImpl implements TableOperationService {
                 pageInfo = new PageReqDto.PageInfo();
             }
             
-            BaseCondition condition = (BaseCondition) jsonObject.getObject(CONDITION_KEY, tableInfoDto.getConditionClass());
+            // 解决 DevTools 类加载器问题：使用线程上下文类加载器动态加载类
+            String conditionClassName = tableInfoDto.getConditionClass().getName();
+            Class<?> conditionClass = Thread.currentThread().getContextClassLoader().loadClass(conditionClassName);
+            
+            BaseCondition condition = (BaseCondition) jsonObject.getObject(CONDITION_KEY, conditionClass);
             if (condition == null) {
-                condition = (BaseCondition) tableInfoDto.getConditionClass().getDeclaredConstructor().newInstance();
+                condition = (BaseCondition) conditionClass.getDeclaredConstructor().newInstance();
             }
             
             // 设置分页参数（如果需要）
@@ -268,10 +272,14 @@ public class TableOperationServiceImpl implements TableOperationService {
                 return Response.error("未找到Condition类: " + tableName);
             }
             
+            // 解决 DevTools 类加载器问题：使用线程上下文类加载器动态加载类
+            String conditionClassName = tableInfoDto.getConditionClass().getName();
+            Class<?> conditionClass = Thread.currentThread().getContextClassLoader().loadClass(conditionClassName);
+            
             // 解析请求参数
-            BaseCondition condition = (BaseCondition) JSON.parseObject(reqJson, tableInfoDto.getConditionClass());
+            BaseCondition condition = (BaseCondition) JSON.parseObject(reqJson, conditionClass);
             if (condition == null) {
-                condition = (BaseCondition) tableInfoDto.getConditionClass().getDeclaredConstructor().newInstance();
+                condition = (BaseCondition) conditionClass.getDeclaredConstructor().newInstance();
             }
             
             BaseMapper mapper = tableInfoDto.getMapper();

@@ -5,12 +5,8 @@ import cn.isqing.icloud.common.utils.enums.status.YesOrNo;
 import cn.isqing.icloud.common.utils.flow.FlowContext;
 import cn.isqing.icloud.common.utils.time.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 
 import java.lang.reflect.Method;
 import java.time.Instant;
@@ -22,9 +18,13 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
+ * 分布式锁工具类
+ * 支持 Redisson 分布式锁和数据库乐观锁
+ * 如果 Redisson 不可用，自动降级为仅使用数据库锁
+ *
  * @author songqingwei@aliyun.com
  * @version 1.0
- **/
+ */
 @Component
 @Slf4j
 public class LockUtil {
@@ -34,7 +34,18 @@ public class LockUtil {
     private static ScheduledExecutorService scheduledExecutor;
 
     // Spring 容器启动后初始化定时任务
-    public LockUtil() {
+    public LockUtil(ApplicationContext applicationContext) {
+        // 尝试从容器中获取 RedissonClient
+        try {
+            Object redissonClient = applicationContext.getBean("redissonClient");
+            if (redissonClient != null) {
+                LockUtil.redissonClient = redissonClient;
+                log.info("RedissonClient 已初始化，分布式锁功能已启用");
+            }
+        } catch (Exception e) {
+            log.warn("RedissonClient 未配置，将仅使用数据库乐观锁");
+        }
+        
         // 创建定时任务线程池
         scheduledExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread thread = new Thread(r, "LockUtil-ClearMap-Scheduler");
@@ -53,21 +64,22 @@ public class LockUtil {
     }
 
 
-    public static RedissonClient redissonClient;
+    public static Object redissonClient;
 
-
-    @Resource
-    public void setRedissonClient(RedissonClient redissonClient) {
-        LockUtil.redissonClient = redissonClient;
+    /**
+     * 检查 Redisson 是否可用
+     */
+    private static boolean isRedissonAvailable() {
+        return redissonClient != null;
     }
 
-    public static RLock getRedisLock(String key) {
+    public static Object getRedisLock(String key) {
         return getRedisLock(key, 5, TimeUnit.SECONDS);
     }
 
 
     public static void tryRunWithRLock(String key, long time, TimeUnit unit, Predicate predicate, Consumer consumer) {
-        RLock rLock = getRedisLock(key, time, unit);
+        Object rLock = getRedisLock(key, time, unit);
         if (rLock == null) {
             log.info("未获取到锁取消执行");
             return;
@@ -79,27 +91,36 @@ public class LockUtil {
             }
         } finally {
             try {
-                rLock.unlock();
+                // 使用反射调用 unlock 方法
+                Method unlockMethod = rLock.getClass().getMethod("unlock");
+                unlockMethod.invoke(rLock);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
         }
     }
 
-    public static RLock getRedisLock(String key, long time, TimeUnit unit) {
-        RLock lock = redissonClient.getLock(key);
+    public static Object getRedisLock(String key, long time, TimeUnit unit) {
+        if (!isRedissonAvailable()) {
+            log.debug("Redisson 未配置，跳过分布式锁: {}", key);
+            return null;
+        }
         try {
-            boolean locked = lock.tryLock(time, unit);
+            // 使用反射调用 getLock 和 tryLock 方法
+            Method getLockMethod = redissonClient.getClass().getMethod("getLock", String.class);
+            Object lock = getLockMethod.invoke(redissonClient, key);
+            
+            Method tryLockMethod = lock.getClass().getMethod("tryLock", long.class, TimeUnit.class);
+            boolean locked = (Boolean) tryLockMethod.invoke(lock, time, unit);
+            
             if (locked) {
+                log.debug("成功获取分布式锁: {}", key);
                 return lock;
+            } else {
+                log.debug("获取分布式锁失败: {}", key);
             }
-        } catch (InterruptedException e) {
-            log.warn(e.getMessage(), e);
-            // 表示为当前线程打中断标记：这里是代码扫描要求不能忽视中断异常
-            Thread.currentThread().interrupt();
-            // Thread.interrupted() 能告诉你线程是否发生中断，并将清除中断状态标记
-            // 这里清除中断标记是为了让后续逻辑正常，中断表示我们没有获取到锁而已，至于谁通知我们中断的 暂时忽略
-            Thread.interrupted();
+        } catch (Exception e) {
+            log.error("获取锁失败: {}", key, e);
         }
         return null;
     }

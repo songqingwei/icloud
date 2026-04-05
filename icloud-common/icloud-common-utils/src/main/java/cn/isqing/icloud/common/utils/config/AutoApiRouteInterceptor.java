@@ -6,6 +6,8 @@ import cn.isqing.icloud.common.utils.enums.ActionType;
 import cn.isqing.icloud.common.utils.scanner.TableInfoScanner;
 import cn.isqing.icloud.common.utils.service.TableOperationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +56,15 @@ public class AutoApiRouteInterceptor implements HandlerInterceptor {
     @Autowired
     private TableOperationService tableOperationService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+    
+    {
+        // 初始化 ObjectMapper，支持 Java 8 日期时间类型
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        objectMapper = new ObjectMapper()
+                .registerModule(javaTimeModule)
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // 禁用时间戳格式，使用字符串格式
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {

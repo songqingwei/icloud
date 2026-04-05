@@ -3,13 +3,13 @@ package cn.isqing.icloud.common.utils.scanner;
 import cn.isqing.icloud.common.utils.dao.BaseMapper;
 import cn.isqing.icloud.common.utils.sql.SqlUtil;
 import cn.isqing.icloud.common.utils.dto.TableInfoDto;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,8 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class TableInfoScanner {
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     /**
      * 表信息映射缓存
@@ -34,12 +33,19 @@ public class TableInfoScanner {
      */
     private final Map<String, TableInfoDto> tableInfoMap = new ConcurrentHashMap<>();
 
+    public TableInfoScanner(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+        log.info("=== TableInfoScanner 构造函数被调用 ===");
+    }
+
     /**
      * Spring容器启动后自动扫描
      */
     @PostConstruct
     public void init() {
+        log.info("=== TableInfoScanner 开始初始化 ===");
         scanAndInitTableInfo();
+        log.info("=== TableInfoScanner 初始化完成 ===");
     }
 
     /**
@@ -58,9 +64,21 @@ public class TableInfoScanner {
                 
                 // 获取Mapper类的实际类信息
                 Class<?> mapperClass = mapper.getClass();
-                // 如果是代理类，获取目标类
-                if (mapperClass.getName().contains("$$")) {
+                
+                // 处理代理类：
+                // 1. JDK 动态代理：类名包含 "$Proxy" 或通过 Proxy.isProxyClass() 判断，使用 getInterfaces()[0] 获取接口
+                // 2. CGLIB 代理：类名包含 "$$"，使用 getSuperclass() 获取父类
+                if (Proxy.isProxyClass(mapperClass) || mapperClass.getName().contains("$Proxy")) {
+                    // JDK 动态代理，获取第一个接口（就是 Mapper 接口）
+                    Class<?>[] interfaces = mapperClass.getInterfaces();
+                    if (interfaces != null && interfaces.length > 0) {
+                        mapperClass = interfaces[0];
+                        log.debug("处理 JDK 动态代理: {} -> {}", mapper.getClass().getName(), mapperClass.getName());
+                    }
+                } else if (mapperClass.getName().contains("$$")) {
+                    // CGLIB 代理，获取父类
                     mapperClass = mapperClass.getSuperclass();
+                    log.debug("处理 CGLIB 代理: {} -> {}", mapper.getClass().getName(), mapperClass.getName());
                 }
                 
                 // 从Mapper类推断Entity和Condition类

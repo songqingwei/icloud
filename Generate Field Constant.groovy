@@ -30,7 +30,7 @@ def generate(table, dir) {
     def className = javaName(table.getName(), true)
     def fields = calcFields(table)
     packageName = getPackageName(dir)
-    PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File(dir, className + "Filed.java")), "UTF-8"))
+    PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File(dir, className + "Field.java")), "UTF-8"))
     printWriter.withPrintWriter { out -> generate(out, className, fields) }
 }
 
@@ -47,7 +47,7 @@ def generate(out, className, fields) {
     }
 
     out.println ""
-    out.println "public class ${className}Filed {"
+    out.println "public class ${className}Field {"
 
     fields.each() {
         out.println ""
