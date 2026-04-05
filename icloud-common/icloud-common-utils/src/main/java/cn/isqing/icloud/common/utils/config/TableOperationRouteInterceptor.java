@@ -4,6 +4,7 @@ import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.dto.TableOperationDto;
 import cn.isqing.icloud.common.utils.enums.ActionType;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
+import cn.isqing.icloud.common.utils.log.MDCUtil;
 import cn.isqing.icloud.common.utils.service.TableOperationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -64,9 +65,12 @@ public class TableOperationRouteInterceptor implements HandlerInterceptor {
             return true;
         }
         
-        log.info("匹配到表操作路由: uri={}, route={}", uri, matchedRoute.getPath());
+        // 生成并设置 MDC Trace ID
+        MDCUtil.appendTraceId();
         
         try {
+            log.info("匹配到表操作路由: uri={}, route={}", uri, matchedRoute.getPath());
+            
             // 读取请求体
             String requestBody = readRequestBody(request);
             
@@ -90,6 +94,9 @@ public class TableOperationRouteInterceptor implements HandlerInterceptor {
             log.error("表操作路由处理失败: uri={}", uri, e);
             writeResponse(response, Response.error("表操作失败: " + e.getMessage()));
             return false;
+        } finally {
+            // 清理 MDC Trace ID，避免线程池复用导致的问题
+            MDCUtil.cancelAppendTraceId();
         }
     }
 

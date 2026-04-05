@@ -3,6 +3,7 @@ package cn.isqing.icloud.common.utils.config;
 import cn.isqing.icloud.common.api.dto.Response;
 import cn.isqing.icloud.common.utils.dto.TableOperationDto;
 import cn.isqing.icloud.common.utils.enums.ActionType;
+import cn.isqing.icloud.common.utils.log.MDCUtil;
 import cn.isqing.icloud.common.utils.scanner.TableInfoScanner;
 import cn.isqing.icloud.common.utils.service.TableOperationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -108,9 +109,12 @@ public class AutoApiRouteInterceptor implements HandlerInterceptor {
             return false;
         }
         
-        log.info("自动API路由: uri={}, table={}, action={}", uri, tableName, actionStr);
+        // 生成并设置 MDC Trace ID
+        MDCUtil.appendTraceId();
         
         try {
+            log.info("自动API路由: uri={}, table={}, action={}", uri, tableName, actionStr);
+            
             // 读取请求体
             String requestBody = readRequestBody(request);
             
@@ -130,6 +134,9 @@ public class AutoApiRouteInterceptor implements HandlerInterceptor {
             log.error("自动API处理失败: uri={}", uri, e);
             writeResponse(response, Response.error("操作失败: " + e.getMessage()));
             return false;
+        } finally {
+            // 清理 MDC Trace ID，避免线程池复用导致的问题
+            MDCUtil.cancelAppendTraceId();
         }
     }
 
