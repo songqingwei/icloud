@@ -1,7 +1,7 @@
 package cn.isqing.icloud.common.utils.event;
 
 import cn.isqing.icloud.common.utils.constants.TableOperationEventConstants;
-import cn.isqing.icloud.common.utils.event.factory.TableOperationEventSubscriberFactory;
+import cn.isqing.icloud.common.utils.event.factory.EventSubscriberFactory;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * 表操作事件发布器
+ * 事件发布器
  * 根据事件类型（三级路由）自动找到对应的订阅者并发布事件
  *
  * @author songqingwei
@@ -19,34 +19,31 @@ import java.util.UUID;
  */
 @Component
 @Slf4j
-public class TableOperationEventPublisher {
+public class EventPublisher {
 
     @Autowired
-    private TableOperationEventSubscriberFactory factory;
+    private EventSubscriberFactory factory;
 
     /**
-     * 发布表操作事件
+     * 发布事件
      *
      * @param eventMsg 事件消息
      */
-    public void publishEvent(TableOperationEventMsg eventMsg) {
+    public void publishEvent(EventMsg eventMsg) {
         try {
-            // 生成事件ID
             if (eventMsg.getEventId() == null) {
                 eventMsg.setEventId(UUID.randomUUID().toString().replace("-", ""));
             }
 
-            // 构建事件类型（三级路由）
             String eventType = TableOperationEventConstants.buildEventType(
-                    eventMsg.getOperation(), 
+                    eventMsg.getOperation(),
                     eventMsg.getTableName()
             );
             eventMsg.setEventType(eventType);
 
-            log.info("发布表操作事件: eventType={}, dataId={}", eventType, eventMsg.getDataId());
+            log.info("发布事件: eventType={}, dataId={}", eventType, eventMsg.getDataId());
 
-            // 根据事件类型获取订阅者列表
-            List<TableOperationEventSubscriber> subscribers = factory.get(
+            List<EventSubscriber> subscribers = factory.get(
                     TableOperationEventConstants.R1_TABLE_OPERATION,
                     eventMsg.getOperation(),
                     eventMsg.getTableName()
@@ -57,35 +54,27 @@ public class TableOperationEventPublisher {
                 return;
             }
 
-            // 并行执行所有订阅者
             subscribers.parallelStream().forEach(subscriber -> {
                 try {
                     subscriber.onEvent(eventMsg);
                     log.debug("事件订阅者处理成功: subscriber={}", subscriber.getClass().getSimpleName());
                 } catch (Exception e) {
                     log.error("事件订阅者处理失败: subscriber={}", subscriber.getClass().getSimpleName(), e);
-                    // 不抛出异常，避免影响其他订阅者
                 }
             });
 
-            log.info("表操作事件发布完成: eventType={}, subscriberCount={}", 
-                    eventType, subscribers.size());
+            log.info("事件发布完成: eventType={}, subscriberCount={}", eventType, subscribers.size());
 
         } catch (Exception e) {
-            log.error("发布表操作事件失败", e);
+            log.error("发布事件失败", e);
         }
     }
 
     /**
-     * 便捷方法：发布插入事件
-     *
-     * @param tableName 表名
-     * @param dataId    数据ID
-     * @param data      数据对象
-     * @param success   是否成功
+     * 发布插入事件
      */
     public void publishInsertEvent(String tableName, Long dataId, Object data, boolean success) {
-        TableOperationEventMsg eventMsg = new TableOperationEventMsg();
+        EventMsg eventMsg = new EventMsg();
         eventMsg.setTableName(tableName);
         eventMsg.setOperation(TableOperationEventConstants.R2_INSERT);
         eventMsg.setDataId(dataId);
@@ -95,15 +84,10 @@ public class TableOperationEventPublisher {
     }
 
     /**
-     * 便捷方法：发布更新事件
-     *
-     * @param tableName 表名
-     * @param dataId    数据ID
-     * @param data      数据对象
-     * @param success   是否成功
+     * 发布更新事件
      */
     public void publishUpdateEvent(String tableName, Long dataId, Object data, boolean success) {
-        TableOperationEventMsg eventMsg = new TableOperationEventMsg();
+        EventMsg eventMsg = new EventMsg();
         eventMsg.setTableName(tableName);
         eventMsg.setOperation(TableOperationEventConstants.R2_UPDATE);
         eventMsg.setDataId(dataId);
@@ -113,15 +97,10 @@ public class TableOperationEventPublisher {
     }
 
     /**
-     * 便捷方法：发布删除事件
-     *
-     * @param tableName 表名
-     * @param dataId    数据ID
-     * @param data      数据对象
-     * @param success   是否成功
+     * 发布删除事件
      */
     public void publishDeleteEvent(String tableName, Long dataId, Object data, boolean success) {
-        TableOperationEventMsg eventMsg = new TableOperationEventMsg();
+        EventMsg eventMsg = new EventMsg();
         eventMsg.setTableName(tableName);
         eventMsg.setOperation(TableOperationEventConstants.R2_DELETE);
         eventMsg.setDataId(dataId);

@@ -2,6 +2,8 @@ package cn.isqing.icloud.common.utils.dto;
 
 import cn.hutool.core.util.StrUtil;
 import cn.isqing.icloud.common.utils.annotation.RouteType;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.PostConstruct;
@@ -14,8 +16,8 @@ import java.util.Map;
  * @author songqingwei@aliyun.com
  * @version 1.0
  **/
+@Slf4j
 public class BaseFactory<T> {
-
     private String temlate = "%s:%s:%s";
 
     @Autowired
@@ -56,9 +58,14 @@ public class BaseFactory<T> {
     @PostConstruct
     public void init() {
         list.forEach(o -> {
-            RouteType routeType = o.getClass().getAnnotation(RouteType.class);
+            Class<?> targetClass = AopUtils.getTargetClass(o);
+            RouteType routeType = targetClass.getAnnotation(RouteType.class);
+            if (routeType == null) {
+                log.warn("BaseFactory: {} 未标注 @RouteType，已跳过路由注册", targetClass.getName());
+                return;
+            }
             String key = getKey(routeType.r1(), routeType.r2(), routeType.r3());
-            map.computeIfAbsent(key,k->new ArrayList<>()).add(o);
+            map.computeIfAbsent(key, k -> new ArrayList<>()).add(o);
         });
     }
 }

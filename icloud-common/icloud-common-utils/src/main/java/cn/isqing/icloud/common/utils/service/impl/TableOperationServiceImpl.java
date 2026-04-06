@@ -8,7 +8,7 @@ import cn.isqing.icloud.common.utils.dto.BaseCondition;
 import cn.isqing.icloud.common.utils.dto.TableInfoDto;
 import cn.isqing.icloud.common.utils.dto.TableOperationDto;
 import cn.isqing.icloud.common.utils.enums.ActionType;
-import cn.isqing.icloud.common.utils.event.TableOperationEventPublisher;
+import cn.isqing.icloud.common.utils.event.EventPublisher;
 import cn.isqing.icloud.common.utils.json.JsonUtil;
 import cn.isqing.icloud.common.utils.scanner.TableInfoScanner;
 import cn.isqing.icloud.common.utils.service.TableOperationService;
@@ -16,7 +16,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,7 +38,7 @@ public class TableOperationServiceImpl implements TableOperationService {
     private TableInfoScanner tableInfoScanner;
     
     @Autowired
-    private TableOperationEventPublisher eventPublisher;
+    private EventPublisher eventPublisher;
 
     @Override
     public Response<Object> execute(TableOperationDto tableOperationDto) {

@@ -6,13 +6,13 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 表操作事件消息
+ * 事件消息
  *
  * @author songqingwei
  * @version 1.0
  */
 @Data
-public class TableOperationEventMsg implements Serializable {
+public class EventMsg implements Serializable {
 
     /**
      * 事件ID
@@ -64,7 +64,7 @@ public class TableOperationEventMsg implements Serializable {
      */
     private String extInfo;
 
-    public TableOperationEventMsg() {
+    public EventMsg() {
         this.operateTime = LocalDateTime.now();
     }
 }
