@@ -20,9 +20,9 @@ import java.util.List;
 public class TableOperationRoutesConfig {
     
     /**
-     * 基础路径，默认为 /table-op
+     * 基础路径，默认为空（无前缀）
      */
-    private String basePath = "/table-op";
+    private String basePath = "";
     
     /**
      * 路由配置列表

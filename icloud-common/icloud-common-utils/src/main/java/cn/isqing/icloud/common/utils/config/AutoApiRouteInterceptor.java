@@ -41,8 +41,6 @@ import java.util.Set;
 @Slf4j
 @Component
 public class AutoApiRouteInterceptor implements HandlerInterceptor {
-
-    private static final String AUTO_API_PREFIX = "/auto-api";
     
     /**
      * 支持的操作类型
@@ -50,6 +48,9 @@ public class AutoApiRouteInterceptor implements HandlerInterceptor {
     private static final Set<String> SUPPORTED_ACTIONS = new HashSet<>(Arrays.asList(
         "page", "insert", "update", "delete", "detail", "list"
     ));
+
+    @Autowired
+    private AutoApiRoutesConfig autoApiConfig;
 
     @Autowired
     private TableInfoScanner tableInfoScanner;
@@ -81,7 +82,18 @@ public class AutoApiRouteInterceptor implements HandlerInterceptor {
         }
         
         // 检查是否是自动API路径
-        if (!uri.startsWith(AUTO_API_PREFIX + "/")) {
+        String prefix = autoApiConfig.getPrefix();
+        boolean isAutoApiPath;
+        
+        if (prefix == null || prefix.isEmpty()) {
+            // 前缀为空时，需要严格校验路径格式 /{tableName}/{action}
+            isAutoApiPath = uri.matches("^/[^/]+/[^/]+$");
+        } else {
+            // 有前缀时，检查是否以前缀开头
+            isAutoApiPath = uri.startsWith(prefix + "/");
+        }
+        
+        if (!isAutoApiPath) {
             log.debug("不是auto-api路径，放行");
             return true;
         }
@@ -147,8 +159,17 @@ public class AutoApiRouteInterceptor implements HandlerInterceptor {
      * @return [tableName, action] 或 null
      */
     private String[] parsePath(String uri) {
+        String prefix = autoApiConfig.getPrefix();
+        String path;
+        
         // 移除前缀
-        String path = uri.substring(AUTO_API_PREFIX.length());
+        if (prefix == null || prefix.isEmpty()) {
+            // 无前缀时，直接使用URI（去掉开头的斜杠）
+            path = uri.startsWith("/") ? uri.substring(1) : uri;
+        } else {
+            // 有前缀时，移除前缀部分
+            path = uri.substring(prefix.length());
+        }
         
         // 去除首尾斜杠
         if (path.startsWith("/")) {

@@ -24,6 +24,9 @@ public class TableOperationWebConfig implements WebMvcConfigurer {
     private AutoApiRouteInterceptor autoApiRouteInterceptor;
 
     @Autowired
+    private AutoApiRoutesConfig autoApiConfig;
+
+    @Autowired
     private TableOperationRoutesConfig routesConfig;
 
     @Override
@@ -31,9 +34,12 @@ public class TableOperationWebConfig implements WebMvcConfigurer {
         log.info("=== 开始注册表操作拦截器 ===");
         
         // 注册自动API路由拦截器（零配置，智能推断）
-        // 拦截 /auto-api/** 路径
+        // 根据配置动态构建拦截路径模式
+        String autoApiPrefix = autoApiConfig.getPrefix();
+        String autoApiPattern = (autoApiPrefix == null || autoApiPrefix.isEmpty()) ? "/**" : autoApiPrefix + "/**";
+        
         registry.addInterceptor(autoApiRouteInterceptor)
-                .addPathPatterns("/auto-api/**")
+                .addPathPatterns(autoApiPattern)
                 .excludePathPatterns(
                     "/static/**",
                     "/public/**",
@@ -42,13 +48,15 @@ public class TableOperationWebConfig implements WebMvcConfigurer {
                     "/js/**",
                     "/images/**"
                 );
-        log.info("已注册自动API拦截器: /auto-api/**");
+        log.info("已注册自动API拦截器: {}", autoApiPattern);
         
         // 注册配置式表操作路由拦截器
-        // 拦截所有配置的basePath下的路径
-        String basePath = routesConfig.getBasePath() + "/**";
+        // 根据配置动态构建拦截路径模式
+        String basePath = routesConfig.getBasePath();
+        String tableOpPattern = (basePath == null || basePath.isEmpty()) ? "/**" : basePath + "/**";
+        
         registry.addInterceptor(tableOperationRouteInterceptor)
-                .addPathPatterns(basePath)
+                .addPathPatterns(tableOpPattern)
                 .excludePathPatterns(
                     "/static/**",
                     "/public/**",
@@ -57,7 +65,7 @@ public class TableOperationWebConfig implements WebMvcConfigurer {
                     "/js/**",
                     "/images/**"
                 );
-        log.info("已注册配置式路由拦截器: {}", basePath);
+        log.info("已注册配置式路由拦截器: {}", tableOpPattern);
         
         log.info("=== 表操作拦截器注册完成 ===");
     }
