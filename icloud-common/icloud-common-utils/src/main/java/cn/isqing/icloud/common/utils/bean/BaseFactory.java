@@ -1,7 +1,8 @@
-package cn.isqing.icloud.common.utils.dto;
+package cn.isqing.icloud.common.utils.bean;
 
-import cn.hutool.core.util.StrUtil;
+import cn.isqing.icloud.common.api.enums.ResCodeEnum;
 import cn.isqing.icloud.common.utils.annotation.RouteType;
+import cn.isqing.icloud.common.utils.dto.BaseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import java.util.Map;
 public class BaseFactory<T> {
     private String temlate = "%s:%s:%s";
 
-    @Autowired
+    @Autowired(required = false)
     List<T> list;
 
     private Map<String, List<T>> map = new HashMap<>();
@@ -52,11 +53,22 @@ public class BaseFactory<T> {
 
 
     public T getSingle(String... r){
-        return map.get(getKey(r)).get(0);
+        List<T> result = map.get(getKey(r));
+        if (result == null || result.isEmpty()) {
+            throw new BaseException(ResCodeEnum.SYSTEM_ERROR.getCode(),
+                    "未找到对应的实现类: " + getKey(r));
+        }
+        return result.get(0);
     }
 
     @PostConstruct
     public void init() {
+        if (list == null || list.isEmpty()) {
+            log.info("BaseFactory: 未找到任何 {} 类型的实现类，工厂已初始化为空", 
+                    getClass().getGenericSuperclass().getTypeName());
+            return;
+        }
+        
         list.forEach(o -> {
             Class<?> targetClass = AopUtils.getTargetClass(o);
             RouteType routeType = targetClass.getAnnotation(RouteType.class);
@@ -67,5 +79,7 @@ public class BaseFactory<T> {
             String key = getKey(routeType.r1(), routeType.r2(), routeType.r3());
             map.computeIfAbsent(key, k -> new ArrayList<>()).add(o);
         });
+        
+        log.info("BaseFactory: 成功注册 {} 个路由规则", map.size());
     }
 }

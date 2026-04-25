@@ -1,6 +1,6 @@
 package cn.isqing.icloud.common.utils.event.factory;
 
-import cn.isqing.icloud.common.utils.dto.BaseFactory;
+import cn.isqing.icloud.common.utils.bean.BaseFactory;
 import cn.isqing.icloud.common.utils.event.EventSubscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
