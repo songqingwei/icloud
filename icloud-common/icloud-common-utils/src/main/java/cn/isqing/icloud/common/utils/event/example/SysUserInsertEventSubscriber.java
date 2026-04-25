@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
  * @version 1.0
  */
 @Slf4j
-@Component
-@RouteType(
-    r1 = TableOperationEventConstants.R1_TABLE_OPERATION,
-    r2 = TableOperationEventConstants.R2_INSERT,
-    r3 = "sys_user"
-)
+//@Component
+//@RouteType(
+//    r1 = TableOperationEventConstants.R1_TABLE_OPERATION,
+//    r2 = TableOperationEventConstants.R2_INSERT,
+//    r3 = "sys_user"
+//)
 public class SysUserInsertEventSubscriber implements EventSubscriber {
 
     @Override
