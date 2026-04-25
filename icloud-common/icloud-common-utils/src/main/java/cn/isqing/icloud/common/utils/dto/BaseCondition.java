@@ -3,6 +3,7 @@ package cn.isqing.icloud.common.utils.dto;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 基础查询条件类
@@ -43,6 +44,21 @@ public class BaseCondition implements Serializable {
      * 偏移量（分页）
      */
     private Long offset;
+
+    /**
+     * 自定义 AND 条件列表
+     * 每个元素是一个完整的 SQL 条件表达式，会自动追加表别名前缀（如果有）
+     * 例如: ["status = 1", "age > 18"] -> WHERE status = 1 AND age > 18
+     */
+    private List<String> andConditions;
+
+    /**
+     * 自定义 OR 条件列表
+     * 每个元素是一个完整的 SQL 条件表达式，会自动追加表别名前缀（如果有）
+     * 这些条件会以 OR 方式连接，并整体用括号包裹后与其他条件进行 AND 连接
+     * 例如: ["type = 'A'", "type = 'B'"] -> WHERE (type = 'A' OR type = 'B')
+     */
+    private List<String> orConditions;
 
     public void setSelectFiled(Object conditionSelectFiled) {
         this.selectFiled = conditionSelectFiled;

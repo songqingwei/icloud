@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,8 @@ public class ConditionParser {
             sql.SELECT((String[]) v);
         });
         baseConditionConsumerMap.put("orderBy", v -> sql.ORDER_BY((String[]) v));
+        baseConditionConsumerMap.put("andConditions", this::dealAndConditions);
+        baseConditionConsumerMap.put("orConditions", this::dealOrConditions);
     }
 
     private List<Object> list;
@@ -177,6 +180,13 @@ public class ConditionParser {
         if (consumer == null) {
             return;
         }
+        
+        // andConditions 和 orConditions 需要特殊处理，直接传递原始值
+        if ("andConditions".equals(name) || "orConditions".equals(name)) {
+            consumer.accept(currentValue);
+            return;
+        }
+        
         if (currentValue instanceof String) {
             String value = (String) this.currentValue;
             if (!tableAliasPre.equals("")) {
@@ -212,6 +222,119 @@ public class ConditionParser {
 
     private void setLimit() {
         sql.LIMIT((int) currentValue);
+    }
+
+    /**
+     * 处理自定义 AND 条件列表
+     * 每个条件会自动追加表别名前缀（如果有）
+     */
+    private void dealAndConditions(Object v) {
+        if (!(v instanceof List)) {
+            return;
+        }
+        List<String> conditions = (List<String>) v;
+        if (conditions.isEmpty()) {
+            return;
+        }
+        for (String condition : conditions) {
+            if (StringUtils.isEmpty(condition)) {
+                continue;
+            }
+            // 自动追加表别名前缀
+            String processedCondition = appendTableAlias(condition);
+            list.add(processedCondition);
+        }
+    }
+
+    /**
+     * 处理自定义 OR 条件列表
+     * 所有条件以 OR 连接，并用括号包裹后作为一个整体条件加入 WHERE
+     */
+    private void dealOrConditions(Object v) {
+        if (!(v instanceof List)) {
+            return;
+        }
+        List<String> conditions = (List<String>) v;
+        if (conditions.isEmpty()) {
+            return;
+        }
+        
+        // 过滤空条件并处理表别名前缀
+        List<String> processedConditions = new ArrayList<>();
+        for (String condition : conditions) {
+            if (StringUtils.isEmpty(condition)) {
+                continue;
+            }
+            String processedCondition = appendTableAlias(condition);
+            processedConditions.add(processedCondition);
+        }
+        
+        if (processedConditions.isEmpty()) {
+            return;
+        }
+        
+        // 将所有条件用 OR 连接，并用括号包裹
+        String orClause = "(" + String.join(" OR ", processedConditions) + ")";
+        list.add(orClause);
+    }
+
+    /**
+     * 为 SQL 条件表达式自动追加表别名前缀
+     * 只在条件中没有包含表名/别名时才追加
+     */
+    private String appendTableAlias(String condition) {
+        if (StringUtils.isEmpty(tableAliasPre)) {
+            return condition;
+        }
+        
+        // 如果条件中已经包含了点号（说明已有表名或别名），则不追加
+        if (condition.contains(".")) {
+            return condition;
+        }
+        
+        // 提取条件中的第一个字段名并追加表别名前缀
+        // 例如: "status = 1" -> "l.status = 1"
+        int operatorIndex = findOperatorIndex(condition);
+        if (operatorIndex > 0) {
+            String fieldName = condition.substring(0, operatorIndex).trim();
+            String rest = condition.substring(operatorIndex);
+            return tableAliasPre + "`" + fieldName + "`" + rest;
+        }
+        
+        return tableAliasPre + condition;
+    }
+
+    /**
+     * 查找 SQL 操作符的位置（=, >, <, >=, <=, !=, LIKE, IN 等）
+     */
+    private int findOperatorIndex(String condition) {
+        String upperCondition = condition.toUpperCase();
+        
+        // 检查各种操作符的位置
+        int[] positions = {
+            condition.indexOf("!="),
+            condition.indexOf(">="),
+            condition.indexOf("<="),
+            condition.indexOf(">"),
+            condition.indexOf("<"),
+            condition.indexOf("="),
+            upperCondition.indexOf(" LIKE "),
+            upperCondition.indexOf(" NOT LIKE "),
+            upperCondition.indexOf(" IN "),
+            upperCondition.indexOf(" NOT IN "),
+            upperCondition.indexOf(" IS "),
+            upperCondition.indexOf(" IS NOT ")
+        };
+        
+        // 找到最小的有效位置（大于0）
+        int minPos = Integer.MAX_VALUE;
+        for (int pos : positions) {
+            if (pos > 0 && pos < minPos) {
+                minPos = pos;
+            }
+        }
+        
+        return minPos == Integer.MAX_VALUE ? -1 : minPos;
     }
 
     private Object getV() {
